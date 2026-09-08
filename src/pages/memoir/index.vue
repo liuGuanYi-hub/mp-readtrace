@@ -9,7 +9,7 @@
       <view class="section-divider"></view>
       <view class="section-head">
         <text class="section-head-title">🛂 典藏护照与实体工坊</text>
-        <text class="section-head-tag">8 大工坊模式就绪</text>
+        <text class="section-head-tag">8 大工坊模式就绪 · 支持 2K 导出</text>
       </view>
     </view>
 
@@ -37,21 +37,27 @@
       </view>
     </view>
 
-    <!-- ═══ 实体拟物工坊交互弹窗（直接在小程序体验 App 级拟物感） ═══ -->
+    <!-- ═══ 实体拟物工坊交互弹窗 ═══ -->
     <view class="workshop-modal-mask" v-if="activeModal" @tap.self="activeModal = null">
       <!-- 1. 透光票根弹窗 -->
       <view v-if="activeModal === 'ticket'" class="ticket-container">
+        <!-- 切换作品栏 -->
+        <view class="switch-work-bar" @tap="openWorkPicker('movie')">
+          <text class="sw-label">当前定制影片：</text>
+          <text class="sw-title">《{{ currentSelectedWork.title }}》▾</text>
+        </view>
+
         <view class="ticket-card">
           <view class="ticket-header">
             <text class="th-cinema">READTRACE CINEMA 🏛️</text>
             <text class="th-seat">SEAT 07排08座</text>
           </view>
           <view class="ticket-body">
-            <image class="ticket-poster" :src="sampleMovie.coverUrl" mode="aspectFill" />
+            <image class="ticket-poster" :src="currentSelectedWork.coverUrl || defaultCover" mode="aspectFill" />
             <view class="ticket-details">
-              <text class="t-movie-title">{{ sampleMovie.title }}</text>
-              <text class="t-movie-director">导演: {{ sampleMovie.author }}</text>
-              <text class="t-movie-rating">★ {{ sampleMovie.rating }} 影史殿堂</text>
+              <text class="t-movie-title">{{ currentSelectedWork.title }}</text>
+              <text class="t-movie-director">导演: {{ currentSelectedWork.author || '未知' }}</text>
+              <text class="t-movie-rating">★ {{ currentSelectedWork.rating ? currentSelectedWork.rating.toFixed(1) : '9.8' }} 影史殿堂</text>
               <text class="t-movie-date">观影记录: 2026.06.15 20:30</text>
             </view>
           </view>
@@ -61,49 +67,72 @@
             <view class="tear-notch right"></view>
           </view>
           <view class="ticket-footer">
-            <text class="t-quote">“{{ sampleMovie.shortComment }}”</text>
+            <text class="t-quote">“{{ currentSelectedWork.shortComment || '链式反应从未停止，爱与引力超越时空。' }}”</text>
             <text class="t-barcode">||| | ||||| || |||| |||| ||| ||||</text>
           </view>
         </view>
-        <view class="modal-btn-close" @tap="activeModal = null">收起票根</view>
+
+        <view class="modal-btn-row">
+          <view class="modal-btn-export" @tap="handleGeneratePoster('ticket')">🎨 生成 2K 透光票根</view>
+          <view class="modal-btn-close" @tap="activeModal = null">关闭</view>
+        </view>
       </view>
 
       <!-- 2. 火漆藏书票工坊弹窗 -->
       <view v-else-if="activeModal === 'exlibris'" class="exlibris-container">
+        <!-- 切换作品栏 -->
+        <view class="switch-work-bar" @tap="openWorkPicker('book')">
+          <text class="sw-label">当前典藏书籍：</text>
+          <text class="sw-title">《{{ currentSelectedWork.title }}》▾</text>
+        </view>
+
         <view class="exlibris-card">
           <view class="el-border">
             <text class="el-top-label">EX LIBRIS · 阅痕典藏</text>
-            <text class="el-serial">NO. 2026-001</text>
+            <text class="el-serial">NO. 2026-042 // CERTIFIED</text>
             <view class="el-wax-stamp">
               <text class="el-wax-text">阅</text>
             </view>
-            <text class="el-title">《{{ sampleBook.title }}》</text>
-            <text class="el-author">作者：{{ sampleBook.author }}</text>
-            <text class="el-motto">“正因为你为你的玫瑰花费了时间，这才使你的玫瑰变得如此重要。”</text>
+            <text class="el-title">《{{ currentSelectedWork.title }}》</text>
+            <text class="el-author">著者：{{ currentSelectedWork.author || '圣埃克苏佩里' }}</text>
+            <text class="el-motto">“{{ currentSelectedWork.shortComment || '正因为你为你的玫瑰花费了时间，这才使你的玫瑰变得如此重要。' }}”</text>
             <text class="el-foot">SWISS TYPOGRAPHIC SPECIMEN</text>
           </view>
         </view>
-        <view class="modal-btn-close" @tap="activeModal = null">盖印完成</view>
+
+        <view class="modal-btn-row">
+          <view class="modal-btn-export" @tap="handleGeneratePoster('exlibris')">🎨 生成 2K 火漆藏书票</view>
+          <view class="modal-btn-close" @tap="activeModal = null">关闭</view>
+        </view>
       </view>
 
       <!-- 3. Hi-Res 拟真黑胶唱机弹窗 -->
       <view v-else-if="activeModal === 'vinyl'" class="vinyl-container">
+        <view class="switch-work-bar" @tap="openWorkPicker('music')">
+          <text class="sw-label">当前播放唱片：</text>
+          <text class="sw-title">《{{ currentSelectedWork.title }}》▾</text>
+        </view>
+
         <view class="vinyl-shell">
           <view class="vinyl-disc rotating">
             <view class="vinyl-groove g1"></view>
             <view class="vinyl-groove g2"></view>
             <view class="vinyl-label-center">
-              <image class="vinyl-art" :src="sampleMusic.coverUrl" mode="aspectFill" />
+              <image class="vinyl-art" :src="currentSelectedWork.coverUrl || defaultCover" mode="aspectFill" />
             </view>
           </view>
           <view class="vinyl-tonearm"></view>
           <view class="vinyl-meta">
-            <text class="vm-title">{{ sampleMusic.title }}</text>
-            <text class="vm-artist">{{ sampleMusic.author }} · 33 1/3 RPM</text>
+            <text class="vm-title">{{ currentSelectedWork.title }}</text>
+            <text class="vm-artist">{{ currentSelectedWork.author || '宇多田光' }} · 33 1/3 RPM</text>
             <text class="vm-status">● 正在沉浸播放 528Hz 治愈声场</text>
           </view>
         </view>
-        <view class="modal-btn-close" @tap="activeModal = null">停止播放</view>
+
+        <view class="modal-btn-row">
+          <view class="modal-btn-export" @tap="handleGeneratePoster('quote')">🎨 导出黑胶随想便笺</view>
+          <view class="modal-btn-close" @tap="activeModal = null">收起</view>
+        </view>
       </view>
 
       <!-- 4. 精神巡礼护照盖章簿弹窗 -->
@@ -128,9 +157,76 @@
             </view>
           </view>
         </view>
-        <view class="modal-btn-close" @tap="activeModal = null">合上护照</view>
+
+        <view class="modal-btn-row">
+          <view class="modal-btn-export" @tap="handleGeneratePoster('quote')">🎨 导出巡礼便笺卡</view>
+          <view class="modal-btn-close" @tap="activeModal = null">合上护照</view>
+        </view>
       </view>
     </view>
+
+    <!-- ═══ 候选作品选择弹窗 ═══ -->
+    <view v-if="showWorkPicker" class="workshop-modal-mask" @tap.self="showWorkPicker = false">
+      <view class="picker-dialog">
+        <view class="picker-header">
+          <text class="picker-title">选择要定制的海报作品</text>
+          <text class="picker-close" @tap="showWorkPicker = false">✕</text>
+        </view>
+        <scroll-view scroll-y class="picker-list">
+          <view
+            v-for="item in pickerList"
+            :key="item.id"
+            class="picker-item"
+            @tap="selectWork(item)"
+          >
+            <image
+              v-if="item.coverUrl"
+              class="picker-cover"
+              :src="item.coverUrl"
+              mode="aspectFill"
+            />
+            <view v-else class="picker-cover-ph">
+              <text>{{ MEDIA_LABEL[item.mediaType]?.emoji || '📖' }}</text>
+            </view>
+            <view class="picker-info">
+              <text class="picker-item-title">{{ item.title }}</text>
+              <text class="picker-item-meta">{{ item.author || '未知创作者' }} · {{ MEDIA_LABEL[item.mediaType]?.name }}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <!-- ═══ 2K 海报生成预览与保存弹窗 ═══ -->
+    <view v-if="posterResultModal.visible" class="workshop-modal-mask" @tap.self="posterResultModal.visible = false">
+      <view class="poster-preview-dialog">
+        <view class="preview-header">
+          <text class="preview-title">✨ 2K 典藏实体海报已就绪</text>
+          <text class="preview-close" @tap="posterResultModal.visible = false">✕</text>
+        </view>
+
+        <image
+          class="poster-preview-img"
+          :src="posterResultModal.imageUrl"
+          mode="aspectFit"
+          @tap="previewFullPoster"
+        />
+
+        <view class="preview-tips">提示：可直接保存至手机相册，或长按全屏分享给好友</view>
+
+        <view class="preview-actions">
+          <button class="btn-save-album" @tap="handleSaveToAlbum">💾 保存至手机相册</button>
+          <button class="btn-full-preview" @tap="previewFullPoster">🔍 全屏预览 / 发送</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 离屏 Canvas (高精 750px) -->
+    <canvas
+      canvas-id="posterCanvas"
+      id="posterCanvas"
+      style="position: fixed; left: -9999px; top: -9999px; width: 750px; height: 1334px;"
+    />
 
     <!-- 底部导航 -->
     <TabBar :active="3" />
@@ -138,36 +234,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import TabBar from '../../components/TabBar.vue';
+import type { Book, MediaType } from '../../utils/models';
+import { MEDIA_LABEL } from '../../utils/models';
+import { loadLocalWorks } from '../../utils/sync';
+import { generatePosterImage, savePosterToAlbum, type PosterType } from '../../utils/poster-engine';
+
+const instance = getCurrentInstance();
 
 const memoirCards = [
   {
-    key: 'passport',
-    emoji: '🛂',
-    title: '精神巡礼护照盖章簿',
-    badge: '打开护照 →',
+    key: 'ticket',
+    emoji: '🎫',
+    title: '复古电影透光票根',
+    badge: '2K 导出 →',
     green: true,
-    desc: '深蓝烫金首页 · 72 部番剧入境签证 · 69 款游戏白金戳印',
-    tags: ['🌸 追番入境签证', '🎮 白金通关戳印'],
+    desc: '16:9 双联撕票打孔票根 · 影史评分 · 经典名台词合璧海报',
+    tags: ['🎞️ SEAT: 07排08座', '🎬 光影放映厅'],
   },
   {
     key: 'exlibris',
     emoji: '📜',
     title: '典藏藏书票工坊',
-    badge: '印章工坊 →',
+    badge: '火漆印鉴 →',
     green: true,
     desc: '瑞士网格版式 · 生成式火漆藏书票 · 经典版画与藏书印鉴',
-    tags: ['✒️ EX-LIBRIS #001', '🏛️ 瑞士网格排版'],
+    tags: ['✒️ EX-LIBRIS #042', '🏛️ 瑞士网格排版'],
   },
   {
-    key: 'ticket',
-    emoji: '🎫',
-    title: '复古电影透光票根',
-    badge: '一键生成',
+    key: 'passport',
+    emoji: '🛂',
+    title: '精神巡礼护照盖章簿',
+    badge: '打开护照 →',
     green: false,
-    desc: '16:9 双联撕票打孔票根 · 影史评分 · 经典名台词合璧海报',
-    tags: ['🎞️ SEAT: 07排08座', '🎬 光影放映厅'],
+    desc: '深蓝烫金首页 · 72 部番剧入境签证 · 69 款游戏白金戳印',
+    tags: ['🌸 追番入境签证', '🎮 白金通关戳印'],
   },
   {
     key: 'vinyl',
@@ -217,35 +319,122 @@ const memoirCards = [
 ];
 
 const activeModal = ref<string | null>(null);
+const allWorks = ref<Book[]>([]);
 
-const sampleMovie = {
-  title: '奥本海默',
+const defaultCover = 'https://i0.hdslb.com/bfs/bangumi/803ee7dc0e151ea3f634fe49e73d3b3fb93ca433.jpg';
+
+const currentSelectedWork = ref<Book>({
+  id: 1,
+  title: '星际穿越',
   author: '克里斯托弗·诺兰',
-  rating: 9.5,
   coverUrl: 'https://i0.hdslb.com/bfs/bangumi/803ee7dc0e151ea3f634fe49e73d3b3fb93ca433.jpg',
-  shortComment: '我现在成了死神，世界的毁灭者。链式反应从未停止。',
-};
+  category: '科幻 / 史诗',
+  status: 'finished',
+  mediaType: 'movie',
+  rating: 9.8,
+  tags: ['硬科幻', '爱与引力'],
+  shortComment: '爱是唯一可以超越时间与空间维度的事物。',
+  review: null,
+  startDate: null,
+  finishDate: '2026-06-15',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  sourceType: null,
+  sourceId: null,
+  remoteRating: null,
+  description: null,
+});
 
-const sampleBook = {
-  title: '小王子',
-  author: '圣埃克苏佩里',
-};
+onMounted(() => {
+  allWorks.value = loadLocalWorks();
+  if (allWorks.value.length > 0) {
+    // 默认选用评分最高的一部
+    const sorted = [...allWorks.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    currentSelectedWork.value = sorted[0];
+  }
+});
 
-const sampleMusic = {
-  title: 'One Last Kiss',
-  author: '宇多田光',
-  coverUrl: 'https://i0.hdslb.com/bfs/bangumi/image/82d628408f5472f1440982e880b0b4f0146862ad.png',
-};
+// 作品切换
+const showWorkPicker = ref(false);
+const pickerList = ref<Book[]>([]);
+
+function openWorkPicker(targetMedia?: MediaType) {
+  if (targetMedia) {
+    const filtered = allWorks.value.filter((b) => b.mediaType === targetMedia);
+    pickerList.value = filtered.length > 0 ? filtered : allWorks.value;
+  } else {
+    pickerList.value = allWorks.value;
+  }
+  showWorkPicker.value = true;
+}
+
+function selectWork(book: Book) {
+  currentSelectedWork.value = book;
+  showWorkPicker.value = false;
+  uni.showToast({ title: `已定制《${book.title}》`, icon: 'none' });
+}
 
 function openWorkshop(card: any) {
   if (['ticket', 'exlibris', 'vinyl', 'passport'].includes(card.key)) {
+    // 自动适配作品媒介
+    if (card.key === 'ticket') {
+      const movies = allWorks.value.filter((b) => b.mediaType === 'movie');
+      if (movies.length) currentSelectedWork.value = movies[0];
+    } else if (card.key === 'exlibris') {
+      const books = allWorks.value.filter((b) => b.mediaType === 'book');
+      if (books.length) currentSelectedWork.value = books[0];
+    } else if (card.key === 'vinyl') {
+      const musics = allWorks.value.filter((b) => b.mediaType === 'music');
+      if (musics.length) currentSelectedWork.value = musics[0];
+    }
     activeModal.value = card.key;
   } else {
     uni.showToast({
-      title: `${card.title} 模组已就绪，将在下一版本完整开放长图渲染`,
+      title: `${card.title} 模组已就绪，将在下一版本开放长图导出`,
       icon: 'none',
     });
   }
+}
+
+// 海报生成
+const posterResultModal = ref({
+  visible: false,
+  imageUrl: '',
+});
+
+async function handleGeneratePoster(type: PosterType) {
+  uni.showLoading({ title: '正在渲染 2K 海报...', mask: true });
+  try {
+    const tempPath = await generatePosterImage('posterCanvas', instance, {
+      type,
+      book: currentSelectedWork.value,
+    });
+    uni.hideLoading();
+    posterResultModal.value = {
+      visible: true,
+      imageUrl: tempPath,
+    };
+  } catch (err: any) {
+    uni.hideLoading();
+    uni.showModal({
+      title: '生成海报失败',
+      content: err?.message || '画布绘制超时，请重试',
+      showCancel: false,
+    });
+  }
+}
+
+async function handleSaveToAlbum() {
+  if (!posterResultModal.value.imageUrl) return;
+  await savePosterToAlbum(posterResultModal.value.imageUrl);
+}
+
+function previewFullPoster() {
+  if (!posterResultModal.value.imageUrl) return;
+  uni.previewImage({
+    urls: [posterResultModal.value.imageUrl],
+    current: posterResultModal.value.imageUrl,
+  });
 }
 </script>
 
@@ -349,95 +538,138 @@ function openWorkshop(card: any) {
   color: #1a1c19;
   font-size: 30rpx;
   font-weight: bold;
+  font-family: serif;
 }
 
 .mc-badge {
-  padding: 8rpx 22rpx;
-  border-radius: 26rpx;
-  background: #ffffff;
-  border: 1.5rpx solid rgba(0, 0, 0, 0.09);
-  color: #1a1c19;
-  font-size: 22rpx;
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  background: rgba(0, 0, 0, 0.05);
+  color: #686e64;
   font-weight: bold;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.04);
 }
 
 .mc-badge.green {
-  background: #3a6348;
-  border-color: #3a6348;
-  color: #ffffff;
+  background: rgba(58, 99, 72, 0.12);
+  color: #3a6348;
 }
 
 .mc-desc {
   display: block;
-  color: #686e64;
+  color: #5c6258;
   font-size: 23rpx;
-  line-height: 1.6;
-  margin-top: 14rpx;
+  line-height: 1.5;
+  margin: 16rpx 0 20rpx;
 }
 
 .mc-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 12rpx;
-  margin-top: 16rpx;
 }
 
 .mc-tag {
-  padding: 6rpx 18rpx;
-  border-radius: 20rpx;
-  background: #ece7de;
-  color: #4c4a45;
+  background: #f4f2ee;
+  color: #6e6b63;
   font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(0, 0, 0, 0.04);
 }
 
-/* ── 拟物工坊弹窗通用容器 ── */
+/* ── 拟物交互弹窗 ── */
 .workshop-modal-mask {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 12, 16, 0.75);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  z-index: 1000;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
   padding: 40rpx;
   box-sizing: border-box;
 }
 
-.modal-btn-close {
-  margin-top: 32rpx;
-  padding: 16rpx 48rpx;
-  border-radius: 36rpx;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1.5rpx solid rgba(255, 255, 255, 0.4);
-  color: #ffffff;
-  font-size: 26rpx;
-  font-weight: bold;
+.switch-work-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1rpx solid rgba(255, 255, 255, 0.25);
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  margin-bottom: 20rpx;
 }
 
-/* 1. 复古透光票根 */
-.ticket-card {
+.sw-label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.sw-title {
+  font-size: 24rpx;
+  color: #FFD700;
+  font-weight: 700;
+}
+
+.modal-btn-row {
+  display: flex;
+  gap: 20rpx;
   width: 100%;
-  max-width: 620rpx;
-  background: #fdfbf7;
+  max-width: 600rpx;
+  margin-top: 30rpx;
+}
+
+.modal-btn-export {
+  flex: 2;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  background: linear-gradient(135deg, #9E7638 0%, #C8A265 100%);
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 700;
+  border-radius: 42rpx;
+  box-shadow: 0 8rpx 24rpx rgba(158, 118, 56, 0.4);
+}
+
+.modal-btn-close {
+  flex: 1;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  font-size: 26rpx;
+  border-radius: 42rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+}
+
+/* 1. 票根 */
+.ticket-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ticket-card {
+  width: 600rpx;
+  background: #211f24;
   border-radius: 28rpx;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  border: 2rpx solid #e0d8c8;
+  box-shadow: 0 24rpx 60rpx rgba(0, 0, 0, 0.6);
+  border: 1.5rpx solid rgba(212, 175, 55, 0.4);
 }
 
 .ticket-header {
-  background: #1a1c19;
-  padding: 20rpx 28rpx;
+  padding: 24rpx 32rpx;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  border-bottom: 1rpx dashed rgba(255, 255, 255, 0.12);
 }
 
 .th-cinema {
@@ -448,68 +680,67 @@ function openWorkshop(card: any) {
 }
 
 .th-seat {
-  color: #ffffff;
+  color: #a89f91;
   font-size: 20rpx;
 }
 
 .ticket-body {
-  padding: 28rpx;
+  padding: 28rpx 32rpx;
   display: flex;
-  align-items: center;
+  gap: 24rpx;
 }
 
 .ticket-poster {
   width: 140rpx;
   height: 200rpx;
-  border-radius: 16rpx;
-  margin-right: 24rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.4);
 }
 
 .ticket-details {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: space-around;
 }
 
 .t-movie-title {
-  color: #1a1c19;
-  font-size: 36rpx;
+  color: #f5efe6;
+  font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .t-movie-director {
-  color: #686e64;
+  color: #a89f91;
   font-size: 22rpx;
-  margin-top: 6rpx;
 }
 
 .t-movie-rating {
-  color: #9e7638;
-  font-size: 24rpx;
+  color: #d4af37;
+  font-size: 22rpx;
   font-weight: bold;
-  margin-top: 8rpx;
 }
 
 .t-movie-date {
-  color: #8c887e;
+  color: #70685f;
   font-size: 20rpx;
-  margin-top: 6rpx;
 }
 
 .ticket-tear-line {
+  height: 32rpx;
   position: relative;
-  height: 28rpx;
   display: flex;
   align-items: center;
 }
 
 .tear-notch {
-  position: absolute;
   width: 32rpx;
   height: 32rpx;
+  background: rgba(0, 0, 0, 0.75);
   border-radius: 50%;
-  background: rgba(10, 12, 16, 0.75);
+  position: absolute;
+  top: 0;
 }
 
 .tear-notch.left { left: -16rpx; }
@@ -518,45 +749,53 @@ function openWorkshop(card: any) {
 .tear-dashed {
   flex: 1;
   height: 2rpx;
-  border-bottom: 2rpx dashed #d5ccbe;
+  border-top: 2rpx dashed rgba(255, 255, 255, 0.2);
   margin: 0 24rpx;
 }
 
 .ticket-footer {
-  padding: 24rpx 28rpx 28rpx;
+  padding: 20rpx 32rpx 28rpx;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .t-quote {
-  color: #4a463e;
-  font-size: 22rpx;
+  color: #dcd3c7;
+  font-size: 21rpx;
   font-style: italic;
-  line-height: 1.5;
+  text-align: center;
+  line-height: 1.4;
+  margin-bottom: 16rpx;
 }
 
 .t-barcode {
-  color: #1a1c19;
-  font-size: 24rpx;
-  letter-spacing: 6rpx;
-  text-align: center;
-  margin-top: 16rpx;
+  color: #d4af37;
+  font-family: monospace;
+  font-size: 28rpx;
+  letter-spacing: 4rpx;
+  opacity: 0.75;
 }
 
-/* 2. 火漆藏书票 */
+/* 2. 藏书票 */
+.exlibris-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .exlibris-card {
-  width: 100%;
-  max-width: 580rpx;
-  background: #fcf8f0;
+  width: 580rpx;
+  background: #fbf7ee;
   border-radius: 20rpx;
   padding: 24rpx;
   box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.5);
 }
 
 .el-border {
-  border: 2.5rpx solid #8c6e4a;
+  border: 2rpx solid #7a5835;
   border-radius: 12rpx;
-  padding: 36rpx 28rpx;
+  padding: 30rpx 24rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -564,85 +803,91 @@ function openWorkshop(card: any) {
 }
 
 .el-top-label {
-  color: #8c6e4a;
-  font-size: 22rpx;
-  letter-spacing: 6rpx;
+  color: #7a5835;
+  font-size: 24rpx;
+  letter-spacing: 4rpx;
   font-weight: bold;
 }
 
 .el-serial {
-  color: #a8957c;
-  font-size: 18rpx;
+  color: #bfa588;
+  font-size: 19rpx;
   margin-top: 4rpx;
 }
 
 .el-wax-stamp {
   width: 100rpx;
   height: 100rpx;
+  background: radial-gradient(circle, #b91c1c 0%, #7f1d1d 100%);
   border-radius: 50%;
-  background: #9e2a2b;
-  border: 4rpx solid #bd3a3c;
-  box-shadow: 0 6rpx 16rpx rgba(158, 42, 43, 0.4);
+  margin: 24rpx 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 24rpx 0;
+  box-shadow: 0 6rpx 16rpx rgba(185, 28, 28, 0.4);
 }
 
 .el-wax-text {
-  color: #fff;
-  font-size: 42rpx;
-  font-weight: bold;
-  font-family: serif;
-}
-
-.el-title {
-  color: #1a1c19;
+  color: #fef08a;
   font-size: 38rpx;
   font-weight: bold;
   font-family: serif;
 }
 
+.el-title {
+  color: #3d2b1f;
+  font-size: 32rpx;
+  font-weight: bold;
+  font-family: serif;
+}
+
 .el-author {
-  color: #686e64;
-  font-size: 24rpx;
-  margin-top: 8rpx;
+  color: #7a5835;
+  font-size: 22rpx;
+  margin-top: 6rpx;
 }
 
 .el-motto {
-  color: #4a463e;
-  font-size: 22rpx;
+  color: #8c6d46;
+  font-size: 20rpx;
+  line-height: 1.5;
+  margin: 16rpx 0;
   font-style: italic;
-  margin-top: 20rpx;
-  line-height: 1.6;
 }
 
 .el-foot {
-  color: #a8957c;
-  font-size: 18rpx;
-  letter-spacing: 4rpx;
-  margin-top: 24rpx;
+  color: #d1bda2;
+  font-size: 17rpx;
+  letter-spacing: 2rpx;
 }
 
-/* 3. 黑胶唱机 */
-.vinyl-shell {
-  width: 580rpx;
-  background: #161a22;
-  border-radius: 36rpx;
-  padding: 36rpx;
+/* 3. 黑胶 */
+.vinyl-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1.5rpx solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.7);
+}
+
+.vinyl-shell {
+  width: 580rpx;
+  height: 580rpx;
+  background: #11141a;
+  border-radius: 40rpx;
+  border: 1.5rpx solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .vinyl-disc {
   width: 380rpx;
   height: 380rpx;
+  background: radial-gradient(circle, #1a1a1a 0%, #0d0d0d 70%, #050505 100%);
   border-radius: 50%;
-  background: #0d0f14;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.8), inset 0 0 40rpx rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10rpx 40rpx rgba(0, 0, 0, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -707,6 +952,12 @@ function openWorkshop(card: any) {
 }
 
 /* 4. 护照 */
+.passport-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .passport-book {
   width: 620rpx;
   background: #1b263b;
@@ -795,5 +1046,153 @@ function openWorkshop(card: any) {
   font-size: 18rpx;
   letter-spacing: 1rpx;
   margin-top: 4rpx;
+}
+
+/* 作品选择器弹窗 */
+.picker-dialog {
+  width: 100%;
+  max-width: 620rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.picker-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #2C2A26;
+}
+
+.picker-close {
+  font-size: 36rpx;
+  color: #8C887B;
+}
+
+.picker-list {
+  max-height: 540rpx;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #F4F2EE;
+}
+
+.picker-cover {
+  width: 80rpx;
+  height: 112rpx;
+  border-radius: 8rpx;
+  margin-right: 20rpx;
+}
+
+.picker-cover-ph {
+  width: 80rpx;
+  height: 112rpx;
+  border-radius: 8rpx;
+  background: #ECEAE4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.picker-info {
+  flex: 1;
+}
+
+.picker-item-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #2C2A26;
+}
+
+.picker-item-meta {
+  font-size: 20rpx;
+  color: #8C887B;
+  margin-top: 4rpx;
+}
+
+/* 2K 海报预览弹窗 */
+.poster-preview-dialog {
+  width: 100%;
+  max-width: 640rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 32rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.preview-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #3A6348;
+}
+
+.preview-close {
+  font-size: 36rpx;
+  color: #8C887B;
+}
+
+.poster-preview-img {
+  width: 480rpx;
+  height: 680rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.25);
+  margin-bottom: 16rpx;
+}
+
+.preview-tips {
+  font-size: 20rpx;
+  color: #8C887B;
+  margin-bottom: 24rpx;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 16rpx;
+  width: 100%;
+}
+
+.btn-save-album {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #3A6348;
+  color: #FFFFFF;
+  font-size: 26rpx;
+  font-weight: 700;
+  border-radius: 40rpx;
+}
+
+.btn-full-preview {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #ECEAE4;
+  color: #2C2A26;
+  font-size: 26rpx;
+  font-weight: 600;
+  border-radius: 40rpx;
 }
 </style>
