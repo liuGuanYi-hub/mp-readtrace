@@ -114,23 +114,39 @@
         </view>
 
         <view class="vinyl-shell">
-          <view class="vinyl-disc rotating">
+          <view class="vinyl-disc" :class="{ rotating: isVinylPlaying }">
             <view class="vinyl-groove g1"></view>
             <view class="vinyl-groove g2"></view>
             <view class="vinyl-label-center">
               <image class="vinyl-art" :src="currentSelectedWork.coverUrl || defaultCover" mode="aspectFill" />
             </view>
           </view>
-          <view class="vinyl-tonearm"></view>
+          <!-- 机械唱臂微动效 -->
+          <view class="vinyl-tonearm" :class="{ dropped: isVinylPlaying }">
+            <view class="tonearm-pivot"></view>
+            <view class="tonearm-stick"></view>
+            <view class="tonearm-head"></view>
+          </view>
           <view class="vinyl-meta">
             <text class="vm-title">{{ currentSelectedWork.title }}</text>
             <text class="vm-artist">{{ currentSelectedWork.author || '宇多田光' }} · 33 1/3 RPM</text>
-            <text class="vm-status">● 正在沉浸播放 528Hz 治愈声场</text>
+            <text class="vm-status">
+              {{ isVinylPlaying ? '● 正在沉浸播放 · 机械落针运转中' : '○ 唱臂抬起待命 · 点击落针播放' }}
+            </text>
+          </view>
+          <!-- 控制按键 -->
+          <view class="vinyl-ctrl-bar">
+            <view class="v-btn-round" @tap="prevVinylTrack">⏮</view>
+            <view class="v-btn-play" @tap="toggleVinylPlay">
+              {{ isVinylPlaying ? '❚❚' : '▶' }}
+            </view>
+            <view class="v-btn-round" @tap="nextVinylTrack">⏭</view>
           </view>
         </view>
 
         <view class="modal-btn-row">
-          <view class="modal-btn-export" @tap="handleGeneratePoster('quote')">🎨 导出黑胶随想便笺</view>
+          <view class="modal-btn-export" @tap="goToStandby">⏳ 桌面禅意伴读钟 →</view>
+          <view class="modal-btn-export" @tap="handleGeneratePoster('quote')">🎨 导出随想卡</view>
           <view class="modal-btn-close" @tap="activeModal = null">收起</view>
         </view>
       </view>
@@ -234,12 +250,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue';
 import TabBar from '../../components/TabBar.vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
 import { loadLocalWorks } from '../../utils/sync';
 import { generatePosterImage, savePosterToAlbum, type PosterType } from '../../utils/poster-engine';
+import { audioEngine, SOUND_TRACKS, type AudioTrack } from '../../utils/audio-engine';
 
 const instance = getCurrentInstance();
 
@@ -345,6 +362,9 @@ const currentSelectedWork = ref<Book>({
   description: null,
 });
 
+const syncAudioTick = ref(0);
+let unsubAudio: any = null;
+
 onMounted(() => {
   allWorks.value = loadLocalWorks();
   if (allWorks.value.length > 0) {
@@ -352,6 +372,14 @@ onMounted(() => {
     const sorted = [...allWorks.value].sort((a, b) => (b.rating || 0) - (a.rating || 0));
     currentSelectedWork.value = sorted[0];
   }
+
+  unsubAudio = audioEngine.subscribe(() => {
+    syncAudioTick.value++;
+  });
+});
+
+onUnmounted(() => {
+  if (unsubAudio) unsubAudio();
 });
 
 // 作品切换
@@ -434,6 +462,47 @@ function previewFullPoster() {
   uni.previewImage({
     urls: [posterResultModal.value.imageUrl],
     current: posterResultModal.value.imageUrl,
+  });
+}
+
+// ── 💿 黑胶唱机与音频控制 ──
+const isVinylPlaying = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  syncAudioTick.value;
+  return audioEngine.isPlaying;
+});
+
+function toggleVinylPlay() {
+  if (!audioEngine.isPlaying && audioEngine.currentTrack.type !== 'vinyl') {
+    const vinyls = SOUND_TRACKS.filter((t) => t.type === 'vinyl');
+    if (vinyls.length) audioEngine.playTrack(vinyls[0]);
+  } else {
+    audioEngine.togglePlay();
+  }
+}
+
+function prevVinylTrack() {
+  audioEngine.prevTrack();
+  currentSelectedWork.value.title = audioEngine.currentTrack.title;
+  currentSelectedWork.value.author = audioEngine.currentTrack.artist;
+  if (audioEngine.currentTrack.coverUrl) {
+    currentSelectedWork.value.coverUrl = audioEngine.currentTrack.coverUrl;
+  }
+}
+
+function nextVinylTrack() {
+  audioEngine.nextTrack();
+  currentSelectedWork.value.title = audioEngine.currentTrack.title;
+  currentSelectedWork.value.author = audioEngine.currentTrack.artist;
+  if (audioEngine.currentTrack.coverUrl) {
+    currentSelectedWork.value.coverUrl = audioEngine.currentTrack.coverUrl;
+  }
+}
+
+function goToStandby() {
+  activeModal.value = null;
+  uni.navigateTo({
+    url: '/pages/standby/index',
   });
 }
 </script>
@@ -949,6 +1018,92 @@ function previewFullPoster() {
   color: #4ade80;
   font-size: 21rpx;
   margin-top: 14rpx;
+}
+
+/* 机械唱臂 */
+.vinyl-tonearm {
+  position: absolute;
+  top: 20rpx;
+  right: 40rpx;
+  width: 80rpx;
+  height: 200rpx;
+  transform-origin: 60rpx 20rpx;
+  transform: rotate(-24deg);
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.vinyl-tonearm.dropped {
+  transform: rotate(6deg);
+}
+
+.tonearm-pivot {
+  position: absolute;
+  top: 10rpx;
+  right: 10rpx;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #d4af37;
+  box-shadow: 0 0 12rpx rgba(212, 175, 55, 0.5);
+}
+
+.tonearm-stick {
+  position: absolute;
+  top: 22rpx;
+  right: 20rpx;
+  width: 6rpx;
+  height: 150rpx;
+  background: linear-gradient(180deg, #d4af37 0%, #a89f91 100%);
+  border-radius: 3rpx;
+}
+
+.tonearm-head {
+  position: absolute;
+  bottom: 16rpx;
+  right: 14rpx;
+  width: 18rpx;
+  height: 30rpx;
+  background: #f0f0f0;
+  border-radius: 4rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+}
+
+/* 控制按键条 */
+.vinyl-ctrl-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36rpx;
+  margin-top: 20rpx;
+  z-index: 6;
+}
+
+.v-btn-round {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.v-btn-play {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #d4af37;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #0a0c10;
+  font-weight: 900;
+  box-shadow: 0 8rpx 20rpx rgba(212, 175, 55, 0.4);
 }
 
 /* 4. 护照 */

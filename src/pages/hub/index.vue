@@ -274,7 +274,7 @@ const nowTime = computed(() => {
 
 const capsules = [
   { emoji: '✨', title: '精神探索', route: '/pages/constellation/index' },
-  { emoji: '⏳', title: '伴读钟', toast: '伴读钟：进入深度心流专注阅读' },
+  { emoji: '⏳', title: '伴读钟', route: '/pages/standby/index' },
   { emoji: '📻', title: '声学磁带', route: '/pages/memoir/index' },
   { emoji: '🎴', title: '文化通行证', route: '/pages/profile/index' },
   { emoji: '📜', title: '时光画卷', route: '/pages/memoir/index' },
@@ -284,7 +284,12 @@ const capsules = [
 
 function onCapsuleTap(c: any) {
   if (c.route) {
-    uni.redirectTo({ url: c.route });
+    uni.navigateTo({
+      url: c.route,
+      fail: () => {
+        uni.redirectTo({ url: c.route });
+      },
+    });
   } else {
     uni.showToast({ title: c.toast || c.title, icon: 'none' });
   }
