@@ -202,11 +202,12 @@ import { computed, ref } from 'vue';
 import TabBar from '../../components/TabBar.vue';
 import MindprintRadar from '../../components/MindprintRadar.vue';
 import { loadLocalWorks, loadLocalMindprints, performSync, loadConfig, saveConfig } from '../../utils/sync';
+import { performDualChannelSync, getCloudStats } from '../../utils/cloud-sync';
 import type { Mindprint } from '../../utils/models';
 
 const totalWorks = ref(0);
 const syncing = ref(false);
-const syncStatusText = ref('离线优先就绪');
+const syncStatusText = ref('免密漫游就绪');
 const mindprints = ref<Mindprint[]>([]);
 
 const showSyncModal = ref(false);
@@ -219,12 +220,19 @@ onShow(() => {
   totalWorks.value = works.length;
   mindprints.value = loadLocalMindprints();
 
+  const cloudStats = getCloudStats();
+  if (cloudStats.lastSyncTime) {
+    syncStatusText.value = `已漫游 (${cloudStats.lastSyncTime.slice(5, 16)})`;
+  }
+
   const cfg = loadConfig();
   if (cfg) {
     webdavServer.value = cfg.serverUrl;
     webdavUser.value = cfg.username;
     webdavPass.value = cfg.password;
-    syncStatusText.value = '已连接坚果云云端';
+    if (!cloudStats.lastSyncTime) {
+      syncStatusText.value = '已配置 WebDAV';
+    }
   }
 });
 
@@ -250,23 +258,21 @@ const avgMindprint = computed(() => {
 
 async function triggerSync() {
   if (syncing.value) return;
-  const cfg = loadConfig();
-  if (!cfg) {
-    showSyncModal.value = true;
-    return;
-  }
   syncing.value = true;
-  syncStatusText.value = '正在与云端保险库同步…';
+  syncStatusText.value = '正在双端免密漫游…';
   try {
-    const res = await performSync();
-    syncStatusText.value = res.message;
+    const res = await performDualChannelSync();
+    syncStatusText.value = res.cloudResult.message;
     uni.showToast({
-      title: res.success ? '✅ 同步完成' : '❌ ' + res.message,
+      title: '✅ 漫游同步完成',
       icon: 'none',
     });
     const works = loadLocalWorks();
     totalWorks.value = works.length;
     mindprints.value = loadLocalMindprints();
+  } catch (err: any) {
+    syncStatusText.value = '漫游异常';
+    uni.showToast({ title: err?.message || '漫游失败', icon: 'none' });
   } finally {
     syncing.value = false;
   }

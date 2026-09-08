@@ -20,6 +20,54 @@
       </view>
     </view>
 
+    <!-- ═══ ☁️ 微信云端免登录静默漫游 ═══ -->
+    <view class="section-title">☁️ 微信云端免登录漫游</view>
+    <view class="cloud-roaming-card">
+      <view class="cr-top">
+        <view class="cr-status-indicator" :class="{ online: cloudStats.mode !== 'uninitialized' }">
+          <text class="cr-dot"></text>
+          <text class="cr-status-name">
+            {{ cloudStats.mode === 'wx_cloud' ? '微信云数据库已连接' : '云端保险库免密漫游已激活' }}
+          </text>
+        </view>
+        <view class="cr-env-btn" @tap="showCloudEnvModal = true">
+          {{ cloudEnvId ? '环境: ' + cloudEnvId : '⚙️ 云环境' }}
+        </view>
+      </view>
+
+      <view class="cr-stats-row">
+        <view class="cr-stat-col">
+          <text class="cr-val">{{ cloudStats.cloudWorksCount }}</text>
+          <text class="cr-lbl">云端藏品</text>
+        </view>
+        <view class="cr-stat-col">
+          <text class="cr-val">{{ cloudStats.cloudNotesCount }}</text>
+          <text class="cr-lbl">心流笔记</text>
+        </view>
+        <view class="cr-stat-col">
+          <text class="cr-val">{{ cloudStats.cloudMindprintsCount }}</text>
+          <text class="cr-lbl">心智印记</text>
+        </view>
+      </view>
+
+      <view class="cr-openid-bar">
+        <text class="cr-openid-text">当前设备身份：{{ cloudStats.openId }}</text>
+      </view>
+
+      <view class="cr-actions">
+        <button class="btn-cloud-sync" :class="{ syncing: isCloudSyncing }" @tap="handleCloudSync">
+          {{ isCloudSyncing ? '🔄 正在双端增量漫游…' : '☁️ 立即一键免密漫游同步' }}
+        </button>
+        <button class="btn-dual-sync" @tap="handleDualSync">
+          🛡️ 双通道协同漫游 (微信+WebDAV)
+        </button>
+      </view>
+
+      <text class="cr-sync-time" v-if="cloudStats.lastSyncTime">
+        上次漫游时间：{{ cloudStats.lastSyncTime }}
+      </text>
+    </view>
+
     <!-- 操作卡片组 -->
     <view class="section-title">全量数据资产流转</view>
 
@@ -191,6 +239,28 @@
         </view>
       </view>
     </view>
+
+    <!-- ☁️ 微信云开发环境配置弹窗 -->
+    <view v-if="showCloudEnvModal" class="modal-mask" @tap.self="showCloudEnvModal = false">
+      <view class="modal-box">
+        <view class="modal-header">
+          <text class="modal-title">⚙️ 微信云开发环境配置</text>
+          <text class="close-btn" @tap="showCloudEnvModal = false">✕</text>
+        </view>
+        <view class="wipe-warning" style="color: #686e64; font-size: 22rpx; line-height: 1.6;">
+          若您在微信小程序后台开通了云开发，可在此填写环境 ID（如 readtrace-prod-xxx）；留空将自动运行本地云端保险库免密漫游通道（免配置防卡顿）。
+        </view>
+        <input
+          v-model="inputEnvId"
+          class="wipe-input"
+          placeholder="请输入云开发环境 ID（留空为自动模式）"
+        />
+        <view class="modal-actions">
+          <button class="btn-cancel" @tap="showCloudEnvModal = false">取消</button>
+          <button class="btn-primary-act" @tap="saveCloudEnv">保存配置</button>
+        </view>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -204,9 +274,30 @@ import {
   wipeAllAccountData,
 } from '@/utils/backup';
 import { loadLocalWorks, loadLocalNotes } from '@/utils/sync';
+import {
+  syncWithWeChatCloud,
+  performDualChannelSync,
+  getCloudStats,
+  getCloudEnvId,
+  setCloudEnvId,
+  type CloudStats,
+} from '@/utils/cloud-sync';
 
 const worksCount = ref(0);
 const notesCount = ref(0);
+
+const isCloudSyncing = ref(false);
+const cloudStats = ref<CloudStats>({
+  lastSyncTime: null,
+  mode: 'uninitialized',
+  openId: '',
+  cloudWorksCount: 0,
+  cloudNotesCount: 0,
+  cloudMindprintsCount: 0,
+});
+const cloudEnvId = ref('');
+const showCloudEnvModal = ref(false);
+const inputEnvId = ref('');
 
 const showImportModal = ref(false);
 const importJsonText = ref('');
@@ -226,11 +317,65 @@ function refreshStats() {
   const notes = loadLocalNotes().filter((n) => !n.isDeleted);
   worksCount.value = works.length;
   notesCount.value = notes.length;
+
+  cloudStats.value = getCloudStats();
+  cloudEnvId.value = getCloudEnvId();
+  inputEnvId.value = cloudEnvId.value;
 }
 
 onMounted(() => {
   refreshStats();
 });
+
+async function handleCloudSync() {
+  if (isCloudSyncing.value) return;
+  isCloudSyncing.value = true;
+  uni.showLoading({ title: '正在云端免密漫游…' });
+  try {
+    const res = await syncWithWeChatCloud();
+    uni.hideLoading();
+    refreshStats();
+    uni.showToast({
+      title: res.message,
+      icon: 'none',
+      duration: 3000,
+    });
+  } catch (err: any) {
+    uni.hideLoading();
+    uni.showToast({ title: err?.message || '漫游失败', icon: 'none' });
+  } finally {
+    isCloudSyncing.value = false;
+  }
+}
+
+async function handleDualSync() {
+  if (isCloudSyncing.value) return;
+  isCloudSyncing.value = true;
+  uni.showLoading({ title: '双通道协同漫游中…' });
+  try {
+    const res = await performDualChannelSync();
+    uni.hideLoading();
+    refreshStats();
+    uni.showModal({
+      title: '☁️ 双通道漫游报告',
+      content: res.summary,
+      showCancel: false,
+    });
+  } catch (err: any) {
+    uni.hideLoading();
+    uni.showToast({ title: '协同漫游异常', icon: 'none' });
+  } finally {
+    isCloudSyncing.value = false;
+  }
+}
+
+function saveCloudEnv() {
+  setCloudEnvId(inputEnvId.value.trim());
+  cloudEnvId.value = inputEnvId.value.trim();
+  showCloudEnvModal.value = false;
+  refreshStats();
+  uni.showToast({ title: '环境配置已更新', icon: 'none' });
+}
 
 function goBack() {
   uni.navigateBack({
@@ -729,5 +874,151 @@ function executeWipeData() {
   padding: 16rpx 20rpx;
   font-size: 26rpx;
   color: #2C2A26;
+}
+
+/* ═══ 微信云端漫游卡片 ═══ */
+.cloud-roaming-card {
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 30rpx 28rpx;
+  border: 1.5rpx solid rgba(58, 99, 72, 0.2);
+  margin-bottom: 36rpx;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
+}
+
+.cr-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.cr-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.cr-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #C62828;
+}
+
+.cr-status-indicator.online .cr-dot {
+  background: #4ADE80;
+  box-shadow: 0 0 10rpx rgba(74, 222, 128, 0.6);
+}
+
+.cr-status-name {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #2C2A26;
+}
+
+.cr-env-btn {
+  font-size: 20rpx;
+  color: #3A6348;
+  background: rgba(58, 99, 72, 0.1);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  font-weight: 600;
+}
+
+.cr-stats-row {
+  display: flex;
+  background: #F8F7F4;
+  border-radius: 20rpx;
+  padding: 20rpx 0;
+  margin-bottom: 20rpx;
+}
+
+.cr-stat-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-right: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+
+.cr-stat-col:last-child {
+  border-right: none;
+}
+
+.cr-val {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #3A6348;
+  font-family: Georgia, serif;
+}
+
+.cr-lbl {
+  font-size: 20rpx;
+  color: #8C9487;
+  margin-top: 4rpx;
+}
+
+.cr-openid-bar {
+  background: #F3F1EC;
+  border-radius: 12rpx;
+  padding: 10rpx 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.cr-openid-text {
+  font-size: 19rpx;
+  color: #686E64;
+  font-family: monospace;
+}
+
+.cr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.btn-cloud-sync {
+  height: 80rpx;
+  line-height: 80rpx;
+  background: #3A6348;
+  color: #FFFFFF;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  box-shadow: 0 8rpx 20rpx rgba(58, 99, 72, 0.25);
+}
+
+.btn-cloud-sync.syncing {
+  background: #9E7638;
+}
+
+.btn-dual-sync {
+  height: 72rpx;
+  line-height: 72rpx;
+  background: #ECEAE4;
+  color: #3A6348;
+  border-radius: 36rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.cr-sync-time {
+  display: block;
+  text-align: center;
+  font-size: 19rpx;
+  color: #8C9487;
+  margin-top: 16rpx;
+}
+
+.btn-primary-act {
+  flex: 1;
+  height: 76rpx;
+  line-height: 76rpx;
+  font-size: 28rpx;
+  border-radius: 16rpx;
+  font-weight: 600;
+  background: #3A6348;
+  color: #FFFFFF;
 }
 </style>
