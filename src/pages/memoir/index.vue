@@ -251,6 +251,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import TabBar from '../../components/TabBar.vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
@@ -376,6 +377,16 @@ onMounted(() => {
   unsubAudio = audioEngine.subscribe(() => {
     syncAudioTick.value++;
   });
+});
+
+onShow(() => {
+  allWorks.value = loadLocalWorks();
+  if (allWorks.value.length > 0) {
+    const found = allWorks.value.find((b) => b.id === currentSelectedWork.value.id);
+    if (found) {
+      currentSelectedWork.value = found;
+    }
+  }
 });
 
 onUnmounted(() => {

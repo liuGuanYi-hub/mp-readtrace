@@ -56,6 +56,9 @@
           <view class="btn-pill-green flex1" @tap="onAction('poster')">🎨 金句印记海报</view>
           <view class="btn-secondary flex1 gap" @tap="onAction('exlibris')">📜 刻印专属藏书票</view>
         </view>
+        <view class="btn-pill-gold" @tap="openPolishSheet">
+          ✨ 文心雕龙 · AI 读后感润色与金句工坊
+        </view>
       </view>
 
       <!-- ═══ 五大快捷 Tab 横滑栏 ═══ -->
@@ -95,9 +98,29 @@
           <text class="desc-text">{{ book.description }}</text>
         </view>
 
+        <!-- 🖋️ 深度读后感与灵感手记 (Review) -->
+        <view class="section-card review-card">
+          <view class="review-header">
+            <text class="sec-title">🖋️ 深度读后感与灵感手记</text>
+            <view class="btn-ai-polish" @tap="openPolishSheet">
+              <text class="ai-sparkle">✨</text>
+              <text class="ai-label">文心雕龙</text>
+            </view>
+          </view>
+          <view v-if="book.review" class="review-body">
+            <text class="review-text">{{ book.review }}</text>
+          </view>
+          <view v-else class="review-empty" @tap="openPolishSheet">
+            <text class="empty-hint">暂无长篇心得，点击「✨ 文心雕龙」由 AI 升华重塑大师级读后感</text>
+          </view>
+        </view>
+
         <!-- 灵感短评金句 -->
         <view class="section-card" v-if="book.shortComment">
-          <text class="sec-title">📜 灵感随想 · 短评金句</text>
+          <view class="quote-header">
+            <text class="sec-title">📜 灵感随想 · 灵魂高光金句</text>
+            <view class="btn-copy-quote" @tap="copyQuote(book.shortComment)">📋 复制</view>
+          </view>
           <view class="quote-box">
             <text class="quote-text">“{{ book.shortComment }}”</text>
           </view>
@@ -280,6 +303,98 @@
           <view class="btn-save-note" @tap="saveNewNote">秒存笔记</view>
         </view>
       </view>
+    <!-- ═══ P25 文心雕龙：AI 读后感润色 Bottom Sheet ═══ -->
+    <view v-if="showPolishModal" class="polish-modal-mask" @tap.self="closePolishSheet">
+      <view class="polish-sheet">
+        <!-- 弹窗头部 -->
+        <view class="ps-header">
+          <view class="ps-title-wrap">
+            <text class="ps-title">✨ 文心雕龙 · AI 润色工坊</text>
+            <text class="ps-sub">《{{ book?.title }}》· 深度重塑与灵魂金句提炼</text>
+          </view>
+          <view class="ps-close" @tap="closePolishSheet">✕</view>
+        </view>
+
+        <scroll-view scroll-y class="ps-body">
+          <!-- 1. 五大经典文风切换流 -->
+          <view class="ps-sec-title">🎭 选择文学流派与修辞语态</view>
+          <scroll-view scroll-x class="style-scroller" :show-scrollbar="false">
+            <view class="style-list">
+              <view
+                v-for="s in POLISH_STYLES"
+                :key="s.id"
+                class="style-chip"
+                :class="{ active: selectedStyle === s.id }"
+                @tap="selectedStyle = s.id"
+              >
+                <text class="sc-emoji">{{ s.emoji }}</text>
+                <text class="sc-name">{{ s.name }}</text>
+                <text class="sc-tag">{{ s.tagline }}</text>
+              </view>
+            </view>
+          </scroll-view>
+
+          <!-- 2. 用户原始草稿 / 大白话感悟 -->
+          <view class="ps-sec-title">📝 原始感悟大白话（可自由输入或修改）</view>
+          <view class="ps-input-wrap">
+            <textarea
+              class="ps-draft-input"
+              v-model="userDraft"
+              placeholder="写下你最真实朴素的观后感（例如：最后一段告别太扎心了，体会到生命真正的无常...）"
+              :maxlength="300"
+            />
+            <text class="ps-char-count">{{ userDraft.length }}/300</text>
+          </view>
+
+          <!-- 唤醒按钮 -->
+          <view class="btn-ps-generate" :class="{ loading: isPolishing }" @tap="startPolish">
+            <text v-if="isPolishing">⚡ 文心雕龙正在字字推敲...</text>
+            <text v-else>✨ 唤醒文心雕龙 · 升华润色</text>
+          </view>
+
+          <!-- 3. 润色生成结果展示 (打字机效果) -->
+          <view v-if="displayPolishedText || isPolishing" class="result-card">
+            <view class="res-head">
+              <text class="res-badge">📜 升华后的深度读后感</text>
+              <text class="res-source" v-if="polishSource">
+                {{ polishSource === 'remote_api' ? '⚡ DeepSeek AI 驱动' : '🏛️ 离线经典母题推导' }}
+              </text>
+            </view>
+            <view class="res-text-box">
+              <text class="res-text">{{ displayPolishedText }}</text>
+              <text v-if="isPolishing" class="typewriter-cursor">|</text>
+            </view>
+
+            <!-- 提炼的高光金句 -->
+            <view v-if="extractedGoldenQuote" class="golden-quote-card">
+              <view class="gq-top">
+                <text class="gq-label">✨ 灵魂高光金句 (≤15字)</text>
+                <text class="gq-len">{{ extractedGoldenQuote.length }} 字 · 适宜刻印藏书票与票根</text>
+              </view>
+              <text class="gq-quote">“{{ extractedGoldenQuote }}”</text>
+              <view class="gq-copy-btn" @tap="copyQuote(extractedGoldenQuote)">📋 复制金句</view>
+            </view>
+          </view>
+
+          <!-- 4. 底部生态联动与应用操作 -->
+          <view v-if="displayPolishedText && !isPolishing" class="ps-actions-panel">
+            <button class="btn-ps-adopt" @tap="adoptAndSave">
+              ✓ 采纳并一键保存入库
+            </button>
+            <view class="ps-sub-actions">
+              <view class="ps-sub-btn" @tap="goToExLibrisWithQuote">📜 刻印专属藏书票</view>
+              <view class="ps-sub-btn" @tap="goToPosterWithQuote">🎨 生成金句海报</view>
+            </view>
+          </view>
+
+          <!-- API Key 配置快捷折叠面板 -->
+          <view class="api-key-config-row">
+            <text class="ak-hint">当前模式：{{ hasCustomKey ? '自配 DeepSeek API' : '内置离线文学母题 (毫秒级防卡顿)' }}</text>
+            <text class="ak-btn" @tap="promptApiKeyConfig">⚙️ {{ hasCustomKey ? '修改 Key' : '配置 Key' }}</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
     </template>
 
     <view v-else class="missing-panel">
@@ -304,6 +419,13 @@ import {
   type AudioTrackItem,
 } from '../../utils/preset-data';
 import MindprintRadar from '../../components/MindprintRadar.vue';
+import {
+  POLISH_STYLES,
+  polishThought,
+  getAiApiKey,
+  setAiApiKey,
+  type PolishStyle,
+} from '../../utils/ai-polish-engine';
 
 const DETAIL_TABS = [
   { key: 'overview', label: '✨ 概览与雷达' },
@@ -434,12 +556,128 @@ function onAction(type: string) {
       });
       break;
     case 'poster':
-      uni.showToast({ title: '已根据短评生成金句艺术海报', icon: 'none' });
+      uni.navigateTo({
+        url: '/pages/memoir/index',
+      });
       break;
     case 'exlibris':
-      uni.showToast({ title: '已生成瑞士网格火漆印鉴藏书票', icon: 'none' });
+      uni.navigateTo({
+        url: '/pages/memoir/index',
+      });
       break;
   }
+}
+
+// ── ✨ P25 文心雕龙 · AI 读后感润色工坊状态 ──
+const showPolishModal = ref(false);
+const selectedStyle = ref<PolishStyle>('classical');
+const userDraft = ref('');
+const displayPolishedText = ref('');
+const extractedGoldenQuote = ref('');
+const polishSource = ref<'remote_api' | 'offline_motif' | null>(null);
+const isPolishing = ref(false);
+const hasCustomKey = computed(() => !!getAiApiKey());
+
+function openPolishSheet() {
+  if (!book.value) return;
+  userDraft.value = book.value.review || book.value.shortComment || '';
+  displayPolishedText.value = book.value.review || '';
+  extractedGoldenQuote.value = book.value.shortComment || '';
+  showPolishModal.value = true;
+}
+
+function closePolishSheet() {
+  showPolishModal.value = false;
+  isPolishing.value = false;
+}
+
+async function startPolish() {
+  if (isPolishing.value || !book.value) return;
+  isPolishing.value = true;
+  displayPolishedText.value = '';
+  extractedGoldenQuote.value = '';
+
+  try {
+    const res = await polishThought({
+      bookTitle: book.value.title,
+      author: book.value.author || '',
+      mediaType: book.value.mediaType,
+      draft: userDraft.value,
+      style: selectedStyle.value,
+      onStream: (chunk) => {
+        displayPolishedText.value = chunk;
+      },
+    });
+    displayPolishedText.value = res.polishedText;
+    extractedGoldenQuote.value = res.goldenQuote;
+    polishSource.value = res.source;
+  } catch (err: any) {
+    uni.showToast({ title: '润色异常，已保留草稿', icon: 'none' });
+  } finally {
+    isPolishing.value = false;
+  }
+}
+
+function adoptAndSave() {
+  if (!book.value) return;
+  book.value.review = displayPolishedText.value;
+  book.value.shortComment = extractedGoldenQuote.value;
+  book.value.updatedAt = new Date().toISOString();
+
+  const all = loadLocalWorks();
+  const idx = all.findIndex((b) => b.id === book.value?.id);
+  if (idx !== -1) {
+    all[idx].review = book.value.review;
+    all[idx].shortComment = book.value.shortComment;
+    all[idx].updatedAt = book.value.updatedAt;
+    uni.setStorageSync('rt_local_works', all);
+  }
+
+  uni.showToast({ title: '✓ 读后感与高光金句已保存入库', icon: 'success' });
+  closePolishSheet();
+}
+
+function copyQuote(text: string) {
+  if (!text) return;
+  uni.setClipboardData({
+    data: text,
+    success: () => {
+      uni.showToast({ title: '已复制金句', icon: 'none' });
+    },
+  });
+}
+
+function promptApiKeyConfig() {
+  const currentKey = getAiApiKey();
+  uni.showModal({
+    title: '配置 DeepSeek API Key',
+    content: currentKey ? `当前已配置: ${currentKey.slice(0, 4)}...${currentKey.slice(-4)}\n是否修改或重设？` : '留空将使用内置离线文学母题推导引擎（零延迟防卡顿）',
+    editable: true,
+    placeholderText: '请输入 sk-xxxxxxxx',
+    success: (res) => {
+      if (res.confirm) {
+        setAiApiKey(res.content?.trim() || '');
+        uni.showToast({
+          title: res.content?.trim() ? '已更新 API Key' : '已切换为离线母题推导',
+          icon: 'none',
+        });
+      }
+    },
+  });
+}
+
+function goToExLibrisWithQuote() {
+  adoptAndSave();
+  uni.navigateTo({
+    url: '/pages/memoir/index',
+  });
+}
+
+function goToPosterWithQuote() {
+  adoptAndSave();
+  uni.navigateTo({
+    url: '/pages/memoir/index',
+  });
 }
 </script>
 
@@ -1140,5 +1378,406 @@ function onAction(type: string) {
   background: #3a6348;
   color: #ffffff;
   font-size: 24rpx;
+}
+
+/* 黄金文心雕龙主胶囊按键 */
+.btn-pill-gold {
+  margin-top: 14rpx;
+  height: 72rpx;
+  background: linear-gradient(135deg, #FAF4E6 0%, #F5E8C8 100%);
+  border: 1.5rpx solid rgba(212, 175, 55, 0.4);
+  color: #9E7638;
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  box-shadow: 0 6rpx 18rpx rgba(212, 175, 55, 0.15);
+}
+
+/* 深度读后感与灵感手记 */
+.review-card {
+  position: relative;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.btn-ai-polish {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 16rpx;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1rpx solid rgba(212, 175, 55, 0.3);
+  border-radius: 24rpx;
+}
+
+.ai-sparkle {
+  font-size: 20rpx;
+  color: #D4AF37;
+}
+
+.ai-label {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #9E7638;
+}
+
+.review-body {
+  background: #FAF8F5;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  border-left: 6rpx solid #3A6348;
+}
+
+.review-text {
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #2D332A;
+  font-family: Georgia, serif;
+}
+
+.review-empty {
+  background: #FAF8F5;
+  border-radius: 20rpx;
+  padding: 30rpx 20rpx;
+  border: 1.5rpx dashed rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quote-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.btn-copy-quote {
+  font-size: 20rpx;
+  color: #3A6348;
+  background: rgba(58, 99, 72, 0.1);
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+}
+
+/* ═══ 文心雕龙 AI 润色 Bottom Sheet ═══ */
+.polish-modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+}
+
+.polish-sheet {
+  width: 100%;
+  max-height: 85vh;
+  background: #FFFFFF;
+  border-top-left-radius: 44rpx;
+  border-top-right-radius: 44rpx;
+  padding: 36rpx 32rpx 60rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -20rpx 60rpx rgba(0, 0, 0, 0.25);
+}
+
+.ps-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+
+.ps-title-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.ps-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #1A1F16;
+}
+
+.ps-sub {
+  font-size: 20rpx;
+  color: #8C9487;
+  margin-top: 4rpx;
+}
+
+.ps-close {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background: #F2EFE9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #555E50;
+}
+
+.ps-body {
+  max-height: 70vh;
+  padding-top: 20rpx;
+}
+
+.ps-sec-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #3A6348;
+  margin: 20rpx 0 12rpx;
+}
+
+.style-scroller {
+  white-space: nowrap;
+}
+
+.style-list {
+  display: flex;
+  gap: 16rpx;
+  padding-bottom: 8rpx;
+}
+
+.style-chip {
+  width: 220rpx;
+  background: #F8F7F4;
+  border: 1.5rpx solid rgba(0, 0, 0, 0.08);
+  border-radius: 20rpx;
+  padding: 16rpx;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.style-chip.active {
+  background: #FAF4E6;
+  border-color: #D4AF37;
+  box-shadow: 0 6rpx 16rpx rgba(212, 175, 55, 0.25);
+}
+
+.sc-emoji {
+  font-size: 36rpx;
+}
+
+.sc-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #1A1F16;
+  margin-top: 6rpx;
+}
+
+.sc-tag {
+  font-size: 18rpx;
+  color: #8C9487;
+  margin-top: 4rpx;
+}
+
+.ps-input-wrap {
+  position: relative;
+  background: #F8F7F4;
+  border-radius: 24rpx;
+  padding: 20rpx;
+  border: 1rpx solid rgba(0, 0, 0, 0.08);
+}
+
+.ps-draft-input {
+  width: 100%;
+  height: 140rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: #1A1F16;
+}
+
+.ps-char-count {
+  position: absolute;
+  right: 20rpx;
+  bottom: 12rpx;
+  font-size: 18rpx;
+  color: #A3ACA0;
+}
+
+.btn-ps-generate {
+  margin: 24rpx 0;
+  height: 84rpx;
+  background: linear-gradient(135deg, #3A6348 0%, #254430 100%);
+  color: #FFFFFF;
+  border-radius: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  box-shadow: 0 10rpx 24rpx rgba(58, 99, 72, 0.3);
+}
+
+.btn-ps-generate.loading {
+  background: #9E7638;
+}
+
+/* 结果卡片 */
+.result-card {
+  background: #FAF8F5;
+  border-radius: 28rpx;
+  padding: 26rpx;
+  border: 1.5rpx solid rgba(212, 175, 55, 0.3);
+  margin-bottom: 24rpx;
+}
+
+.res-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.res-badge {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #3A6348;
+}
+
+.res-source {
+  font-size: 18rpx;
+  color: #9E7638;
+}
+
+.res-text-box {
+  min-height: 140rpx;
+}
+
+.res-text {
+  font-size: 25rpx;
+  line-height: 1.85;
+  color: #2D332A;
+  font-family: Georgia, serif;
+}
+
+.typewriter-cursor {
+  color: #D4AF37;
+  font-weight: 900;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 黄金高光金句卡片 */
+.golden-quote-card {
+  margin-top: 24rpx;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FAF4E6 100%);
+  border-radius: 20rpx;
+  padding: 20rpx;
+  border: 1.5rpx dashed #D4AF37;
+  position: relative;
+}
+
+.gq-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.gq-label {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #9E7638;
+}
+
+.gq-len {
+  font-size: 18rpx;
+  color: #8C9487;
+}
+
+.gq-quote {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #1A1F16;
+  font-family: Georgia, serif;
+  display: block;
+  margin: 10rpx 0 14rpx;
+}
+
+.gq-copy-btn {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  background: rgba(212, 175, 55, 0.15);
+  border-radius: 16rpx;
+  font-size: 20rpx;
+  color: #9E7638;
+  font-weight: 600;
+}
+
+/* 采纳与周边操作 */
+.ps-actions-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.btn-ps-adopt {
+  width: 100%;
+  height: 84rpx;
+  line-height: 84rpx;
+  background: #3A6348;
+  color: #FFFFFF;
+  border-radius: 42rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.ps-sub-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.ps-sub-btn {
+  flex: 1;
+  height: 68rpx;
+  background: #F2EFE9;
+  color: #3A6348;
+  border-radius: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 600;
+}
+
+/* API Key 设置行 */
+.api-key-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-top: 1rpx solid rgba(0, 0, 0, 0.05);
+}
+
+.ak-hint {
+  font-size: 18rpx;
+  color: #8C9487;
+}
+
+.ak-btn {
+  font-size: 20rpx;
+  color: #3A6348;
+  font-weight: 600;
 }
 </style>
