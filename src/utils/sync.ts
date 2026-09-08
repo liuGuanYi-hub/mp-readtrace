@@ -37,7 +37,7 @@ const STORAGE_KEYS = {
 
 // ---------------------------------------------------------------- 本地存储（Local-First）
 
-export function loadLocalWorks(): Book[] {
+export function loadAllLocalWorks(): Book[] {
   const cached = uni.getStorageSync(STORAGE_KEYS.works);
   if (Array.isArray(cached) && cached.length > 0) {
     return cached;
@@ -47,17 +47,25 @@ export function loadLocalWorks(): Book[] {
   return [...PRESET_BOOKS];
 }
 
+export function loadLocalWorks(): Book[] {
+  return loadAllLocalWorks().filter((b) => !b.isDeleted);
+}
+
 export function saveLocalWorks(works: Book[]) {
   uni.setStorageSync(STORAGE_KEYS.works, works);
 }
 
-export function loadLocalNotes(): Note[] {
+export function loadAllLocalNotes(): Note[] {
   const cached = uni.getStorageSync(STORAGE_KEYS.notes);
   if (Array.isArray(cached) && cached.length > 0) {
     return cached;
   }
   uni.setStorageSync(STORAGE_KEYS.notes, PRESET_NOTES);
   return [...PRESET_NOTES];
+}
+
+export function loadLocalNotes(): Note[] {
+  return loadAllLocalNotes().filter((n) => !n.isDeleted);
 }
 
 export function loadLocalMindprints(): Mindprint[] {

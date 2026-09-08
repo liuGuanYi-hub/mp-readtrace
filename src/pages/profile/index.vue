@@ -294,7 +294,7 @@ function onEditCurator() {
 function onAction(type: string) {
   switch (type) {
     case 'favorites':
-      uni.redirectTo({ url: '/pages/hub/index' });
+      uni.navigateTo({ url: '/pages/favorites/index' });
       break;
     case 'chronicle':
       uni.redirectTo({ url: '/pages/memoir/index' });
@@ -306,13 +306,13 @@ function onAction(type: string) {
       uni.showToast({ title: '已点亮 12 枚专属精神勋章（包含深邃探索者、星海漫步者）', icon: 'none' });
       break;
     case 'migration':
-      uni.showToast({ title: '可点击首页「📥 导入书单」一键载入多源典藏清单', icon: 'none' });
+      uni.navigateTo({ url: '/pages/backup/index' });
       break;
     case 'backup':
-      showSyncModal.value = true;
+      uni.navigateTo({ url: '/pages/backup/index' });
       break;
     case 'trash':
-      uni.showToast({ title: '回收站暂无归档作品', icon: 'none' });
+      uni.navigateTo({ url: '/pages/trash/index' });
       break;
     case 'changelog':
       uni.showToast({ title: 'v4.3.0: 全面像素级复刻 Android App 策展设计语言', icon: 'none' });

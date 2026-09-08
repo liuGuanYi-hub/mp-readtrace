@@ -6,7 +6,10 @@
     { "path": "pages/memoir/index", "style": { "navigationBarTitleText": "纪念" } },
     { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的" } },
     { "path": "pages/book-detail/index", "style": { "navigationBarTitleText": "印记检视", "navigationStyle": "custom" } },
-    { "path": "pages/quick-log/index", "style": { "navigationBarTitleText": "极速速记", "navigationStyle": "custom" } }
+    { "path": "pages/quick-log/index", "style": { "navigationBarTitleText": "极速速记", "navigationStyle": "custom" } },
+    { "path": "pages/backup/index", "style": { "navigationBarTitleText": "数据主权与备份", "navigationStyle": "custom" } },
+    { "path": "pages/trash/index", "style": { "navigationBarTitleText": "回收站", "navigationStyle": "custom" } },
+    { "path": "pages/favorites/index", "style": { "navigationBarTitleText": "我的最爱", "navigationStyle": "custom" } }
   ],
   "globalStyle": {
     "navigationBarBackgroundColor": "#F8F7F4",

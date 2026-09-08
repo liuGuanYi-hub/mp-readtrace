@@ -123,8 +123,8 @@
     <!-- 💖 4. 我的最爱 · 心选展厅横滑流 (Curator Favorites strip) -->
     <view class="fav-section" v-if="favWorks.length">
       <view class="fav-head">
-        <text class="fav-title">💖 我的最爱 · 心选展厅</text>
-        <view class="fav-all" @tap="goLibraryAll">全部 ➔</view>
+        <text class="fav-title" @tap="goToFavorites">💖 我的最爱 · 心选展厅</text>
+        <view class="fav-all" @tap="goToFavorites">全部 ➔</view>
       </view>
       <scroll-view scroll-x class="fav-scroller" enhanced :show-scrollbar="false">
         <view
@@ -412,8 +412,12 @@ function goLibraryWithStatus(s: string) {
   uni.redirectTo({ url: `/pages/library/index?status=${s}` });
 }
 
+function goToFavorites() {
+  uni.navigateTo({ url: '/pages/favorites/index' });
+}
+
 function openTrash() {
-  uni.showToast({ title: '回收站暂无归档作品', icon: 'none' });
+  uni.navigateTo({ url: '/pages/trash/index' });
 }
 </script>
 

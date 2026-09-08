@@ -32,6 +32,48 @@ export interface Book {
   sourceId: string | null;
   remoteRating: number | null;
   description: string | null;
+  // v5 同构：软删除与高阶维度
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+  characters?: BookCharacter[];
+  outlines?: BookOutline[];
+  sessions?: ReadingSession[];
+  audioTracks?: AudioTrackItem[];
+  // 策展人最爱
+  isFavorite?: boolean;
+  favoriteReason?: string | null;
+  favoriteOrder?: number;
+}
+
+export interface BookCharacter {
+  name: string;
+  roleTitle?: string | null;
+  avatarEmoji?: string;
+  description?: string | null;
+  relationship?: string | null;
+  createdAt?: string;
+}
+
+export interface BookOutline {
+  chapterOrder: number;
+  title: string;
+  summary: string;
+  keyTakeaways?: string | null;
+  createdAt?: string;
+}
+
+export interface ReadingSession {
+  durationMinutes: number;
+  pagesRead?: string | null;
+  thought?: string | null;
+  createdAt: string;
+}
+
+export interface AudioTrackItem {
+  trackOrder: number;
+  title: string;
+  fileUri: string;
+  durationMs: number;
 }
 
 export interface Note {
@@ -43,6 +85,8 @@ export interface Note {
   chapter: string | null;
   createdAt: string;
   updatedAt: string;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
 }
 
 export interface Mindprint {
