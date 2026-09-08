@@ -26,6 +26,8 @@ export interface SyncResult {
 const REMOTE_BACKUP = 'readtrace/backup.json';
 const REMOTE_MANIFEST = 'readtrace/manifest.json';
 
+import { PRESET_BOOKS, PRESET_NOTES, PRESET_MINDPRINTS } from './preset-data';
+
 const STORAGE_KEYS = {
   config: 'rt_webdav_config',
   works: 'rt_local_works',
@@ -36,7 +38,13 @@ const STORAGE_KEYS = {
 // ---------------------------------------------------------------- 本地存储（Local-First）
 
 export function loadLocalWorks(): Book[] {
-  return uni.getStorageSync(STORAGE_KEYS.works) || [];
+  const cached = uni.getStorageSync(STORAGE_KEYS.works);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return cached;
+  }
+  // 首次运行自动灌入预设典藏
+  uni.setStorageSync(STORAGE_KEYS.works, PRESET_BOOKS);
+  return [...PRESET_BOOKS];
 }
 
 export function saveLocalWorks(works: Book[]) {
@@ -44,11 +52,35 @@ export function saveLocalWorks(works: Book[]) {
 }
 
 export function loadLocalNotes(): Note[] {
-  return uni.getStorageSync(STORAGE_KEYS.notes) || [];
+  const cached = uni.getStorageSync(STORAGE_KEYS.notes);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return cached;
+  }
+  uni.setStorageSync(STORAGE_KEYS.notes, PRESET_NOTES);
+  return [...PRESET_NOTES];
 }
 
 export function loadLocalMindprints(): Mindprint[] {
-  return uni.getStorageSync(STORAGE_KEYS.mindprints) || [];
+  const cached = uni.getStorageSync(STORAGE_KEYS.mindprints);
+  if (Array.isArray(cached) && cached.length > 0) {
+    return cached;
+  }
+  uni.setStorageSync(STORAGE_KEYS.mindprints, PRESET_MINDPRINTS);
+  return [...PRESET_MINDPRINTS];
+}
+
+export function importPresetCatalog(): number {
+  const current = loadLocalWorks();
+  const existingTitles = new Set(current.map((b) => b.title.trim()));
+  let added = 0;
+  for (const preset of PRESET_BOOKS) {
+    if (!existingTitles.has(preset.title.trim())) {
+      current.push(preset);
+      added++;
+    }
+  }
+  saveLocalWorks(current);
+  return added;
 }
 
 // ---------------------------------------------------------------- WebDAV 请求层

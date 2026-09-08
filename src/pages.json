@@ -1,13 +1,18 @@
 {
   "pages": [
-    { "path": "pages/library/index", "style": { "navigationBarTitleText": "阅痕 · 库藏" } },
+    { "path": "pages/hub/index", "style": { "navigationBarTitleText": "阅痕" } },
+    { "path": "pages/library/index", "style": { "navigationBarTitleText": "阅痕" } },
+    { "path": "pages/constellation/index", "style": { "navigationBarTitleText": "星系", "navigationBarBackgroundColor": "#0A0C10", "navigationBarTextStyle": "white" } },
+    { "path": "pages/memoir/index", "style": { "navigationBarTitleText": "纪念" } },
+    { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的" } },
+    { "path": "pages/book-detail/index", "style": { "navigationBarTitleText": "印记检视", "navigationStyle": "custom" } },
     { "path": "pages/quick-log/index", "style": { "navigationBarTitleText": "极速速记", "navigationStyle": "custom" } }
   ],
   "globalStyle": {
-    "navigationBarBackgroundColor": "#05070B",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#05070B",
-    "backgroundTextStyle": "dark"
+    "navigationBarBackgroundColor": "#F8F7F4",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F8F7F4",
+    "backgroundTextStyle": "light"
   },
   "sitemapLocation": "sitemap.json"
 }
