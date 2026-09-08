@@ -36,11 +36,11 @@
         <view class="divider"></view>
 
         <!-- 快速功能操作区（主按键独占 + 副按键等分一行） -->
-        <view class="btn-add" @tap="goQuickLog">＋ 添加新作</view>
+        <view class="btn-add" @tap="goDiscover">🔍 探索与全网搜源录入</view>
         <view class="sub-btn-row">
-          <view class="btn-secondary flex1" @tap="showImportModal = true">📥 导入书单</view>
-          <view class="btn-secondary flex1 gap" @tap="goProfile">📦 备份</view>
-          <view class="btn-secondary flex1 gap" @tap="openTrash">🗑️ 回收站</view>
+          <view class="btn-secondary flex1" @tap="goQuickLog">⚡ 极速速记</view>
+          <view class="btn-secondary flex1 gap" @tap="showImportModal = true">📥 预置书单</view>
+          <view class="btn-secondary flex1 gap" @tap="goProfile">📦 数据主权</view>
         </view>
 
         <!-- ✦ 页脚铭文行：项目理念常驻 -->
@@ -386,6 +386,10 @@ function importPresetCategory(cat: MediaType) {
   works.value = current;
   showImportModal.value = false;
   uni.showToast({ title: `已添加 ${matches.length} 部${MEDIA_LABEL[cat].name}`, icon: 'none' });
+}
+
+function goDiscover() {
+  uni.navigateTo({ url: '/pages/discover/index' });
 }
 
 function goQuickLog() {

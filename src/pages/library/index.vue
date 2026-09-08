@@ -12,7 +12,10 @@
       <!-- 标题与新增操作栏 -->
       <view class="title-row">
         <text class="panel-title">📚 精神藏库</text>
-        <view class="btn-add" @tap="goQuickLog">+ 记录</view>
+        <view class="header-actions">
+          <view class="btn-discover" @tap="goDiscover">🔍 搜源建库</view>
+          <view class="btn-add" @tap="goQuickLog">+ 记录</view>
+        </view>
       </view>
 
       <!-- 一级：媒介类型切换胶囊栏 -->
@@ -41,11 +44,14 @@
         <input
           class="search-input"
           v-model="keyword"
-          placeholder="搜索作品名、创作者、分类、标签..."
+          placeholder="搜索藏库作品名、创作者、分类、标签..."
           placeholder-class="ph"
           confirm-type="search"
         />
         <view v-if="keyword" class="search-clear" @tap="keyword = ''">✕</view>
+        <view class="search-discover-tag" @tap="goDiscover">
+          <text class="sdt-text">全网搜源 ➔</text>
+        </view>
       </view>
 
       <!-- 二级：iOS 风格轻量状态分段条 -->
@@ -314,6 +320,10 @@ function backToTop() {
   }, 100);
 }
 
+function goDiscover() {
+  uni.navigateTo({ url: '/pages/discover/index' });
+}
+
 function goQuickLog() {
   uni.navigateTo({ url: '/pages/quick-log/index' });
 }
@@ -348,6 +358,22 @@ function exportView() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.btn-discover {
+  padding: 10rpx 20rpx;
+  border-radius: 28rpx;
+  background: #ECEAE4;
+  color: #3A6348;
+  font-size: 22rpx;
+  font-weight: bold;
+  border: 1rpx solid rgba(58, 99, 72, 0.25);
 }
 
 .panel-title {
@@ -423,6 +449,19 @@ function exportView() {
   color: #686e64;
   font-size: 28rpx;
   padding: 8rpx;
+}
+
+.search-discover-tag {
+  background: #3A6348;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+  margin-left: 10rpx;
+}
+
+.sdt-text {
+  font-size: 20rpx;
+  color: #FFFFFF;
+  font-weight: 600;
 }
 
 /* 二级/三级分段条 */

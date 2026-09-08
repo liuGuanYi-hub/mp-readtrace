@@ -77,6 +77,8 @@ export function loadLocalMindprints(): Mindprint[] {
   return [...PRESET_MINDPRINTS];
 }
 
+export const loadAllLocalMindprints = loadLocalMindprints;
+
 export function importPresetCatalog(): number {
   const current = loadLocalWorks();
   const existingTitles = new Set(current.map((b) => b.title.trim()));

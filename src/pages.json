@@ -9,7 +9,8 @@
     { "path": "pages/quick-log/index", "style": { "navigationBarTitleText": "极速速记", "navigationStyle": "custom" } },
     { "path": "pages/backup/index", "style": { "navigationBarTitleText": "数据主权与备份", "navigationStyle": "custom" } },
     { "path": "pages/trash/index", "style": { "navigationBarTitleText": "回收站", "navigationStyle": "custom" } },
-    { "path": "pages/favorites/index", "style": { "navigationBarTitleText": "我的最爱", "navigationStyle": "custom" } }
+    { "path": "pages/favorites/index", "style": { "navigationBarTitleText": "我的最爱", "navigationStyle": "custom" } },
+    { "path": "pages/discover/index", "style": { "navigationBarTitleText": "探索与外部建库", "navigationStyle": "custom" } }
   ],
   "globalStyle": {
     "navigationBarBackgroundColor": "#F8F7F4",
