@@ -1,6 +1,7 @@
 <template>
   <scroll-view scroll-y class="page" :show-scrollbar="false">
-    <!-- 🌌 动态极光渐变与微胶片颗粒质感层 -->
+    <!-- 🌌 极光流体背景（对齐 App AuroraFluidBackgroundView）与微胶片颗粒质感层 -->
+    <AuroraBackground />
     <view class="film-grain-overlay"></view>
 
     <!-- ═══ 第一屏 · 清爽记录台（正方形悬浮记录台，对齐 App P35 设计） ═══ -->
@@ -15,20 +16,22 @@
 
         <!-- 大标题行 -->
         <view class="title-row">
-          <text class="home-title">阅痕 ReadTrace</text>
-          <view class="theme-btn" @tap="toggleTheme">{{ isDark ? '🌙' : '☀️' }}</view>
+          <ScrambleText class="home-title holo-shine" text="阅痕 ReadTrace" />
+          <view class="theme-btn rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="toggleTheme">☀️</view>
         </view>
         <text class="home-subtitle">{{ circadian.emoji }} {{ circadian.label }} · {{ nowTime }} 四时自然光感校准</text>
 
         <!-- ✦ 五媒介藏品统计网格（正方形腹地：一览精神领土） -->
         <view class="arc-row">
           <view
-            class="arc-item"
+            class="arc-item rt-spring"
             v-for="m in ARC_MEDIA"
             :key="m.key"
+            hover-class="rt-press"
+            hover-stay-time="120"
             @tap="goLibraryWithMedia(m.key)"
           >
-            <text class="arc-count">{{ countByMedia[m.key] || 0 }}</text>
+            <CountUp class="arc-count" :value="countByMedia[m.key] || 0" />
             <text class="arc-label">{{ m.label }}</text>
           </view>
         </view>
@@ -36,11 +39,11 @@
         <view class="divider"></view>
 
         <!-- 快速功能操作区（主按键独占 + 副按键等分一行） -->
-        <view class="btn-add" @tap="goDiscover">🔍 探索与全网搜源录入</view>
+        <view class="btn-add rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goDiscover">🔍 探索与全网搜源录入</view>
         <view class="sub-btn-row">
-          <view class="btn-secondary flex1" @tap="goQuickLog">⚡ 极速速记</view>
-          <view class="btn-secondary flex1 gap" @tap="showImportModal = true">📥 预置书单</view>
-          <view class="btn-secondary flex1 gap" @tap="goProfile">📦 数据主权</view>
+          <view class="btn-secondary flex1 rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goQuickLog">⚡ 极速速记</view>
+          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="showImportModal = true">📥 预置书单</view>
+          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goProfile">📦 数据主权</view>
         </view>
 
         <!-- ✦ 页脚铭文行：项目理念常驻 -->
@@ -56,7 +59,7 @@
     </view>
 
     <!-- 🌟 1. 今日焦点 · 破壁策展主位 (Hero Curatorial Bento Card) -->
-    <view v-if="hero" class="hero-card" @tap="openDetail(hero)">
+    <view v-if="hero" class="hero-card rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="openDetail(hero)">
       <view class="hero-head">
         <view class="hero-badge-left">
           <text class="hero-editorial-badge">✦</text>
@@ -76,7 +79,7 @@
         </view>
 
         <view class="hero-info">
-          <text class="hero-title">《{{ hero.title }}》</text>
+          <ScrambleText class="hero-title" :text="'《' + hero.title + '》'" />
           <text class="hero-author">{{ hero.author || '未知作者' }}</text>
           <view class="gold-badge" v-if="hero.rating">
             ★ {{ hero.rating.toFixed(1).replace(/\.0$/, '') }} · 精神珍藏
@@ -101,8 +104,10 @@
       <view
         v-for="(c, i) in capsules"
         :key="c.title"
-        class="capsule"
+        class="capsule rt-spring"
         :class="{ dark: i === 0 }"
+        hover-class="rt-press"
+        hover-stay-time="120"
         @tap="onCapsuleTap(c)"
       >
         <text class="capsule-emoji">{{ c.emoji }}</text>
@@ -114,9 +119,9 @@
     <view class="parchment-ribbon">
       <view class="pr-head">
         <text class="pr-title">📜 灵感随想 · 羊皮纸笺</text>
-        <view class="pr-refresh" @tap="rotateQuote">🔄 换一句</view>
+        <view class="pr-refresh rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="rotateQuote">🔄 换一句</view>
       </view>
-      <text class="pr-quote">“{{ currentQuote.text }}”</text>
+      <DropCapText class="pr-quote" :text="currentQuote.text" />
       <text class="pr-source">—— {{ currentQuote.source }}</text>
     </view>
 
@@ -130,7 +135,9 @@
         <view
           v-for="(fav, idx) in favWorks"
           :key="fav.id"
-          class="fav-card"
+          class="fav-card rt-spring"
+          hover-class="rt-press"
+          hover-stay-time="120"
           @tap="openDetail(fav)"
         >
           <image v-if="fav.coverUrl" class="fav-cover" :src="fav.coverUrl" mode="aspectFill" />
@@ -151,20 +158,20 @@
         <text v-if="avgRating" class="insight-avg">均分 ★ {{ avgRating }}</text>
       </view>
       <view class="insight-stats">
-        <view class="stat-col" @tap="goLibraryAll">
-          <text class="stat-num">{{ works.length }}</text>
+        <view class="stat-col rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goLibraryAll">
+          <CountUp class="stat-num" :value="works.length" />
           <text class="stat-label">总藏品</text>
         </view>
-        <view class="stat-col" @tap="goLibraryWithStatus('reading')">
-          <text class="stat-num">{{ countByStatus('reading') }}</text>
+        <view class="stat-col rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goLibraryWithStatus('reading')">
+          <CountUp class="stat-num" :value="countByStatus('reading')" />
           <text class="stat-label">进行中</text>
         </view>
-        <view class="stat-col" @tap="goLibraryWithStatus('finished')">
-          <text class="stat-num">{{ countByStatus('finished') }}</text>
+        <view class="stat-col rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goLibraryWithStatus('finished')">
+          <CountUp class="stat-num" :value="countByStatus('finished')" />
           <text class="stat-label">已完成</text>
         </view>
-        <view class="stat-col" @tap="goLibraryWithStatus('wishlist')">
-          <text class="stat-num gold">{{ countByStatus('wishlist') }}</text>
+        <view class="stat-col rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goLibraryWithStatus('wishlist')">
+          <CountUp class="stat-num gold" :value="countByStatus('wishlist')" />
           <text class="stat-label">想看</text>
         </view>
       </view>
@@ -240,6 +247,10 @@ import { loadLocalWorks, saveLocalWorks, importPresetCatalog } from '../../utils
 import { PRESET_BOOKS } from '../../utils/preset-data';
 import TabBar from '../../components/TabBar.vue';
 import InfiniteMarquee from '../../components/InfiniteMarquee.vue';
+import AuroraBackground from '../../components/AuroraBackground.vue';
+import ScrambleText from '../../components/ScrambleText.vue';
+import CountUp from '../../components/CountUp.vue';
+import DropCapText from '../../components/DropCapText.vue';
 
 const ARC_MEDIA = [
   { key: 'book', label: '📚 书籍' },
@@ -249,11 +260,10 @@ const ARC_MEDIA = [
   { key: 'music', label: '🎵 音乐' },
 ] as const;
 
-const isDark = ref(false);
 function toggleTheme() {
-  isDark.value = !isDark.value;
+  // 夜间主题 Token 已在 App.vue 预留，本期仅日间：如实提示而非假装切换
   uni.showToast({
-    title: isDark.value ? '已开启暗夜星辉模式' : '已恢复白昼正午光感',
+    title: '夜间星辉模式开发中 · 本期以暖纸白呈现',
     icon: 'none',
   });
 }
@@ -447,6 +457,19 @@ function openTrash() {
   bottom: 0;
   pointer-events: none;
   background: radial-gradient(circle at 50% 50%, transparent 80%, rgba(0, 0, 0, 0.02) 100%);
+}
+
+/* 内容层级：确保各区块浮于 fixed 极光背景之上 */
+.first-screen-stage,
+.marquee-section,
+.hero-card,
+.capsule-scroller,
+.parchment-ribbon,
+.fav-section,
+.insight-panel,
+.memory-panel {
+  position: relative;
+  z-index: 1;
 }
 
 .flex1 { flex: 1; }

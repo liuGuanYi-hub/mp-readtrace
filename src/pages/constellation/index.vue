@@ -15,21 +15,13 @@
         }"
       ></view>
 
-      <!-- 节点间星轨连线 (SVG) -->
-      <svg class="constellation-svg" width="100%" height="100%">
-        <line
-          v-for="(line, idx) in constellationLines"
-          :key="`line-${idx}`"
-          :x1="line.x1 + '%'"
-          :y1="line.y1 + '%'"
-          :x2="line.x2 + '%'"
-          :y2="line.y2 + '%'"
-          :stroke="line.color"
-          :stroke-width="line.width"
-          stroke-dasharray="3, 3"
-          opacity="0.35"
-        />
-      </svg>
+      <!-- 节点间星轨连线（Canvas 2D：微信真机不支持 SVG 标签，dash 虚线对齐原视觉） -->
+      <canvas
+        type="2d"
+        id="sky-lines-canvas"
+        canvas-id="sky-lines-canvas"
+        class="constellation-canvas"
+      ></canvas>
 
       <!-- 恒星节点群 -->
       <view
@@ -143,7 +135,7 @@
 
 <script setup lang="ts">
 import { onShow } from '@dcloudio/uni-app';
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
 import { loadLocalWorks } from '../../utils/sync';
@@ -178,12 +170,13 @@ interface StarNode {
   glowColor: string;
 }
 
+// 媒介星辰五色系 · 对齐 Android CosmicGravityGraphView/MindprintConstellationView 调色盘
 const COLOR_MAP: Record<MediaType, { core: string; glow: string }> = {
-  book: { core: '#3A6348', glow: 'rgba(58, 99, 72, 0.45)' },
-  anime: { core: '#A855F7', glow: 'rgba(168, 85, 247, 0.45)' },
-  movie: { core: '#38BDF8', glow: 'rgba(56, 189, 248, 0.45)' },
-  game: { core: '#14B8A6', glow: 'rgba(20, 184, 166, 0.45)' },
-  music: { core: '#EAB308', glow: 'rgba(234, 179, 8, 0.45)' },
+  book: { core: '#E07A5F', glow: 'rgba(224, 122, 95, 0.45)' },   // 珊瑚琥珀
+  anime: { core: '#9B5DE5', glow: 'rgba(155, 93, 229, 0.45)' },  // 紫罗兰
+  movie: { core: '#F4A261', glow: 'rgba(244, 162, 97, 0.45)' },  // 落日金
+  game: { core: '#00BBF9', glow: 'rgba(0, 187, 249, 0.45)' },    // 冰川青
+  music: { core: '#81B29A', glow: 'rgba(129, 178, 154, 0.45)' }, // 翡翠绿
 };
 
 // 确定性随机布点
@@ -253,6 +246,50 @@ const constellationLines = computed(() => {
   return lines;
 });
 
+// ── 星轨连线 Canvas 2D 绘制（微信真机无 SVG，替代原 <line> 模板）──
+const lineInstance = getCurrentInstance();
+let lineCanvasCtx: any = null;
+let lineCssSize = { w: 0, h: 0 };
+
+function drawConstellationLines() {
+  if (!lineCanvasCtx || !lineCssSize.w) return;
+  const c = lineCanvasCtx;
+  c.clearRect(0, 0, lineCssSize.w, lineCssSize.h);
+  c.globalAlpha = 0.35;
+  c.setLineDash([3, 3]);
+  for (const l of constellationLines.value) {
+    c.beginPath();
+    c.moveTo((l.x1 / 100) * lineCssSize.w, (l.y1 / 100) * lineCssSize.h);
+    c.lineTo((l.x2 / 100) * lineCssSize.w, (l.y2 / 100) * lineCssSize.h);
+    c.strokeStyle = l.color;
+    c.lineWidth = l.width;
+    c.stroke();
+  }
+  c.setLineDash([]);
+  c.globalAlpha = 1;
+}
+
+onMounted(() => {
+  const query = uni.createSelectorQuery().in(lineInstance);
+  query
+    .select('#sky-lines-canvas')
+    .fields({ node: true, size: true })
+    .exec((res: any) => {
+      const info = res && res[0];
+      if (!info || !info.node) return;
+      const dpr = uni.getSystemInfoSync().pixelRatio || 2;
+      lineCssSize = { w: info.width, h: info.height };
+      info.node.width = info.width * dpr;
+      info.node.height = info.height * dpr;
+      lineCanvasCtx = info.node.getContext('2d');
+      lineCanvasCtx.scale(dpr, dpr);
+      drawConstellationLines();
+    });
+});
+
+// 筛选/数据变化时重绘连线（stars 变化必然引起 constellationLines 重算）
+watch(constellationLines, () => drawConstellationLines());
+
 // 背景星尘
 const stardust = Array.from({ length: 36 }).map((_, i) => ({
   id: i,
@@ -315,11 +352,13 @@ page {
   pointer-events: none;
 }
 
-/* 连线 SVG */
-.constellation-svg {
+/* 星轨连线画布 */
+.constellation-canvas {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 1;
 }

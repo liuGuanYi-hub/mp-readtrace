@@ -13,8 +13,8 @@
       <view class="title-row">
         <text class="panel-title">📚 精神藏库</text>
         <view class="header-actions">
-          <view class="btn-discover" @tap="goDiscover">🔍 搜源建库</view>
-          <view class="btn-add" @tap="goQuickLog">+ 记录</view>
+          <view class="btn-discover rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goDiscover">🔍 搜源建库</view>
+          <view class="btn-add rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goQuickLog">+ 记录</view>
         </view>
       </view>
 
@@ -111,7 +111,9 @@
       <view
         v-for="book in filtered"
         :key="book.id"
-        class="book-card"
+        class="book-card rt-spring"
+        hover-class="rt-press"
+        hover-stay-time="120"
         @tap="openDetail(book)"
       >
         <view class="cover-box">
@@ -150,7 +152,9 @@
       <view
         v-for="book in filtered"
         :key="`grid-${book.id}`"
-        class="grid-card"
+        class="grid-card rt-spring"
+        hover-class="rt-press"
+        hover-stay-time="120"
         @tap="openDetail(book)"
       >
         <view class="grid-cover-wrap">

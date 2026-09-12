@@ -1,69 +1,22 @@
 <template>
   <view class="radar-container">
-    <svg :width="size" :height="size" :viewBox="`0 0 ${size} ${size}`" class="radar-svg">
-      <!-- 背景六边形参考网格环 (3 圈) -->
-      <polygon
-        v-for="ring in rings"
-        :key="ring"
-        :points="getHexagonPoints(center, center, radius * ring)"
-        fill="none"
-        stroke="rgba(0, 0, 0, 0.08)"
-        stroke-width="1"
-      />
-
-      <!-- 轴线 -->
-      <line
-        v-for="(axis, i) in axes"
-        :key="`axis-${i}`"
-        :x1="center"
-        :y1="center"
-        :x2="axis.x"
-        :y2="axis.y"
-        stroke="rgba(0, 0, 0, 0.08)"
-        stroke-width="1"
-      />
-
-      <!-- 雷达数据多边形填充面 -->
-      <polygon
-        :points="dataPolygonPoints"
-        fill="rgba(58, 99, 72, 0.25)"
-        stroke="#3A6348"
-        stroke-width="2.5"
-      />
-
-      <!-- 数据顶点圆点 -->
-      <circle
-        v-for="(pt, i) in dataPoints"
-        :key="`dot-${i}`"
-        :cx="pt.x"
-        :cy="pt.y"
-        r="3.5"
-        fill="#3A6348"
-        stroke="#FFFFFF"
-        stroke-width="1.5"
-      />
-
-      <!-- 维度文本标签 -->
-      <text
-        v-for="(axis, i) in axes"
-        :key="`label-${i}`"
-        :x="axis.labelX"
-        :y="axis.labelY"
-        :text-anchor="axis.textAnchor"
-        dominant-baseline="central"
-        fill="#686E64"
-        font-size="11"
-        font-family="sans-serif"
-        font-weight="bold"
-      >
-        {{ axis.label }} ({{ (scores[i] || 8.0).toFixed(1) }})
-      </text>
-    </svg>
+    <canvas
+      type="2d"
+      :id="canvasId"
+      :canvas-id="canvasId"
+      class="radar-canvas"
+      :style="{ width: size + 'px', height: size + 'px' }"
+    ></canvas>
   </view>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+/**
+ * 六维心智雷达 · Canvas 2D 版
+ * 视觉对齐 Android MindprintRadarView：#DDD4CA 蛛网 + 琥珀 #C47D5C 数据多边形
+ * （原 SVG 直写模板在微信真机不渲染，故重写为 Canvas；打开/数据变化时 800ms 从中心展开）
+ */
+import { getCurrentInstance, onMounted, watch } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -86,73 +39,145 @@ const props = withDefaults(
   }
 );
 
-const center = computed(() => props.size / 2);
-const radius = computed(() => props.size * 0.36);
-const rings = [0.33, 0.66, 1.0];
+const canvasId = `radar-${Math.random().toString(36).slice(2, 8)}`;
+const instance = getCurrentInstance();
 
 const labels = ['深度', '美学', '共情', '思辨', '难度', '治愈'];
-const scores = computed(() => [
-  props.depth,
-  props.artistry,
-  props.emotion,
-  props.logic,
-  props.difficulty,
-  props.healing,
-]);
-
-// 6 个顶点的角度（从正上方 -90度 开始）
+// 6 个顶点的角度（从正上方 -90° 开始）
 const angles = [-90, -30, 30, 90, 150, 210].map((deg) => (deg * Math.PI) / 180);
 
-function getHexagonPoints(cx: number, cy: number, r: number): string {
-  return angles
-    .map((ang) => {
-      const x = cx + r * Math.cos(ang);
-      const y = cy + r * Math.sin(ang);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
+let canvasNode: any = null;
+let ctx: any = null;
+let rafId = 0;
+
+function getScores(): number[] {
+  return [props.depth, props.artistry, props.emotion, props.logic, props.difficulty, props.healing];
 }
 
-// 轴线终点与标签定位
-const axes = computed(() =>
-  angles.map((ang, i) => {
-    const x = center.value + radius.value * Math.cos(ang);
-    const y = center.value + radius.value * Math.sin(ang);
-    const labelDist = radius.value + 18;
-    const lx = center.value + labelDist * Math.cos(ang);
-    const ly = center.value + labelDist * Math.sin(ang);
+function draw(progress: number) {
+  if (!ctx) return;
+  const size = props.size;
+  const cx = size / 2;
+  const cy = size / 2;
+  const radius = size * 0.36;
+  const scores = getScores();
 
-    let anchor: 'middle' | 'start' | 'end' = 'middle';
-    if (Math.abs(Math.cos(ang)) > 0.3) {
-      anchor = Math.cos(ang) > 0 ? 'start' : 'end';
-    }
+  ctx.clearRect(0, 0, size, size);
 
+  const webStroke = '#DDD4CA';
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = webStroke;
+
+  // 背景六边形参考网格环（3 圈）
+  for (const ring of [0.33, 0.66, 1.0]) {
+    ctx.beginPath();
+    angles.forEach((ang, i) => {
+      const x = cx + radius * ring * Math.cos(ang);
+      const y = cy + radius * ring * Math.sin(ang);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  // 轴线
+  angles.forEach((ang) => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + radius * Math.cos(ang), cy + radius * Math.sin(ang));
+    ctx.stroke();
+  });
+
+  // 数据多边形（progress: 0→1 从中心展开）
+  const pts = scores.map((score, i) => {
+    const normalized = (Math.min(10, Math.max(1, score)) / 10) * progress;
+    const r = radius * normalized;
     return {
-      x,
-      y,
-      labelX: lx,
-      labelY: ly,
-      label: labels[i],
-      textAnchor: anchor,
+      x: cx + r * Math.cos(angles[i]),
+      y: cy + r * Math.sin(angles[i]),
     };
-  })
-);
+  });
 
-// 根据实际数值计算多边形顶点
-const dataPoints = computed(() =>
-  scores.value.map((score, i) => {
-    const normalized = Math.min(10, Math.max(1, score)) / 10;
-    const r = radius.value * normalized;
-    const ang = angles[i];
-    return {
-      x: center.value + r * Math.cos(ang),
-      y: center.value + r * Math.sin(ang),
-    };
-  })
-);
+  ctx.beginPath();
+  pts.forEach((p, i) => (i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)));
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(196, 125, 92, 0.27)'; // #C47D5C @ 27%
+  ctx.fill();
+  ctx.lineWidth = 2.5;
+  ctx.strokeStyle = '#C47D5C';
+  ctx.stroke();
 
-const dataPolygonPoints = computed(() =>
-  dataPoints.value.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  // 数据顶点圆点（随展开进度渐显）
+  if (progress > 0.6) {
+    const dotAlpha = Math.min(1, (progress - 0.6) / 0.4);
+    ctx.globalAlpha = dotAlpha;
+    pts.forEach((p) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#C47D5C';
+      ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.stroke();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // 维度文本标签
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillStyle = '#686E64';
+  ctx.textBaseline = 'middle';
+  angles.forEach((ang, i) => {
+    const labelDist = radius + 18;
+    const lx = cx + labelDist * Math.cos(ang);
+    const ly = cy + labelDist * Math.sin(ang);
+    const cos = Math.cos(ang);
+    ctx.textAlign = Math.abs(cos) > 0.3 ? (cos > 0 ? 'left' : 'right') : 'center';
+    ctx.globalAlpha = progress;
+    ctx.fillText(`${labels[i]} (${(scores[i] || 8.0).toFixed(1)})`, lx, ly);
+    ctx.globalAlpha = 1;
+  });
+}
+
+function startExpandAnimation() {
+  if (!canvasNode) return;
+  if (rafId) canvasNode.cancelAnimationFrame(rafId);
+  const duration = 800;
+  const start = Date.now();
+  const tick = () => {
+    const t = Math.min(1, (Date.now() - start) / duration);
+    // ease-out cubic：先快后慢，贴近 App 的 Decelerate 展开手感
+    const progress = 1 - Math.pow(1 - t, 3);
+    draw(progress);
+    if (t < 1) rafId = canvasNode.requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+onMounted(() => {
+  const query = uni.createSelectorQuery().in(instance);
+  query
+    .select(`#${canvasId}`)
+    .fields({ node: true, size: true })
+    .exec((res: any) => {
+      const info = res && res[0];
+      if (!info || !info.node) return;
+      canvasNode = info.node;
+      const dpr = (uni.getSystemInfoSync().pixelRatio) || 2;
+      canvasNode.width = props.size * dpr;
+      canvasNode.height = props.size * dpr;
+      ctx = canvasNode.getContext('2d');
+      ctx.scale(dpr, dpr);
+      startExpandAnimation();
+    });
+});
+
+watch(
+  () => [props.depth, props.artistry, props.emotion, props.logic, props.difficulty, props.healing],
+  () => {
+    if (ctx) startExpandAnimation();
+  }
 );
 </script>
 
@@ -163,7 +188,7 @@ const dataPolygonPoints = computed(() =>
   justify-content: center;
   width: 100%;
 }
-.radar-svg {
+.radar-canvas {
   display: block;
 }
 </style>

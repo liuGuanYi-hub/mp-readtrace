@@ -42,6 +42,43 @@ page {
   color: var(--rt-ink);
 }
 
+/* ── 全息流光扫光（对齐 App HolographicRatingView 三色扫光）──
+   用法：<text class="holo-shine">标题</text> */
+.holo-shine {
+  background: linear-gradient(
+    110deg,
+    var(--rt-ink) 30%,
+    #ffe700 45%,
+    #4deeea 52%,
+    #ff2a85 58%,
+    var(--rt-ink) 72%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important; /* 页面样式可能设置标题 color，此处需强制透明露出渐变 */
+  animation: rt-holo-shift 3.6s linear infinite;
+}
+
+@keyframes rt-holo-shift {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+/* ── 弹簧按压反馈（对齐 App ViewAnimationHelper.attachSpringTouch）──
+   用法：class 里加 rt-spring，元素加 hover-class="rt-press" hover-stay-time="120" */
+.rt-spring {
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rt-press {
+  transform: scale(0.96);
+}
+
 /* ── 夜间主题预留位（本期不启用，Token 结构已就绪）──
    启用方式：后续在 page 选择器按主题切换以下变量即可，无需改动业务样式。
    夜间值参考（对齐 values-night/colors.xml）：
