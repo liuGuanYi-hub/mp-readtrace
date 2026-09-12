@@ -20,15 +20,15 @@
         </view>
 
         <view class="pass-body">
-          <view class="pass-avatar">ZZD</view>
+          <view class="pass-avatar">{{ avatarText }}</view>
           <view class="pass-user">
-            <text class="pass-name">首席独立策展人</text>
+            <text class="pass-name">{{ curatorName || '首席独立策展人' }}</text>
             <text class="pass-id">ID: RT-2026-88019 · 殿堂级</text>
           </view>
         </view>
 
         <view class="pass-foot">
-          <text class="pass-meta">已入库 {{ totalWorks }} 部跨界藏品 · 解锁 12 枚心智徽章</text>
+          <text class="pass-meta">已入库 {{ totalWorks }} 部跨界藏品 · 解锁 {{ unlockedCount }} 枚心智徽章</text>
           <text class="pass-sign">AUTHENTIC ARCHIVE</text>
         </view>
       </view>
@@ -46,11 +46,9 @@
     <view class="annual-persona-panel">
       <view class="persona-head">
         <text class="persona-title">🧠 年度认知心智画像</text>
-        <view class="persona-badge">深邃博学者</view>
+        <view class="persona-badge">{{ personaTitle }}</view>
       </view>
-      <text class="persona-desc">
-        对宏大哲学叙事、意识流机战、宇宙社会学与纯真诗意展现出极高心智共鸣与深度洞察
-      </text>
+      <text class="persona-desc">{{ personaDesc }}</text>
 
       <!-- 原生六维心智雷达图 -->
       <view class="radar-box">
@@ -102,7 +100,7 @@
     <view class="action-card" @tap="onAction('badges')">
       <view class="card-head">
         <text class="card-title">🏅 精神阅痕成就勋章</text>
-        <view class="card-badge">已解锁 12/18</view>
+        <view class="card-badge">已解锁 {{ unlockedCount }}/18</view>
       </view>
       <text class="card-desc">
         收集深邃探索者、时间旅人、黄金精神等 18 枚策展人专属荣誉勋章
@@ -192,6 +190,83 @@
       </view>
     </view>
 
+    <!-- 🏅 成就勋章墙（真实本地统计） -->
+    <view class="sync-modal-mask" v-if="showBadgesModal" @tap.self="showBadgesModal = false">
+      <view class="sync-dialog badges-dialog">
+        <view class="modal-header">
+          <text class="modal-title">🏅 精神阅痕成就勋章</text>
+          <view class="modal-close" @tap="showBadgesModal = false">✕</view>
+        </view>
+        <text class="modal-sub">已解锁 {{ unlockedCount }} / {{ badges.length }} 枚 · 由你的真实馆藏数据点亮</text>
+        <view class="badge-grid">
+          <view
+            v-for="b in badges"
+            :key="b.name"
+            class="badge-cell"
+            :class="{ locked: !b.unlocked }"
+          >
+            <text class="badge-emoji">{{ b.unlocked ? b.emoji : '🔒' }}</text>
+            <text class="badge-name">{{ b.name }}</text>
+            <text class="badge-desc">{{ b.desc }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 📜 版本演进纪要 -->
+    <view class="sync-modal-mask" v-if="showChangelogModal" @tap.self="showChangelogModal = false">
+      <view class="sync-dialog">
+        <view class="modal-header">
+          <text class="modal-title">📜 版本演进纪要</text>
+          <view class="modal-close" @tap="showChangelogModal = false">✕</view>
+        </view>
+        <scroll-view scroll-y class="changelog-scroll">
+          <view v-for="c in CHANGELOG" :key="c.version" class="cl-block">
+            <view class="cl-head">
+              <text class="cl-version">{{ c.version }}</text>
+              <text class="cl-date">{{ c.date }}</text>
+            </view>
+            <text class="cl-title">{{ c.title }}</text>
+            <text v-for="(it, i) in c.items" :key="i" class="cl-item">· {{ it }}</text>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <!-- 🏷️ 关于阅痕 -->
+    <view class="sync-modal-mask" v-if="showAboutModal" @tap.self="showAboutModal = false">
+      <view class="sync-dialog">
+        <view class="modal-header">
+          <text class="modal-title">🏷️ 关于阅痕 ReadTrace</text>
+          <view class="modal-close" @tap="showAboutModal = false">✕</view>
+        </view>
+        <view class="about-body">
+          <text class="about-slogan">— 记录看过的作品，也记录当时的自己 —</text>
+          <text class="about-para">阅痕是一个跨媒介文化印记策展空间：书籍、番剧、影视、游戏与音乐，都值得被认真归档。它像一座只属于你的私人美术馆，每部作品都是一件带故事的藏品。</text>
+          <text class="about-para">小程序端与 Android App 端数据模型完全同构，通过 WebDAV 或 JSON 备份即可双端漫游。Local-First：所有数据默认只存在你的设备里。</text>
+          <text class="about-meta">小程序版本 v1.1.0 · 对齐 App v1.0.12</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- ✦ 策展人署名编辑 -->
+    <view class="sync-modal-mask" v-if="showCuratorModal" @tap.self="showCuratorModal = false">
+      <view class="sync-dialog">
+        <view class="modal-header">
+          <text class="modal-title">✦ 策展人入驻</text>
+          <view class="modal-close" @tap="showCuratorModal = false">✕</view>
+        </view>
+        <text class="modal-sub">署名将显示在你的全息通行卡上</text>
+        <view class="form-item">
+          <text class="form-label">策展人署名</text>
+          <input class="form-input" v-model="curatorInput" placeholder="如：ZZD / 阿澈 / 星海漫游者" />
+        </view>
+        <view class="modal-btn-row">
+          <view class="modal-btn-save" @tap="saveCurator">保存署名</view>
+        </view>
+      </view>
+    </view>
+
     <TabBar :active="4" />
   </scroll-view>
 </template>
@@ -201,24 +276,37 @@ import { onShow } from '@dcloudio/uni-app';
 import { computed, ref } from 'vue';
 import TabBar from '../../components/TabBar.vue';
 import MindprintRadar from '../../components/MindprintRadar.vue';
-import { loadLocalWorks, loadLocalMindprints, performSync, loadConfig, saveConfig } from '../../utils/sync';
+import { loadLocalWorks, loadLocalNotes, loadLocalMindprints, performSync, loadConfig, saveConfig } from '../../utils/sync';
 import { performDualChannelSync, getCloudStats } from '../../utils/cloud-sync';
-import type { Mindprint } from '../../utils/models';
+import type { Book, Mindprint, Note } from '../../utils/models';
 
 const totalWorks = ref(0);
 const syncing = ref(false);
 const syncStatusText = ref('免密漫游就绪');
 const mindprints = ref<Mindprint[]>([]);
+const worksFull = ref<Book[]>([]);
+const notesFull = ref<Note[]>([]);
 
 const showSyncModal = ref(false);
 const webdavServer = ref('');
 const webdavUser = ref('');
 const webdavPass = ref('');
 
+// ── 徽章墙 / 版本纪要 / 关于 / 策展人编辑 ──
+const showBadgesModal = ref(false);
+const showChangelogModal = ref(false);
+const showAboutModal = ref(false);
+const showCuratorModal = ref(false);
+const curatorName = ref('');
+const curatorInput = ref('');
+
 onShow(() => {
   const works = loadLocalWorks();
   totalWorks.value = works.length;
+  worksFull.value = works;
+  notesFull.value = loadLocalNotes();
   mindprints.value = loadLocalMindprints();
+  curatorName.value = uni.getStorageSync('rt_curator_name') || '';
 
   const cloudStats = getCloudStats();
   if (cloudStats.lastSyncTime) {
@@ -294,10 +382,135 @@ function saveWebDavSettings() {
 }
 
 function onEditCurator() {
-  uni.showToast({ title: '已认证为核心策展人 ZZD', icon: 'none' });
+  curatorInput.value = curatorName.value;
+  showCuratorModal.value = true;
 }
 
-function onAction(type: string) {
+function saveCurator() {
+  const name = curatorInput.value.trim();
+  if (!name) {
+    uni.showToast({ title: '请填写策展人署名', icon: 'none' });
+    return;
+  }
+  curatorName.value = name;
+  uni.setStorageSync('rt_curator_name', name);
+  showCuratorModal.value = false;
+  uni.showToast({ title: '通行证署名已更新', icon: 'none' });
+}
+
+const avatarText = computed(() => (curatorName.value ? curatorName.value.slice(0, 2) : '策展'));
+
+// ── 认知画像称号：由六维均值的主导维度推导（对齐 App ReadingPersona 思路）──
+const personaTitle = computed(() => {
+  const m = avgMindprint.value;
+  const dims: Array<[string, number]> = [
+    ['深邃博学者', m.depth],
+    ['美学鉴赏家', m.artistry],
+    ['共情诗人', m.emotion],
+    ['逻辑星图师', m.logic],
+    ['硬核攀登者', m.difficulty],
+    ['治愈系旅人', m.healing],
+  ];
+  dims.sort((a, b) => b[1] - a[1]);
+  return dims[0][0];
+});
+
+const personaDesc = computed(() => {
+  const n = mindprints.value.length;
+  if (!n) return '开始记录作品后，这里会生成你的年度认知心智画像';
+  const m = avgMindprint.value;
+  const top = personaTitle.value;
+  return `基于 ${n} 部作品的六维心智均值推导 · 当前主导维度映射为「${top}」，思想 ${m.depth.toFixed(1)} / 情感 ${m.emotion.toFixed(1)} / 逻辑 ${m.logic.toFixed(1)}`;
+});
+
+// ── 真实成就统计与 18 枚徽章（对齐 App MilestoneBadgeHelper 思路）──
+interface BadgeDef {
+  emoji: string;
+  name: string;
+  desc: string;
+  check: () => boolean;
+}
+
+const badgeStats = computed(() => {
+  const works = worksFull.value;
+  const finished = works.filter((b) => b.status === 'finished').length;
+  const highRated = works.filter((b) => (b.rating ?? 0) >= 9).length;
+  const perfect = works.some((b) => b.rating === 10);
+  const favs = works.filter((b) => b.isFavorite).length;
+  const archived = works.filter((b) => b.isDeleted).length;
+  const reviews = works.filter((b) => !!b.review).length;
+  const categorized = works.filter((b) => !!b.category).length;
+  const mediaSet = new Set(works.filter((b) => !b.isDeleted).map((b) => b.mediaType));
+  const tagCount = new Set(works.filter((b) => !b.isDeleted).flatMap((b) => b.tags || [])).size;
+  return {
+    total: totalWorks.value,
+    finished,
+    highRated,
+    perfect,
+    favs,
+    archived,
+    reviews,
+    categorized,
+    mediaKinds: mediaSet.size,
+    tagCount,
+    noteCount: notesFull.value.length,
+    mindprintCount: mindprints.value.length,
+  };
+});
+
+const BADGE_DEFS: BadgeDef[] = [
+  { emoji: '🌱', name: '初次印记', desc: '入库第 1 部作品', check: () => badgeStats.value.total >= 1 },
+  { emoji: '📚', name: '十部典藏', desc: '累计入库 10 部', check: () => badgeStats.value.total >= 10 },
+  { emoji: '🏛️', name: '三十收藏家', desc: '累计入库 30 部', check: () => badgeStats.value.total >= 30 },
+  { emoji: '👑', name: '全知策展人', desc: '累计入库 50 部', check: () => badgeStats.value.total >= 50 },
+  { emoji: '⏳', name: '时间旅人', desc: '完结 5 部作品', check: () => badgeStats.value.finished >= 5 },
+  { emoji: '🏁', name: '完卷礼赞', desc: '完结 15 部作品', check: () => badgeStats.value.finished >= 15 },
+  { emoji: '🌌', name: '五域行者', desc: '五种媒介均有藏品', check: () => badgeStats.value.mediaKinds >= 5 },
+  { emoji: '🌍', name: '三栖漫游', desc: '书/番/影三域各有收藏', check: () => badgeStats.value.mediaKinds >= 3 },
+  { emoji: '✍️', name: '心流记录者', desc: '写下 5 条笔记', check: () => badgeStats.value.noteCount >= 5 },
+  { emoji: '📜', name: '金句猎手', desc: '写下 20 条笔记', check: () => badgeStats.value.noteCount >= 20 },
+  { emoji: '🖋️', name: '长文思考者', desc: '沉淀 3 篇长评', check: () => badgeStats.value.reviews >= 3 },
+  { emoji: '🏷️', name: '标签诗人', desc: '使用 15 个不同标签', check: () => badgeStats.value.tagCount >= 15 },
+  { emoji: '🗂️', name: '分类学家', desc: '为 5 部作品归类', check: () => badgeStats.value.categorized >= 5 },
+  { emoji: '⭐', name: '品鉴之眼', desc: '收藏 3 部 9 分神作', check: () => badgeStats.value.highRated >= 3 },
+  { emoji: '🌟', name: '满分致敬', desc: '存在 10 分满分藏品', check: () => badgeStats.value.perfect },
+  { emoji: '💖', name: '心选策展', desc: '心选展厅收录 3 部', check: () => badgeStats.value.favs >= 3 },
+  { emoji: '🧠', name: '心智测绘', desc: '生成 10 组六维画像', check: () => badgeStats.value.mindprintCount >= 10 },
+  { emoji: '🗑️', name: '断舍离', desc: '使用过回收站归档', check: () => badgeStats.value.archived >= 1 },
+];
+
+const badges = computed(() => BADGE_DEFS.map((d) => ({ ...d, unlocked: d.check() })));
+const unlockedCount = computed(() => badges.value.filter((b) => b.unlocked).length);
+
+// ── 版本演进纪要（双端同步迭代节奏）──
+const CHANGELOG = [
+  {
+    version: 'v1.1.0',
+    date: '2026-09-12',
+    title: '与 Android App 对齐工程',
+    items: [
+      '设计 Token 体系对齐 App 色彩规范（苔绿/烫金/暖纸白）',
+      '极光流体背景、全息流光、字符解密、数字滚动等标志性特效移植',
+      '六维雷达与星图连线 Canvas 化，根治真机 SVG 不渲染',
+      '收藏/归档数据链路打通，编辑印记与海报带参直达落地',
+      '成就勋章接入真实本地统计',
+    ],
+  },
+  {
+    version: 'v1.0.x',
+    date: '2026-08',
+    title: '七轮快速迭代',
+    items: [
+      '五 Tab 框架、Local-First 本地库与 WebDAV 同步',
+      'Schema v4/v5 双端同构与 JSON/Markdown/CSV 导出',
+      '文心雕龙 AI 读后感润色（流式输出）',
+      '伴读白噪音、黑胶唱机与禅意番茄钟',
+      '微信云开发双通道漫游（云数据库 + 本地快照）',
+    ],
+  },
+];
+
+const onAction = (type: string) => {
   switch (type) {
     case 'favorites':
       uni.navigateTo({ url: '/pages/favorites/index' });
@@ -306,10 +519,10 @@ function onAction(type: string) {
       uni.redirectTo({ url: '/pages/memoir/index' });
       break;
     case 'community':
-      uni.showToast({ title: '已连接本地局域展厅，可与 App 端 3D 展厅联动', icon: 'none' });
+      uni.showToast({ title: '3D 展厅依赖自建后端，计划接入微信云开发实现', icon: 'none' });
       break;
     case 'badges':
-      uni.showToast({ title: '已点亮 12 枚专属精神勋章（包含深邃探索者、星海漫步者）', icon: 'none' });
+      showBadgesModal.value = true;
       break;
     case 'migration':
       uni.navigateTo({ url: '/pages/backup/index' });
@@ -321,10 +534,10 @@ function onAction(type: string) {
       uni.navigateTo({ url: '/pages/trash/index' });
       break;
     case 'changelog':
-      uni.showToast({ title: 'v4.3.0: 全面像素级复刻 Android App 策展设计语言', icon: 'none' });
+      showChangelogModal.value = true;
       break;
     case 'about':
-      uni.showToast({ title: '阅痕 ReadTrace · 美术馆级跨媒介文化印记空间', icon: 'none' });
+      showAboutModal.value = true;
       break;
   }
 }
@@ -713,5 +926,128 @@ function onAction(type: string) {
   font-size: 26rpx;
   font-weight: bold;
   box-shadow: 0 6rpx 20rpx rgba(58, 99, 72, 0.3);
+}
+
+/* ── 成就勋章墙 ── */
+.badges-dialog {
+  max-height: 78vh;
+  overflow-y: auto;
+}
+
+.badge-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18rpx;
+  margin-top: 24rpx;
+}
+
+.badge-cell {
+  width: calc((100% - 36rpx) / 3);
+  background: var(--rt-parchment);
+  border: 1rpx solid rgba(140, 110, 74, 0.29);
+  border-radius: 18rpx;
+  padding: 20rpx 12rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.badge-cell.locked {
+  opacity: 0.45;
+  filter: grayscale(0.8);
+}
+
+.badge-emoji {
+  font-size: 44rpx;
+}
+
+.badge-name {
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  font-weight: bold;
+  color: var(--rt-ink);
+}
+
+.badge-desc {
+  margin-top: 6rpx;
+  font-size: 19rpx;
+  color: var(--rt-muted);
+  line-height: 1.4;
+}
+
+/* ── 版本演进纪要 ── */
+.changelog-scroll {
+  max-height: 56vh;
+  margin-top: 20rpx;
+}
+
+.cl-block {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--rt-stroke);
+  display: flex;
+  flex-direction: column;
+}
+
+.cl-head {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.cl-version {
+  font-family: serif;
+  font-weight: bold;
+  font-size: 28rpx;
+  color: var(--rt-accent);
+}
+
+.cl-date {
+  font-size: 21rpx;
+  color: var(--rt-faint);
+}
+
+.cl-title {
+  margin-top: 8rpx;
+  font-size: 25rpx;
+  font-weight: bold;
+  color: var(--rt-ink);
+}
+
+.cl-item {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--rt-muted);
+  line-height: 1.6;
+}
+
+/* ── 关于 ── */
+.about-body {
+  margin-top: 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.about-slogan {
+  font-family: serif;
+  font-size: 26rpx;
+  color: var(--rt-gold);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.about-para {
+  font-size: 24rpx;
+  color: var(--rt-ink);
+  line-height: 1.8;
+  margin-bottom: 16rpx;
+}
+
+.about-meta {
+  margin-top: 8rpx;
+  font-size: 20rpx;
+  color: var(--rt-faint);
+  text-align: right;
 }
 </style>

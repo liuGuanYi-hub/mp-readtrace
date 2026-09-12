@@ -251,7 +251,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, getCurrentInstance } from 'vue';
-import { onShow } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 import TabBar from '../../components/TabBar.vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
@@ -387,6 +387,38 @@ onShow(() => {
       currentSelectedWork.value = found;
     }
   }
+  consumePendingWorkshop();
+});
+
+/** 消费带参直达请求：选中作品并打开对应工坊 */
+function consumePendingWorkshop() {
+  if (!pendingWorkshop.value) return;
+  const ws = pendingWorkshop.value;
+  const bookId = pendingBookId.value;
+  pendingWorkshop.value = '';
+  pendingBookId.value = 0;
+
+  if (bookId) {
+    const found = allWorks.value.find((b) => b.id === bookId);
+    if (found) currentSelectedWork.value = found;
+  }
+  if (ws === 'exlibris') {
+    activeModal.value = 'exlibris';
+  } else if (ws === 'quote') {
+    handleGeneratePoster('quote');
+  }
+}
+
+// ── 带参直达：book-detail 海报/藏书票按钮 → ?workshop=quote|exlibris&bookId=N ──
+const pendingWorkshop = ref('');
+const pendingBookId = ref(0);
+
+onLoad((options: any) => {
+  const ws = options?.workshop;
+  const bookId = Number(options?.bookId);
+  if (!ws) return;
+  pendingWorkshop.value = ws;
+  if (bookId) pendingBookId.value = bookId;
 });
 
 onUnmounted(() => {

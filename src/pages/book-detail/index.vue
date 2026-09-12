@@ -303,6 +303,52 @@
           <view class="btn-save-note" @tap="saveNewNote">秒存笔记</view>
         </view>
       </view>
+
+      <!-- ── ✏️ 编辑印记弹窗 ── -->
+      <view class="note-modal-mask" v-if="showEditModal" @tap.self="showEditModal = false">
+        <view class="note-dialog">
+          <view class="nd-head">
+            <text class="nd-title">✏️ 编辑印记档案</text>
+            <view class="nd-close" @tap="showEditModal = false">✕</view>
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">作品名</text>
+            <input class="nd-input ed-full" v-model="editForm.title" placeholder="作品名" />
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">创作者</text>
+            <input class="nd-input ed-full" v-model="editForm.author" placeholder="作者 / 导演 / 开发商" />
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">分类</text>
+            <input class="nd-input ed-full" v-model="editForm.category" placeholder="如：小说 / 科幻 / RPG" />
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">状态</text>
+            <picker mode="selector" :range="editStatusOptions.map(o => o.label)" :value="editStatusIndex" @change="onEditStatusChange">
+              <view class="ed-picker">{{ editStatusOptions[editStatusIndex]?.label || '选择状态' }} ▾</view>
+            </picker>
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">评分 · {{ editForm.rating.toFixed(1) }}</text>
+            <slider
+              class="ed-slider"
+              :min="1"
+              :max="10"
+              :step="0.5"
+              :value="editForm.rating"
+              activeColor="#3A6348"
+              block-size="20"
+              @change="(e: any) => (editForm.rating = Number(e.detail.value))"
+            />
+          </view>
+          <view class="ed-field">
+            <text class="ed-label">一句短评</text>
+            <input class="nd-input ed-full" v-model="editForm.shortComment" placeholder="一句话印记（将同步到藏库卡片）" />
+          </view>
+          <view class="btn-save-note" @tap="saveEdit">保存印记</view>
+        </view>
+      </view>
     <!-- ═══ P25 文心雕龙：AI 读后感润色 Bottom Sheet ═══ -->
     <view v-if="showPolishModal" class="polish-modal-mask" @tap.self="closePolishSheet">
       <view class="polish-sheet">
@@ -407,10 +453,11 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app';
 import { computed, ref } from 'vue';
-import type { Book, Note, Mindprint } from '../../utils/models';
+import type { Book, Note, Mindprint, BookStatus } from '../../utils/models';
 import { MEDIA_LABEL, MEDIA_STATUS, deriveMindprint } from '../../utils/models';
-import { loadLocalWorks, loadLocalNotes, loadLocalMindprints } from '../../utils/sync';
+import { loadLocalWorks, saveLocalWorks, loadLocalNotes, loadLocalMindprints } from '../../utils/sync';
 import { toggleFavorite, softDeleteWork } from '../../utils/backup';
+import { audioEngine, SOUND_TRACKS } from '../../utils/audio-engine';
 import {
   PRESET_CHARACTERS,
   PRESET_OUTLINES,
@@ -460,6 +507,71 @@ const showAddNoteModal = ref(false);
 const newNoteContent = ref('');
 const newNoteChapter = ref('');
 const newNotePage = ref('');
+
+// ── ✏️ 编辑印记（对齐 App AddBookActivity 预填编辑流）──
+const showEditModal = ref(false);
+const editForm = ref({
+  title: '',
+  author: '',
+  category: '',
+  status: 'reading' as BookStatus,
+  rating: 8,
+  shortComment: '',
+});
+const STATUS_KEYS: BookStatus[] = ['wishlist', 'reading', 'finished', 'paused', 'abandoned'];
+
+const editStatusOptions = computed(() => {
+  const map = book.value ? MEDIA_STATUS[book.value.mediaType] : null;
+  return STATUS_KEYS.map((k) => ({ key: k, label: map?.[k] || k }));
+});
+
+const editStatusIndex = computed(() =>
+  Math.max(0, STATUS_KEYS.indexOf(editForm.value.status))
+);
+
+function openEditModal() {
+  if (!book.value) return;
+  editForm.value = {
+    title: book.value.title || '',
+    author: book.value.author || '',
+    category: book.value.category || '',
+    status: (book.value.status || 'reading') as BookStatus,
+    rating: book.value.rating ?? 8,
+    shortComment: book.value.shortComment || '',
+  };
+  showEditModal.value = true;
+}
+
+function onEditStatusChange(e: any) {
+  const idx = Number(e?.detail?.value ?? 0);
+  editForm.value.status = STATUS_KEYS[idx] || 'reading';
+}
+
+function saveEdit() {
+  if (!book.value) return;
+  if (!editForm.value.title.trim()) {
+    uni.showToast({ title: '作品名不能为空', icon: 'none' });
+    return;
+  }
+  const all = loadLocalWorks();
+  const idx = all.findIndex((b) => b.id === book.value!.id);
+  if (idx >= 0) {
+    all[idx] = {
+      ...all[idx],
+      title: editForm.value.title.trim(),
+      author: editForm.value.author.trim() || null,
+      category: editForm.value.category.trim() || null,
+      status: editForm.value.status,
+      rating: editForm.value.rating,
+      shortComment: editForm.value.shortComment.trim() || null,
+      updatedAt: new Date().toISOString(),
+    };
+    saveLocalWorks(all);
+    book.value = all[idx];
+    showEditModal.value = false;
+    uni.showToast({ title: '印记已更新', icon: 'none' });
+  }
+}
 
 onLoad((options: any) => {
   const id = Number(options?.id);
@@ -534,9 +646,17 @@ function saveNewNote() {
 }
 
 function playTrack(tr: AudioTrackItem) {
+  // 概念曲目暂无版权音源：起播真实伴读黑胶氛围曲（audio-engine 内置可播音源）
+  if (audioEngine.currentTrack.type !== 'vinyl') {
+    const vinyls = SOUND_TRACKS.filter((t) => t.type === 'vinyl');
+    if (vinyls.length) audioEngine.playTrack(vinyls[0]);
+  } else if (!audioEngine.isPlaying) {
+    audioEngine.togglePlay();
+  }
   uni.showToast({
-    title: `正在播放: ${tr.title} - ${tr.artist}`,
+    title: `《${book.value?.title}》伴读黑胶已起针 ·「${tr.title}」为概念曲目暂无音源`,
     icon: 'none',
+    duration: 2400,
   });
 }
 
@@ -546,7 +666,7 @@ function onAction(type: string) {
       uni.showToast({ title: '3D 翻阅需 GPU 加速，建议在 App 端体验', icon: 'none' });
       break;
     case 'edit':
-      uni.showToast({ title: '已进入检视编辑状态', icon: 'none' });
+      if (book.value) openEditModal();
       break;
     case 'archive':
       uni.showModal({
@@ -563,13 +683,14 @@ function onAction(type: string) {
       });
       break;
     case 'poster':
+      // 带作品与金句参数跳转海报工坊，memoir onLoad 直接落位
       uni.navigateTo({
-        url: '/pages/memoir/index',
+        url: `/pages/memoir/index?workshop=quote&bookId=${book.value?.id}`,
       });
       break;
     case 'exlibris':
       uni.navigateTo({
-        url: '/pages/memoir/index',
+        url: `/pages/memoir/index?workshop=exlibris&bookId=${book.value?.id}`,
       });
       break;
   }
@@ -1363,6 +1484,37 @@ function goToPosterWithQuote() {
   justify-content: center;
   font-size: 26rpx;
   font-weight: bold;
+}
+
+/* ── 编辑印记弹窗 ── */
+.ed-field {
+  margin-top: 20rpx;
+}
+
+.ed-label {
+  display: block;
+  font-size: 22rpx;
+  color: var(--rt-muted);
+  margin-bottom: 8rpx;
+}
+
+.ed-full {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ed-picker {
+  height: 68rpx;
+  line-height: 68rpx;
+  padding: 0 20rpx;
+  background: var(--rt-parchment);
+  border-radius: 14rpx;
+  font-size: 26rpx;
+  color: var(--rt-ink);
+}
+
+.ed-slider {
+  margin: 6rpx 8rpx 0;
 }
 
 /* 缺失提示 */
