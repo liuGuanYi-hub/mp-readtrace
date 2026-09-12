@@ -410,6 +410,7 @@ import { computed, ref } from 'vue';
 import type { Book, Note, Mindprint } from '../../utils/models';
 import { MEDIA_LABEL, MEDIA_STATUS, deriveMindprint } from '../../utils/models';
 import { loadLocalWorks, loadLocalNotes, loadLocalMindprints } from '../../utils/sync';
+import { toggleFavorite, softDeleteWork } from '../../utils/backup';
 import {
   PRESET_CHARACTERS,
   PRESET_OUTLINES,
@@ -480,6 +481,9 @@ onLoad((options: any) => {
     characters.value = PRESET_CHARACTERS[id] || [];
     outlines.value = PRESET_OUTLINES[id] || [];
     tracks.value = PRESET_TRACKS[id] || [];
+
+    // 同步最爱状态（与心选展厅 favorites 页共用 isFavorite 字段）
+    isFav.value = !!found.isFavorite;
   }
 });
 
@@ -492,7 +496,10 @@ function goBack() {
 }
 
 function toggleFav() {
+  if (!book.value) return;
   isFav.value = !isFav.value;
+  // 持久化到本地库，与 favorites 页 / WebDAV 备份共用同一字段
+  toggleFavorite(book.value.id, isFav.value);
   uni.showToast({
     title: isFav.value ? '已加入心选展厅' : '已移出心选展厅',
     icon: 'none',
@@ -547,9 +554,9 @@ function onAction(type: string) {
         content: `确定将《${book.value?.title}》移入回收站吗？`,
         success: (res) => {
           if (res.confirm) {
-            const all = loadLocalWorks().filter((b) => b.id !== book.value?.id);
-            uni.setStorageSync('rt_local_works', all);
-            uni.showToast({ title: '已归档', icon: 'none' });
+            // 软删除进回收站（与 App 端归档语义一致，可恢复）
+            softDeleteWork(book.value!.id);
+            uni.showToast({ title: '已归档至回收站', icon: 'none' });
             setTimeout(() => goBack(), 600);
           }
         },

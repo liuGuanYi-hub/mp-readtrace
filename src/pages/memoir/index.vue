@@ -118,7 +118,7 @@
             <view class="vinyl-groove g1"></view>
             <view class="vinyl-groove g2"></view>
             <view class="vinyl-label-center">
-              <image class="vinyl-art" :src="currentSelectedWork.coverUrl || defaultCover" mode="aspectFill" />
+              <image class="vinyl-art" :src="vinylDisplay.coverUrl || defaultCover" mode="aspectFill" />
             </view>
           </view>
           <!-- 机械唱臂微动效 -->
@@ -128,8 +128,8 @@
             <view class="tonearm-head"></view>
           </view>
           <view class="vinyl-meta">
-            <text class="vm-title">{{ currentSelectedWork.title }}</text>
-            <text class="vm-artist">{{ currentSelectedWork.author || '宇多田光' }} · 33 1/3 RPM</text>
+            <text class="vm-title">{{ vinylDisplay.title }}</text>
+            <text class="vm-artist">{{ vinylDisplay.artist }} · 33 1/3 RPM</text>
             <text class="vm-status">
               {{ isVinylPlaying ? '● 正在沉浸播放 · 机械落针运转中' : '○ 唱臂抬起待命 · 点击落针播放' }}
             </text>
@@ -410,6 +410,7 @@ function openWorkPicker(targetMedia?: MediaType) {
 function selectWork(book: Book) {
   currentSelectedWork.value = book;
   showWorkPicker.value = false;
+  if (activeModal.value === 'vinyl') syncVinylDisplayFromWork();
   uni.showToast({ title: `已定制《${book.title}》`, icon: 'none' });
 }
 
@@ -425,6 +426,7 @@ function openWorkshop(card: any) {
     } else if (card.key === 'vinyl') {
       const musics = allWorks.value.filter((b) => b.mediaType === 'music');
       if (musics.length) currentSelectedWork.value = musics[0];
+      syncVinylDisplayFromWork();
     }
     activeModal.value = card.key;
   } else {
@@ -477,6 +479,28 @@ function previewFullPoster() {
 }
 
 // ── 💿 黑胶唱机与音频控制 ──
+// 唱机独立展示态：切歌只改唱机显示，绝不写回 Book 数据（避免污染藏品标题/作者/封面）
+const vinylDisplay = ref({ title: '', artist: '', coverUrl: '' });
+
+function syncVinylDisplayFromWork() {
+  vinylDisplay.value = {
+    title: currentSelectedWork.value.title,
+    artist: currentSelectedWork.value.author || '未知艺术家',
+    coverUrl: currentSelectedWork.value.coverUrl || '',
+  };
+}
+
+function syncVinylDisplayFromTrack() {
+  const t = audioEngine.currentTrack;
+  if (t && t.type === 'vinyl') {
+    vinylDisplay.value = {
+      title: t.title,
+      artist: t.artist,
+      coverUrl: t.coverUrl || '',
+    };
+  }
+}
+
 const isVinylPlaying = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   syncAudioTick.value;
@@ -486,7 +510,10 @@ const isVinylPlaying = computed(() => {
 function toggleVinylPlay() {
   if (!audioEngine.isPlaying && audioEngine.currentTrack.type !== 'vinyl') {
     const vinyls = SOUND_TRACKS.filter((t) => t.type === 'vinyl');
-    if (vinyls.length) audioEngine.playTrack(vinyls[0]);
+    if (vinyls.length) {
+      audioEngine.playTrack(vinyls[0]);
+      syncVinylDisplayFromTrack();
+    }
   } else {
     audioEngine.togglePlay();
   }
@@ -494,20 +521,12 @@ function toggleVinylPlay() {
 
 function prevVinylTrack() {
   audioEngine.prevTrack();
-  currentSelectedWork.value.title = audioEngine.currentTrack.title;
-  currentSelectedWork.value.author = audioEngine.currentTrack.artist;
-  if (audioEngine.currentTrack.coverUrl) {
-    currentSelectedWork.value.coverUrl = audioEngine.currentTrack.coverUrl;
-  }
+  syncVinylDisplayFromTrack();
 }
 
 function nextVinylTrack() {
   audioEngine.nextTrack();
-  currentSelectedWork.value.title = audioEngine.currentTrack.title;
-  currentSelectedWork.value.author = audioEngine.currentTrack.artist;
-  if (audioEngine.currentTrack.coverUrl) {
-    currentSelectedWork.value.coverUrl = audioEngine.currentTrack.coverUrl;
-  }
+  syncVinylDisplayFromTrack();
 }
 
 function goToStandby() {

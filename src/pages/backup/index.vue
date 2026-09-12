@@ -27,7 +27,7 @@
         <view class="cr-status-indicator" :class="{ online: cloudStats.mode !== 'uninitialized' }">
           <text class="cr-dot"></text>
           <text class="cr-status-name">
-            {{ cloudStats.mode === 'wx_cloud' ? '微信云数据库已连接' : '云端保险库免密漫游已激活' }}
+            {{ cloudStats.mode === 'wx_cloud' ? '微信云数据库已连接' : '本地快照模式（未连接云端）' }}
           </text>
         </view>
         <view class="cr-env-btn" @tap="showCloudEnvModal = true">
@@ -248,7 +248,7 @@
           <text class="close-btn" @tap="showCloudEnvModal = false">✕</text>
         </view>
         <view class="wipe-warning" style="color: #686e64; font-size: 22rpx; line-height: 1.6;">
-          若您在微信小程序后台开通了云开发，可在此填写环境 ID（如 readtrace-prod-xxx）；留空将自动运行本地云端保险库免密漫游通道（免配置防卡顿）。
+          若您在微信小程序后台开通了云开发，可在此填写环境 ID（如 readtrace-prod-xxx），填写后同步走真实云数据库；留空则仅在本机做快照整理（不产生网络同步）。
         </view>
         <input
           v-model="inputEnvId"
@@ -380,7 +380,7 @@ function saveCloudEnv() {
 function goBack() {
   uni.navigateBack({
     fail: () => {
-      uni.switchTab({ url: '/pages/profile/index' });
+      uni.redirectTo({ url: '/pages/profile/index' });
     },
   });
 }

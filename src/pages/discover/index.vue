@@ -264,7 +264,7 @@ onMounted(() => {
 function goBack() {
   uni.navigateBack({
     fail: () => {
-      uni.switchTab({ url: '/pages/hub/index' });
+      uni.redirectTo({ url: '/pages/hub/index' });
     },
   });
 }

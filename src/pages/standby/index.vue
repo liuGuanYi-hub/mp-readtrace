@@ -243,7 +243,7 @@ onUnmounted(() => {
 function goBack() {
   uni.navigateBack({
     fail: () => {
-      uni.switchTab({ url: '/pages/hub/index' });
+      uni.redirectTo({ url: '/pages/hub/index' });
     },
   });
 }
@@ -291,6 +291,13 @@ function resetPomodoro() {
   audioEngine.resetPomodoro();
 }
 </script>
+
+<style>
+/* 暗色页全局底色：覆盖 App.vue 浅色 page 背景，防止回弹露白（page 选择器不能放 scoped 块） */
+page {
+  background: #0A0C10;
+}
+</style>
 
 <style scoped>
 .standby-page {

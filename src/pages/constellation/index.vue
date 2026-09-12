@@ -282,6 +282,11 @@ function openDetail(book: Book) {
 </script>
 
 <style>
+/* 暗色页全局底色：覆盖 App.vue 浅色 page 背景，防止回弹露白 */
+page {
+  background: #0a0c10;
+}
+
 .galaxy-page {
   position: relative;
   width: 100vw;

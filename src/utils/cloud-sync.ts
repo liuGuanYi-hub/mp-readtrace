@@ -260,7 +260,8 @@ export async function syncWithWeChatCloud(): Promise<CloudSyncResult> {
       downloadedCount: pulled,
       mergedCount: merged.length,
       timestamp: timeStr,
-      message: `免密静默漫游完成：已同步 ${merged.length} 部典藏 · ${localNotes.length} 条心流 · ${localMindprints.length} 组心智`,
+      // 降级模式仅在本机快照内合并（未出网），文案必须如实告知用户
+      message: `本地快照模式（未出网）：设备内整理 ${merged.length} 部典藏 · ${localNotes.length} 条心流。配置云开发环境 ID 后才会真正云端漫游`,
     };
 
     uni.setStorageSync(STORAGE_KEYS.lastSyncTime, timeStr);

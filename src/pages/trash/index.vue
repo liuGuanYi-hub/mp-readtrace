@@ -118,7 +118,7 @@ onMounted(() => {
 function goBack() {
   uni.navigateBack({
     fail: () => {
-      uni.switchTab({ url: '/pages/profile/index' });
+      uni.redirectTo({ url: '/pages/profile/index' });
     },
   });
 }
