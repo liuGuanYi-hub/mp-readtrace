@@ -192,6 +192,34 @@
       <text class="back-top-text">顶部</text>
     </view>
 
+    <!-- 📜 长卷预览弹窗 -->
+    <view class="scroll-preview-mask" v-if="scrollPreview.visible" @tap.self="scrollPreview.visible = false">
+      <view class="scroll-preview-dialog">
+        <view class="sp-head">
+          <text class="sp-title">📜 藏库宣纸长卷已生成</text>
+          <view class="sp-close" @tap="scrollPreview.visible = false">✕</view>
+        </view>
+        <image
+          v-if="scrollPreview.imageUrl"
+          class="sp-image"
+          :src="scrollPreview.imageUrl"
+          mode="aspectFit"
+          @tap="previewScroll"
+        />
+        <view class="sp-btn-row">
+          <view class="sp-btn sp-btn-ghost" @tap="previewScroll">🔍 全屏预览</view>
+          <view class="sp-btn sp-btn-primary" @tap="saveScroll">💾 保存到相册</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 离屏长卷画布（尺寸随藏品数量动态计算） -->
+    <canvas
+      canvas-id="scrollCanvas"
+      id="scrollCanvas"
+      :style="'position: fixed; left: -9999px; top: -9999px; width: 750px; height: ' + scrollCanvasHeight + 'px;'"
+    />
+
     <TabBar :active="1" />
   </scroll-view>
 </template>
@@ -202,6 +230,8 @@ import { computed, ref } from 'vue';
 import type { Book, BookStatus, MediaType } from '../../utils/models';
 import { MEDIA_LABEL, MEDIA_STATUS } from '../../utils/models';
 import { loadLocalWorks } from '../../utils/sync';
+import { generateLibraryScroll, computeScrollHeight, savePosterToAlbum } from '../../utils/poster-engine';
+import { getCurrentInstance } from 'vue';
 import TabBar from '../../components/TabBar.vue';
 
 const RATING_RANGES = [
@@ -336,8 +366,51 @@ function openDetail(book: Book) {
   uni.navigateTo({ url: `/pages/book-detail/index?id=${book.id}` });
 }
 
+// ── 📜 导出宣纸长卷（真实渲染 → 预览 → 存相册）──
+const instance = getCurrentInstance();
+const scrollCanvasHeight = ref(computeScrollHeight(1));
+const scrollPreview = ref({ visible: false, imageUrl: '' });
+
 function exportView() {
-  uni.showToast({ title: `已生成 ${filtered.value.length} 部藏品长卷预览`, icon: 'none' });
+  const works = filtered.value;
+  if (!works.length) {
+    uni.showToast({ title: '藏库为空，先去记录几部作品吧', icon: 'none' });
+    return;
+  }
+  if (works.length > 16) {
+    uni.showToast({ title: '长卷单幅收录前 16 部 · 可用筛选聚焦', icon: 'none', duration: 2000 });
+  }
+  scrollCanvasHeight.value = computeScrollHeight(works.length);
+  uni.showLoading({ title: '正在铺陈宣纸长卷...', mask: true });
+  // 等待画布尺寸生效后再绘制
+  setTimeout(async () => {
+    try {
+      const tempPath = await generateLibraryScroll('scrollCanvas', instance, works);
+      uni.hideLoading();
+      scrollPreview.value = { visible: true, imageUrl: tempPath };
+    } catch (err: any) {
+      uni.hideLoading();
+      uni.showModal({
+        title: '生成失败',
+        content: err?.errMsg || err?.message || '画布绘制超时，请重试',
+        showCancel: false,
+      });
+    }
+  }, 120);
+}
+
+function previewScroll() {
+  if (!scrollPreview.value.imageUrl) return;
+  uni.previewImage({ urls: [scrollPreview.value.imageUrl], current: scrollPreview.value.imageUrl });
+}
+
+async function saveScroll() {
+  if (!scrollPreview.value.imageUrl) return;
+  try {
+    await savePosterToAlbum(scrollPreview.value.imageUrl);
+  } catch {
+    // 授权/保存提示已由 savePosterToAlbum 处理
+  }
 }
 </script>
 
@@ -860,5 +933,84 @@ function exportView() {
   color: var(--rt-accent);
   font-size: 18rpx;
   font-weight: bold;
+}
+
+/* ── 长卷预览弹窗 ── */
+.scroll-preview-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 12, 16, 0.62);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.scroll-preview-dialog {
+  width: 100%;
+  max-height: 86vh;
+  background: var(--rt-bg);
+  border-radius: 28rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sp-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: var(--rt-ink);
+}
+
+.sp-close {
+  font-size: 28rpx;
+  color: var(--rt-muted);
+  padding: 8rpx;
+}
+
+.sp-image {
+  flex: 1;
+  min-height: 480rpx;
+  margin: 20rpx 0;
+  border-radius: 16rpx;
+  background: var(--rt-parchment);
+}
+
+.sp-btn-row {
+  display: flex;
+  gap: 18rpx;
+}
+
+.sp-btn {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.sp-btn-ghost {
+  background: var(--rt-chip);
+  color: var(--rt-ink);
+}
+
+.sp-btn-primary {
+  background: var(--rt-accent);
+  color: #ffffff;
 }
 </style>

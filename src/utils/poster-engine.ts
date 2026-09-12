@@ -517,3 +517,178 @@ export function savePosterToAlbum(filePath: string): Promise<void> {
     });
   });
 }
+
+// ═══════════════════════════════════════════════════════════
+// 📜 藏库宣纸长卷（对齐 Android LibraryScrollPreviewActivity）
+// 竖向长图：宣纸底 + 题签 + 藏品清单（封面/标题/作者/评分）+ 卷尾铭文
+// ═══════════════════════════════════════════════════════════
+
+/** 长卷单页最多收录条数（Canvas 高度上限保护） */
+export const SCROLL_MAX_WORKS = 16;
+
+/** 计算长卷画布高度（页面据此设置 canvas 元素尺寸） */
+export function computeScrollHeight(worksCount: number): number {
+  const count = Math.min(worksCount, SCROLL_MAX_WORKS);
+  return 300 + count * 190 + 160;
+}
+
+/**
+ * 绘制宣纸长卷内容（旧版 Canvas API，与既有海报一致）
+ */
+function drawLibraryScrollPoster(
+  ctx: UniApp.CanvasContext,
+  works: Book[],
+  coverPaths: Map<number, string | undefined>,
+): void {
+  const W = 750;
+  const list = works.slice(0, SCROLL_MAX_WORKS);
+  const HEADER_H = 300;
+  const ROW_H = 190;
+  const FOOTER_H = 160;
+  const H = computeScrollHeight(works.length);
+
+  // 1. 宣纸底 + 轻微暖调渐变
+  ctx.setFillStyle('#F6F1E8');
+  ctx.fillRect(0, 0, W, H);
+  ctx.setFillStyle('rgba(158, 118, 56, 0.045)');
+  ctx.fillRect(0, 0, W, HEADER_H);
+
+  // 2. 题签区
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(60, 56, 96, 6); // 顶部金线
+  ctx.setFontSize(22);
+  ctx.setFillStyle('#8C887B');
+  ctx.setTextAlign('left');
+  ctx.fillText('READTRACE · LIBRARY SCROLL', 60, 108);
+  ctx.setFontSize(52);
+  ctx.setFillStyle('#1A1C19');
+  ctx.fillText('精 神 藏 库 · 长 卷', 60, 178);
+  ctx.setFontSize(24);
+  ctx.setFillStyle('#686E64');
+  ctx.fillText(`共收录 ${works.length} 部跨界藏品 · ${new Date().toISOString().slice(0, 10)}`, 60, 226);
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(60, 258, W - 120, 3);
+
+  // 3. 藏品行
+  list.forEach((b, i) => {
+    const rowY = HEADER_H + i * ROW_H;
+
+    // 序号刊号
+    ctx.setFontSize(26);
+    ctx.setFillStyle('#9E7638');
+    ctx.fillText(String(i + 1).padStart(2, '0'), 60, rowY + 108);
+
+    // 封面
+    const cover = coverPaths.get(b.id);
+    const cx = 130;
+    const cy = rowY + 20;
+    const cw = 108;
+    const ch = 150;
+    if (cover) {
+      ctx.drawImage(cover, cx, cy, cw, ch);
+    } else {
+      ctx.setFillStyle('#EAE2D5');
+      ctx.fillRect(cx, cy, cw, ch);
+      ctx.setFontSize(40);
+      ctx.setTextAlign('center');
+      ctx.fillText('📖', cx + cw / 2, cy + ch / 2 + 14);
+      ctx.setTextAlign('left');
+    }
+    ctx.setStrokeStyle('rgba(0, 0, 0, 0.08)');
+    ctx.setLineWidth(1);
+    ctx.strokeRect(cx, cy, cw, ch);
+
+    // 文本区
+    const tx = 270;
+    const title = b.title.length > 13 ? b.title.slice(0, 12) + '…' : b.title;
+    ctx.setFontSize(32);
+    ctx.setFillStyle('#1A1C19');
+    ctx.fillText(`《${title}》`, tx, rowY + 62);
+
+    const meta = [b.author || '未知作者', b.category].filter(Boolean).join(' · ');
+    ctx.setFontSize(23);
+    ctx.setFillStyle('#686E64');
+    ctx.fillText(meta.length > 18 ? meta.slice(0, 17) + '…' : meta, tx, rowY + 102);
+
+    if (b.rating) {
+      ctx.setFontSize(24);
+      ctx.setFillStyle('#9E7638');
+      ctx.fillText(`★ ${b.rating.toFixed(1)}`, tx, rowY + 142);
+    }
+    if (b.shortComment) {
+      const c = b.shortComment.length > 12 ? b.shortComment.slice(0, 11) + '…' : b.shortComment;
+      ctx.setFontSize(22);
+      ctx.setFillStyle('#8C887B');
+      ctx.fillText(`“${c}”`, tx + 120, rowY + 142);
+    }
+
+    // 行分隔线
+    ctx.setStrokeStyle('rgba(0, 0, 0, 0.06)');
+    ctx.beginPath();
+    ctx.moveTo(60, rowY + ROW_H - 6);
+    ctx.lineTo(W - 60, rowY + ROW_H - 6);
+    ctx.stroke();
+  });
+
+  // 4. 卷尾铭文
+  const footY = H - 90;
+  ctx.setTextAlign('center');
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(W / 2 - 60, footY - 44, 120, 2);
+  ctx.setFontSize(24);
+  ctx.setFillStyle('#5C584E');
+  ctx.fillText('— 记录看过的作品，也记录当时的自己 —', W / 2, footY);
+  ctx.setFontSize(19);
+  ctx.setFillStyle('#8C887B');
+  ctx.fillText('READTRACE CURATOR ARCHIVE · VOL. I', W / 2, footY + 38);
+  ctx.setTextAlign('left');
+}
+
+/**
+ * 生成藏库长卷临时文件（离屏 Canvas → PNG 长图）
+ * 页面需提供尺寸为 750 x computeScrollHeight(works.length) px 的 canvas 元素
+ */
+export async function generateLibraryScroll(
+  canvasId: string,
+  componentContext: any,
+  works: Book[],
+): Promise<string> {
+  const list = works.slice(0, SCROLL_MAX_WORKS);
+
+  // 封面预下载（尽力而为，失败回退占位）
+  const coverPaths = new Map<number, string | undefined>();
+  for (const w of list) {
+    if (w.coverUrl) {
+      try {
+        coverPaths.set(w.id, await getLocalImagePath(w.coverUrl));
+      } catch {
+        coverPaths.set(w.id, undefined);
+      }
+    }
+  }
+
+  const ctx = uni.createCanvasContext(canvasId, componentContext);
+  drawLibraryScrollPoster(ctx, works, coverPaths);
+  const H = computeScrollHeight(works.length);
+
+  return new Promise((resolve, reject) => {
+    ctx.draw(false, () => {
+      setTimeout(() => {
+        uni.canvasToTempFilePath(
+          {
+            canvasId,
+            width: 750,
+            height: H,
+            destWidth: 1500,
+            destHeight: H * 2,
+            fileType: 'png',
+            quality: 1.0,
+            success: (res) => resolve(res.tempFilePath),
+            fail: (err) => reject(err),
+          },
+          componentContext,
+        );
+      }, 200);
+    });
+  });
+}
