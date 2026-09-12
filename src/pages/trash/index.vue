@@ -139,7 +139,7 @@ function handlePurgeWork(id: number, title: string) {
     title: '彻底删除作品',
     content: `确定永久抹除《${title}》及其所有笔记与大纲？操作无法撤回！`,
     confirmText: '永久删除',
-    confirmColor: '#C62828',
+    confirmColor: '#9E4545',
     success: (res) => {
       if (res.confirm) {
         purgeWork(id);
@@ -161,7 +161,7 @@ function handlePurgeNote(id: number) {
     title: '彻底删除笔记',
     content: '确定永久抹除该条笔记？操作无法撤回！',
     confirmText: '永久删除',
-    confirmColor: '#C62828',
+    confirmColor: '#9E4545',
     success: (res) => {
       if (res.confirm) {
         purgeNote(id);
@@ -177,7 +177,7 @@ function confirmClearAll() {
     title: '清空回收站',
     content: '确定永久清除回收站中的所有作品与随感吗？此操作不可逆！',
     confirmText: '全部清空',
-    confirmColor: '#C62828',
+    confirmColor: '#9E4545',
     success: (res) => {
       if (res.confirm) {
         purgeAllTrash();
@@ -192,7 +192,7 @@ function confirmClearAll() {
 <style scoped>
 .trash-page {
   min-height: 100vh;
-  background-color: #F8F7F4;
+  background-color: var(--rt-bg);
   padding: 40rpx 32rpx 80rpx;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -209,7 +209,7 @@ function confirmClearAll() {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,7 +218,7 @@ function confirmClearAll() {
 
 .back-icon {
   font-size: 38rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1;
 }
 
@@ -231,12 +231,12 @@ function confirmClearAll() {
 .page-title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .page-subtitle {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
   font-family: Georgia, serif;
 }
@@ -249,7 +249,7 @@ function confirmClearAll() {
 
 .clear-text {
   font-size: 24rpx;
-  color: #C62828;
+  color: var(--rt-danger);
   font-weight: 600;
 }
 
@@ -263,7 +263,7 @@ function confirmClearAll() {
   flex: 1;
   text-align: center;
   padding: 16rpx 0;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
   font-size: 26rpx;
   font-weight: 600;
@@ -272,7 +272,7 @@ function confirmClearAll() {
 }
 
 .chip-item.active {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   box-shadow: 0 4rpx 12rpx rgba(58, 99, 72, 0.25);
 }
@@ -297,7 +297,7 @@ function confirmClearAll() {
 
 .empty-text {
   font-size: 28rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .trash-item-card {
@@ -306,7 +306,7 @@ function confirmClearAll() {
   background: #FFFFFF;
   border-radius: 20rpx;
   padding: 24rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   box-shadow: 0 4rpx 16rpx rgba(44, 42, 38, 0.04);
 }
 
@@ -322,7 +322,7 @@ function confirmClearAll() {
   width: 96rpx;
   height: 136rpx;
   border-radius: 12rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,12 +340,12 @@ function confirmClearAll() {
 .item-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .item-meta {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 6rpx;
 }
 
@@ -379,14 +379,14 @@ function confirmClearAll() {
 
 .btn-purge {
   background: #FFEBEE;
-  color: #C62828;
+  color: var(--rt-danger);
 }
 
 .trash-note-card {
   background: #FFFFFF;
   border-radius: 20rpx;
   padding: 24rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   box-shadow: 0 4rpx 16rpx rgba(44, 42, 38, 0.04);
 }
 
@@ -399,7 +399,7 @@ function confirmClearAll() {
 
 .note-type-badge {
   font-size: 20rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
   padding: 2rpx 10rpx;
   border-radius: 6rpx;
@@ -408,7 +408,7 @@ function confirmClearAll() {
 .note-book-title {
   font-size: 24rpx;
   font-weight: 600;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .note-content {

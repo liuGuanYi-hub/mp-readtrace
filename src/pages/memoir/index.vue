@@ -540,7 +540,7 @@ function goToStandby() {
 <style>
 .page {
   min-height: 100vh;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   padding: 24rpx 28rpx 260rpx;
   box-sizing: border-box;
 }
@@ -556,7 +556,7 @@ function goToStandby() {
 
 .page-title {
   display: block;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 46rpx;
   font-weight: bold;
   font-family: serif;
@@ -564,7 +564,7 @@ function goToStandby() {
 
 .page-subtitle {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   line-height: 1.6;
   margin-top: 12rpx;
@@ -584,14 +584,14 @@ function goToStandby() {
 }
 
 .section-head-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .section-head-tag {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 21rpx;
   font-weight: bold;
 }
@@ -634,7 +634,7 @@ function goToStandby() {
 }
 
 .mc-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 30rpx;
   font-weight: bold;
   font-family: serif;
@@ -645,13 +645,13 @@ function goToStandby() {
   padding: 6rpx 16rpx;
   border-radius: 20rpx;
   background: rgba(0, 0, 0, 0.05);
-  color: #686e64;
+  color: var(--rt-muted);
   font-weight: bold;
 }
 
 .mc-badge.green {
   background: rgba(58, 99, 72, 0.12);
-  color: #3a6348;
+  color: var(--rt-accent);
 }
 
 .mc-desc {
@@ -727,7 +727,7 @@ function goToStandby() {
   height: 84rpx;
   line-height: 84rpx;
   text-align: center;
-  background: linear-gradient(135deg, #9E7638 0%, #C8A265 100%);
+  background: linear-gradient(135deg, var(--rt-gold) 0%, #C8A265 100%);
   color: #FFFFFF;
   font-size: 28rpx;
   font-weight: 700;
@@ -772,7 +772,7 @@ function goToStandby() {
 }
 
 .th-cinema {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-size: 22rpx;
   font-weight: bold;
   letter-spacing: 2rpx;
@@ -816,7 +816,7 @@ function goToStandby() {
 }
 
 .t-movie-rating {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-size: 22rpx;
   font-weight: bold;
 }
@@ -869,7 +869,7 @@ function goToStandby() {
 }
 
 .t-barcode {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-family: monospace;
   font-size: 28rpx;
   letter-spacing: 4rpx;
@@ -1075,7 +1075,7 @@ function goToStandby() {
   width: 24rpx;
   height: 24rpx;
   border-radius: 50%;
-  background: #d4af37;
+  background: var(--rt-gold-bright);
   box-shadow: 0 0 12rpx rgba(212, 175, 55, 0.5);
 }
 
@@ -1085,7 +1085,7 @@ function goToStandby() {
   right: 20rpx;
   width: 6rpx;
   height: 150rpx;
-  background: linear-gradient(180deg, #d4af37 0%, #a89f91 100%);
+  background: linear-gradient(180deg, var(--rt-gold-bright) 0%, #a89f91 100%);
   border-radius: 3rpx;
 }
 
@@ -1126,12 +1126,12 @@ function goToStandby() {
   width: 80rpx;
   height: 80rpx;
   border-radius: 50%;
-  background: #d4af37;
+  background: var(--rt-gold-bright);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32rpx;
-  color: #0a0c10;
+  color: var(--rt-deep);
   font-weight: 900;
   box-shadow: 0 8rpx 20rpx rgba(212, 175, 55, 0.4);
 }
@@ -1253,12 +1253,12 @@ function goToStandby() {
 .picker-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .picker-close {
   font-size: 36rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .picker-list {
@@ -1283,7 +1283,7 @@ function goToStandby() {
   width: 80rpx;
   height: 112rpx;
   border-radius: 8rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1298,12 +1298,12 @@ function goToStandby() {
 .picker-item-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .picker-item-meta {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
 }
 
@@ -1331,12 +1331,12 @@ function goToStandby() {
 .preview-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: #3A6348;
+  color: var(--rt-accent);
 }
 
 .preview-close {
   font-size: 36rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .poster-preview-img {
@@ -1349,7 +1349,7 @@ function goToStandby() {
 
 .preview-tips {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-bottom: 24rpx;
 }
 
@@ -1363,7 +1363,7 @@ function goToStandby() {
   flex: 1;
   height: 80rpx;
   line-height: 80rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   font-size: 26rpx;
   font-weight: 700;
@@ -1374,8 +1374,8 @@ function goToStandby() {
   flex: 1;
   height: 80rpx;
   line-height: 80rpx;
-  background: #ECEAE4;
-  color: #2C2A26;
+  background: var(--rt-chip);
+  color: var(--rt-ink);
   font-size: 26rpx;
   font-weight: 600;
   border-radius: 40rpx;

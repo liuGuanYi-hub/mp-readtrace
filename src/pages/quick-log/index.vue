@@ -250,7 +250,7 @@ async function syncNow() {
 <style>
 .quick-log-page {
   min-height: 100vh;
-  background: #090c10;
+  background: var(--rt-deep);
   padding: 32rpx;
   box-sizing: border-box;
   display: flex;
@@ -321,7 +321,7 @@ async function syncNow() {
 }
 
 .media-chip.selected {
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   border-color: #4ade80;
 }
@@ -382,7 +382,7 @@ async function syncNow() {
 }
 
 .pc-media-tag {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-size: 20rpx;
   font-weight: bold;
 }
@@ -485,7 +485,7 @@ async function syncNow() {
 }
 
 .status-key-btn.active .status-key-text {
-  color: #1a1c19;
+  color: var(--rt-ink);
 }
 
 /* 保存按键 */
@@ -494,7 +494,7 @@ async function syncNow() {
   height: 90rpx;
   background: #fde047;
   border-radius: 30rpx;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   display: flex;

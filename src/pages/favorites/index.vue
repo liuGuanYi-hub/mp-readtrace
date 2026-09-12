@@ -228,7 +228,7 @@ function saveFavoriteReason() {
 <style scoped>
 .favorites-page {
   min-height: 100vh;
-  background-color: #F8F7F4;
+  background-color: var(--rt-bg);
   padding: 40rpx 32rpx 140rpx;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -245,7 +245,7 @@ function saveFavoriteReason() {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,7 +254,7 @@ function saveFavoriteReason() {
 
 .back-icon {
   font-size: 38rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1;
 }
 
@@ -266,12 +266,12 @@ function saveFavoriteReason() {
 .page-title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .page-subtitle {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
   font-family: Georgia, serif;
 }
@@ -291,7 +291,7 @@ function saveFavoriteReason() {
   align-items: center;
   gap: 8rpx;
   padding: 14rpx 28rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   border-radius: 36rpx;
   font-size: 26rpx;
   color: #5C584E;
@@ -299,7 +299,7 @@ function saveFavoriteReason() {
 }
 
 .media-tab.active {
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
   box-shadow: 0 4rpx 14rpx rgba(158, 118, 56, 0.3);
 }
@@ -317,7 +317,7 @@ function saveFavoriteReason() {
   padding: 100rpx 40rpx;
   background: #FFFFFF;
   border-radius: 24rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
 }
 
 .empty-icon {
@@ -328,19 +328,19 @@ function saveFavoriteReason() {
 .empty-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .empty-desc {
   font-size: 24rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   text-align: center;
   margin: 12rpx 0 36rpx;
   line-height: 1.5;
 }
 
 .btn-empty-add {
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
   font-size: 26rpx;
   font-weight: 600;
@@ -353,7 +353,7 @@ function saveFavoriteReason() {
   background: #FFFFFF;
   border-radius: 24rpx;
   padding: 24rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   box-shadow: 0 8rpx 24rpx rgba(44, 42, 38, 0.05);
 }
 
@@ -367,7 +367,7 @@ function saveFavoriteReason() {
   position: absolute;
   top: -12rpx;
   left: -8rpx;
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
   padding: 2rpx 10rpx;
   border-radius: 8rpx;
@@ -389,7 +389,7 @@ function saveFavoriteReason() {
   width: 140rpx;
   height: 200rpx;
   border-radius: 12rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -411,7 +411,7 @@ function saveFavoriteReason() {
 .fav-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1.3;
   flex: 1;
   margin-right: 16rpx;
@@ -425,7 +425,7 @@ function saveFavoriteReason() {
 
 .fav-author {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 6rpx;
 }
 
@@ -438,17 +438,17 @@ function saveFavoriteReason() {
 
 .star {
   font-size: 24rpx;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .score {
   font-size: 24rpx;
   font-weight: 700;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .reason-bubble {
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border-radius: 16rpx;
   padding: 14rpx 18rpx;
   margin-top: 10rpx;
@@ -459,7 +459,7 @@ function saveFavoriteReason() {
 }
 
 .reason-quote {
-  color: #9E7638;
+  color: var(--rt-gold);
   font-size: 32rpx;
   line-height: 1;
   font-family: Georgia, serif;
@@ -475,7 +475,7 @@ function saveFavoriteReason() {
 
 .edit-icon {
   font-size: 22rpx;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .bottom-bar {
@@ -486,13 +486,13 @@ function saveFavoriteReason() {
   padding: 20rpx 32rpx env(safe-area-inset-bottom);
   background: rgba(248, 247, 244, 0.9);
   backdrop-filter: blur(12px);
-  border-top: 1rpx solid #ECEAE4;
+  border-top: 1rpx solid var(--rt-chip);
 }
 
 .btn-bottom-add {
   height: 84rpx;
   line-height: 84rpx;
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
   font-size: 28rpx;
   font-weight: 700;
@@ -532,12 +532,12 @@ function saveFavoriteReason() {
 .modal-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .close-btn {
   font-size: 36rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .picker-scroll {
@@ -562,7 +562,7 @@ function saveFavoriteReason() {
   width: 80rpx;
   height: 112rpx;
   border-radius: 8rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -576,18 +576,18 @@ function saveFavoriteReason() {
 .cand-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .cand-author {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
 }
 
 .btn-cand-add {
   padding: 8rpx 20rpx;
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
   font-size: 22rpx;
   font-weight: 600;
@@ -597,8 +597,8 @@ function saveFavoriteReason() {
 .reason-textarea {
   width: 100%;
   height: 200rpx;
-  background: #F8F7F4;
-  border: 1rpx solid #ECEAE4;
+  background: var(--rt-bg);
+  border: 1rpx solid var(--rt-chip);
   border-radius: 16rpx;
   padding: 16rpx;
   box-sizing: border-box;
@@ -621,12 +621,12 @@ function saveFavoriteReason() {
 }
 
 .btn-cancel {
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
 }
 
 .btn-confirm {
-  background: #9E7638;
+  background: var(--rt-gold);
   color: #FFFFFF;
 }
 </style>

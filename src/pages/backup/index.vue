@@ -247,7 +247,7 @@
           <text class="modal-title">⚙️ 微信云开发环境配置</text>
           <text class="close-btn" @tap="showCloudEnvModal = false">✕</text>
         </view>
-        <view class="wipe-warning" style="color: #686e64; font-size: 22rpx; line-height: 1.6;">
+        <view class="wipe-warning" style="color: var(--rt-muted); font-size: 22rpx; line-height: 1.6;">
           若您在微信小程序后台开通了云开发，可在此填写环境 ID（如 readtrace-prod-xxx），填写后同步走真实云数据库；留空则仅在本机做快照整理（不产生网络同步）。
         </view>
         <input
@@ -506,7 +506,7 @@ function executeWipeData() {
 <style scoped>
 .backup-page {
   min-height: 100vh;
-  background-color: #F8F7F4;
+  background-color: var(--rt-bg);
   padding: 40rpx 32rpx 80rpx;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -523,7 +523,7 @@ function executeWipeData() {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -532,7 +532,7 @@ function executeWipeData() {
 
 .back-icon {
   font-size: 38rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1;
 }
 
@@ -544,13 +544,13 @@ function executeWipeData() {
 .page-title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
   letter-spacing: 0.5rpx;
 }
 
 .page-subtitle {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
   font-family: Georgia, serif;
 }
@@ -562,7 +562,7 @@ function executeWipeData() {
   border-radius: 20rpx;
   padding: 28rpx 32rpx;
   box-shadow: 0 8rpx 24rpx rgba(44, 42, 38, 0.05);
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   margin-bottom: 40rpx;
 }
 
@@ -579,12 +579,12 @@ function executeWipeData() {
 .stat-main {
   font-size: 28rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .stat-sub {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 6rpx;
 }
 
@@ -597,7 +597,7 @@ function executeWipeData() {
 }
 
 .danger-title {
-  color: #C62828;
+  color: var(--rt-danger);
   margin-top: 36rpx;
 }
 
@@ -613,13 +613,13 @@ function executeWipeData() {
   background: #FFFFFF;
   border-radius: 20rpx;
   padding: 28rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   box-shadow: 0 4rpx 16rpx rgba(44, 42, 38, 0.04);
 }
 
 .action-card.primary {
   background: linear-gradient(135deg, #FFFFFF 0%, #F3F7F4 100%);
-  border-color: #3A6348;
+  border-color: var(--rt-accent);
 }
 
 .card-icon-wrap {
@@ -646,12 +646,12 @@ function executeWipeData() {
 .card-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .card-desc {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 6rpx;
 }
 
@@ -674,12 +674,12 @@ function executeWipeData() {
 }
 
 .danger-text {
-  color: #C62828;
+  color: var(--rt-danger);
 }
 
 .danger-tag {
   font-size: 20rpx;
-  color: #C62828;
+  color: var(--rt-danger);
   background: #FFCDD2;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
@@ -722,18 +722,18 @@ function executeWipeData() {
 .modal-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .close-btn {
   font-size: 36rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   padding: 10rpx;
 }
 
 .file-picker-btn {
-  background: #ECEAE4;
-  color: #2C2A26;
+  background: var(--rt-chip);
+  color: var(--rt-ink);
   font-size: 26rpx;
   border-radius: 16rpx;
   padding: 18rpx;
@@ -749,20 +749,20 @@ function executeWipeData() {
 .line {
   flex: 1;
   height: 1rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
 }
 
 .divider-text {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   padding: 0 16rpx;
 }
 
 .json-textarea {
   width: 100%;
   height: 240rpx;
-  background: #F8F7F4;
-  border: 1rpx solid #ECEAE4;
+  background: var(--rt-bg);
+  border: 1rpx solid var(--rt-chip);
   border-radius: 16rpx;
   padding: 16rpx;
   box-sizing: border-box;
@@ -790,12 +790,12 @@ function executeWipeData() {
   font-size: 22rpx;
   padding: 8rpx 20rpx;
   border-radius: 24rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
 }
 
 .mode-chip.active {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
 }
 
@@ -815,17 +815,17 @@ function executeWipeData() {
 }
 
 .btn-cancel {
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
 }
 
 .btn-confirm {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
 }
 
 .btn-wipe {
-  background: #C62828;
+  background: var(--rt-danger);
   color: #FFFFFF;
 }
 
@@ -835,7 +835,7 @@ function executeWipeData() {
 
 .preview-scroll {
   max-height: 480rpx;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border-radius: 16rpx;
   padding: 20rpx;
   box-sizing: border-box;
@@ -844,14 +844,14 @@ function executeWipeData() {
 .preview-code {
   font-size: 22rpx;
   font-family: monospace;
-  color: #2C2A26;
+  color: var(--rt-ink);
   white-space: pre-wrap;
   word-break: break-all;
 }
 
 .wipe-notice {
   font-size: 26rpx;
-  color: #C62828;
+  color: var(--rt-danger);
   line-height: 1.5;
   margin-bottom: 20rpx;
 }
@@ -863,17 +863,17 @@ function executeWipeData() {
 }
 
 .keyword {
-  color: #C62828;
+  color: var(--rt-danger);
   font-weight: 700;
 }
 
 .wipe-input {
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border: 2rpx solid #FFCDD2;
   border-radius: 16rpx;
   padding: 16rpx 20rpx;
   font-size: 26rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 /* ═══ 微信云端漫游卡片 ═══ */
@@ -903,7 +903,7 @@ function executeWipeData() {
   width: 14rpx;
   height: 14rpx;
   border-radius: 50%;
-  background: #C62828;
+  background: var(--rt-danger);
 }
 
 .cr-status-indicator.online .cr-dot {
@@ -914,12 +914,12 @@ function executeWipeData() {
 .cr-status-name {
   font-size: 24rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .cr-env-btn {
   font-size: 20rpx;
-  color: #3A6348;
+  color: var(--rt-accent);
   background: rgba(58, 99, 72, 0.1);
   padding: 6rpx 16rpx;
   border-radius: 20rpx;
@@ -928,7 +928,7 @@ function executeWipeData() {
 
 .cr-stats-row {
   display: flex;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border-radius: 20rpx;
   padding: 20rpx 0;
   margin-bottom: 20rpx;
@@ -949,7 +949,7 @@ function executeWipeData() {
 .cr-val {
   font-size: 36rpx;
   font-weight: 800;
-  color: #3A6348;
+  color: var(--rt-accent);
   font-family: Georgia, serif;
 }
 
@@ -968,7 +968,7 @@ function executeWipeData() {
 
 .cr-openid-text {
   font-size: 19rpx;
-  color: #686E64;
+  color: var(--rt-muted);
   font-family: monospace;
 }
 
@@ -981,7 +981,7 @@ function executeWipeData() {
 .btn-cloud-sync {
   height: 80rpx;
   line-height: 80rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   border-radius: 40rpx;
   font-size: 26rpx;
@@ -990,14 +990,14 @@ function executeWipeData() {
 }
 
 .btn-cloud-sync.syncing {
-  background: #9E7638;
+  background: var(--rt-gold);
 }
 
 .btn-dual-sync {
   height: 72rpx;
   line-height: 72rpx;
-  background: #ECEAE4;
-  color: #3A6348;
+  background: var(--rt-chip);
+  color: var(--rt-accent);
   border-radius: 36rpx;
   font-size: 24rpx;
   font-weight: 600;
@@ -1018,7 +1018,7 @@ function executeWipeData() {
   font-size: 28rpx;
   border-radius: 16rpx;
   font-weight: 600;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
 }
 </style>

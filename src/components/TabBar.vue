@@ -74,7 +74,7 @@ function go(i: number) {
   position: absolute;
   top: 10rpx;
   bottom: 10rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border-radius: 38rpx;
   transition: left 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: inset 0 2rpx 4rpx rgba(0, 0, 0, 0.03);
@@ -103,7 +103,7 @@ function go(i: number) {
 }
 
 .nav-label {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   margin-top: 4rpx;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -111,7 +111,7 @@ function go(i: number) {
 }
 
 .nav-tab.active .nav-label {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-weight: bold;
 }
 </style>

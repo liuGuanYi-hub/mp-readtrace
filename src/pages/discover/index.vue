@@ -326,7 +326,7 @@ function executeImport() {
 <style scoped>
 .discover-page {
   min-height: 100vh;
-  background-color: #F8F7F4;
+  background-color: var(--rt-bg);
   padding: 40rpx 32rpx 40rpx;
   box-sizing: border-box;
   display: flex;
@@ -345,7 +345,7 @@ function executeImport() {
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -354,7 +354,7 @@ function executeImport() {
 
 .back-icon {
   font-size: 38rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1;
 }
 
@@ -366,12 +366,12 @@ function executeImport() {
 .page-title {
   font-size: 40rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .page-subtitle {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
   font-family: Georgia, serif;
 }
@@ -391,13 +391,13 @@ function executeImport() {
 .search-icon {
   font-size: 32rpx;
   margin-right: 16rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .search-input {
   flex: 1;
   font-size: 28rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .clear-icon {
@@ -410,7 +410,7 @@ function executeImport() {
   display: flex;
   align-items: center;
   gap: 6rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   padding: 10rpx 20rpx;
   border-radius: 28rpx;
 }
@@ -438,7 +438,7 @@ function executeImport() {
 
 .tab-chip {
   padding: 12rpx 24rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   border-radius: 30rpx;
   font-size: 24rpx;
   color: #5C584E;
@@ -447,7 +447,7 @@ function executeImport() {
 }
 
 .tab-chip.active {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   box-shadow: 0 4rpx 12rpx rgba(58, 99, 72, 0.3);
 }
@@ -461,12 +461,12 @@ function executeImport() {
 .section-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .section-hint {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 4rpx;
 }
 
@@ -490,13 +490,13 @@ function executeImport() {
 
 .empty-text {
   font-size: 28rpx;
-  color: #2C2A26;
+  color: var(--rt-ink);
   font-weight: 600;
 }
 
 .empty-sub {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 8rpx;
 }
 
@@ -506,7 +506,7 @@ function executeImport() {
   border-radius: 20rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
-  border: 1rpx solid #ECEAE4;
+  border: 1rpx solid var(--rt-chip);
   box-shadow: 0 6rpx 20rpx rgba(44, 42, 38, 0.04);
 }
 
@@ -522,7 +522,7 @@ function executeImport() {
   width: 140rpx;
   height: 200rpx;
   border-radius: 12rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -547,7 +547,7 @@ function executeImport() {
 .card-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
   line-height: 1.3;
   flex: 1;
   margin-right: 12rpx;
@@ -555,7 +555,7 @@ function executeImport() {
 
 .remote-badge {
   background: #FFF8E1;
-  color: #9E7638;
+  color: var(--rt-gold);
   font-size: 22rpx;
   font-weight: 700;
   padding: 2rpx 10rpx;
@@ -565,7 +565,7 @@ function executeImport() {
 
 .card-author {
   font-size: 22rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   margin-top: 6rpx;
 }
 
@@ -596,12 +596,12 @@ function executeImport() {
 
 .tag-chip {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .btn-add-lib {
   padding: 10rpx 24rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   font-size: 22rpx;
   font-weight: 700;
@@ -610,8 +610,8 @@ function executeImport() {
 
 .btn-in-library {
   padding: 10rpx 24rpx;
-  background: #ECEAE4;
-  color: #8C887B;
+  background: var(--rt-chip);
+  color: var(--rt-faint);
   font-size: 22rpx;
   font-weight: 600;
   border-radius: 24rpx;
@@ -646,12 +646,12 @@ function executeImport() {
 .sheet-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
 }
 
 .sheet-close {
   font-size: 36rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
   padding: 8rpx;
 }
 
@@ -686,7 +686,7 @@ function executeImport() {
 .char-bubble {
   display: flex;
   align-items: center;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   padding: 12rpx 16rpx;
   border-radius: 12rpx;
   gap: 14rpx;
@@ -699,13 +699,13 @@ function executeImport() {
 .char-name {
   font-size: 24rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
   margin-right: 12rpx;
 }
 
 .char-role {
   font-size: 20rpx;
-  color: #8C887B;
+  color: var(--rt-faint);
 }
 
 .outline-list {
@@ -716,7 +716,7 @@ function executeImport() {
 
 .outline-row {
   display: flex;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   padding: 12rpx 16rpx;
   border-radius: 12rpx;
   gap: 10rpx;
@@ -725,7 +725,7 @@ function executeImport() {
 .outline-order {
   font-size: 22rpx;
   font-weight: 700;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .outline-body {
@@ -735,7 +735,7 @@ function executeImport() {
 .outline-name {
   font-size: 24rpx;
   font-weight: 700;
-  color: #2C2A26;
+  color: var(--rt-ink);
   display: block;
 }
 
@@ -764,7 +764,7 @@ function executeImport() {
 }
 
 .status-chip.active {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
 }
 
@@ -777,7 +777,7 @@ function executeImport() {
 .rating-label {
   font-size: 24rpx;
   font-weight: 700;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .sheet-actions {
@@ -790,7 +790,7 @@ function executeImport() {
   flex: 1;
   height: 80rpx;
   line-height: 80rpx;
-  background: #ECEAE4;
+  background: var(--rt-chip);
   color: #5C584E;
   font-size: 26rpx;
   border-radius: 40rpx;
@@ -801,7 +801,7 @@ function executeImport() {
   flex: 2;
   height: 80rpx;
   line-height: 80rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   font-size: 26rpx;
   border-radius: 40rpx;

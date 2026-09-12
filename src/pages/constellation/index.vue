@@ -284,14 +284,14 @@ function openDetail(book: Book) {
 <style>
 /* 暗色页全局底色：覆盖 App.vue 浅色 page 背景，防止回弹露白 */
 page {
-  background: #0a0c10;
+  background: var(--rt-deep);
 }
 
 .galaxy-page {
   position: relative;
   width: 100vw;
   height: 100vh;
-  background: #0a0c10;
+  background: var(--rt-deep);
   overflow: hidden;
 }
 
@@ -458,7 +458,7 @@ page {
 }
 
 .filter-chip.selected {
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   border-color: #4ade80;
   box-shadow: 0 0 16rpx rgba(74, 222, 128, 0.3);
@@ -550,7 +550,7 @@ page {
 .btn-node-detail {
   padding: 10rpx 26rpx;
   border-radius: 24rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;

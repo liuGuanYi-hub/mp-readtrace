@@ -64,19 +64,19 @@ defineProps<{
 }
 
 .item-bullet {
-  color: #9e7638;
+  color: var(--rt-gold);
   margin-right: 12rpx;
   font-size: 18rpx;
 }
 
 .item-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-weight: bold;
   font-family: serif;
 }
 
 .item-quote {
-  color: #686e64;
+  color: var(--rt-muted);
   margin-left: 10rpx;
   font-style: italic;
 }

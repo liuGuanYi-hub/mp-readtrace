@@ -435,7 +435,7 @@ function openTrash() {
   min-height: 100vh;
   padding: 24rpx 28rpx 260rpx;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #E8F2EC 0%, #F8F7F4 22%, #F8F7F4 75%, #E2EEF4 100%);
+  background: linear-gradient(180deg, #E8F2EC 0%, var(--rt-bg) 22%, var(--rt-bg) 75%, #E2EEF4 100%);
   position: relative;
 }
 
@@ -475,7 +475,7 @@ function openTrash() {
 }
 
 .mast-caps {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 20rpx;
   font-weight: bold;
   letter-spacing: 3rpx;
@@ -483,7 +483,7 @@ function openTrash() {
 }
 
 .issue-tag {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 20rpx;
   font-weight: bold;
   letter-spacing: 3rpx;
@@ -497,7 +497,7 @@ function openTrash() {
 
 .home-title {
   flex: 1;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 58rpx;
   font-weight: bold;
   font-family: serif;
@@ -518,7 +518,7 @@ function openTrash() {
 
 .home-subtitle {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   line-height: 1.5;
   margin-top: 10rpx;
@@ -544,14 +544,14 @@ function openTrash() {
 }
 
 .arc-count {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 42rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .arc-label {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   margin-top: 4rpx;
 }
@@ -561,7 +561,7 @@ function openTrash() {
   margin-top: 28rpx;
   height: 92rpx;
   border-radius: 32rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 28rpx;
   font-weight: bold;
@@ -586,7 +586,7 @@ function openTrash() {
   height: 80rpx;
   border-radius: 28rpx;
   background: #ffffff;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 24rpx;
   font-weight: bold;
   box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.05);
@@ -603,7 +603,7 @@ function openTrash() {
 
 .inscription {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   letter-spacing: 2rpx;
   font-family: serif;
@@ -639,13 +639,13 @@ function openTrash() {
 }
 
 .hero-editorial-badge {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 22rpx;
   margin-right: 8rpx;
 }
 
 .hero-badge-title {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 25rpx;
   font-weight: bold;
   font-family: serif;
@@ -655,9 +655,9 @@ function openTrash() {
 .status-pill {
   padding: 4rpx 16rpx;
   border-radius: 999rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border: 1.5rpx solid rgba(58, 99, 72, 0.2);
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 21rpx;
   font-weight: bold;
 }
@@ -680,7 +680,7 @@ function openTrash() {
   border-radius: 26rpx;
   box-shadow: 0 16rpx 36rpx rgba(0, 0, 0, 0.16);
   border: 2rpx solid rgba(255, 255, 255, 0.6);
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
 }
 
 .hero-ph {
@@ -701,7 +701,7 @@ function openTrash() {
 }
 
 .hero-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 38rpx;
   font-weight: bold;
   font-family: serif;
@@ -709,7 +709,7 @@ function openTrash() {
 }
 
 .hero-author {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   font-family: serif;
   margin-top: 8rpx;
@@ -722,7 +722,7 @@ function openTrash() {
   border-radius: 20rpx;
   background: rgba(158, 118, 56, 0.1);
   border: 1.5rpx solid rgba(158, 118, 56, 0.35);
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 21rpx;
   font-weight: bold;
 }
@@ -747,7 +747,7 @@ function openTrash() {
 .btn-primary {
   height: 76rpx;
   border-radius: 32rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 25rpx;
   font-weight: bold;
@@ -776,7 +776,7 @@ function openTrash() {
   height: 80rpx;
   padding: 0 26rpx;
   margin-right: 16rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border: 1.5rpx solid rgba(0, 0, 0, 0.08);
   border-radius: 40rpx;
   transition: transform 0.15s ease;
@@ -787,7 +787,7 @@ function openTrash() {
 }
 
 .capsule.dark {
-  background: #3a6348;
+  background: var(--rt-accent);
   border-color: rgba(58, 99, 72, 0.6);
 }
 
@@ -796,7 +796,7 @@ function openTrash() {
 }
 
 .capsule-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 24rpx;
   font-weight: bold;
   margin-left: 10rpx;
@@ -823,7 +823,7 @@ function openTrash() {
 
 .pr-title {
   flex: 1;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 25rpx;
   font-weight: bold;
   font-family: serif;
@@ -835,14 +835,14 @@ function openTrash() {
   border-radius: 20rpx;
   background: rgba(255, 255, 255, 0.9);
   border: 1.5rpx solid rgba(0, 0, 0, 0.08);
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 21rpx;
   font-weight: bold;
 }
 
 .pr-quote {
   display: block;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 27rpx;
   line-height: 1.65;
   margin-top: 14rpx;
@@ -850,7 +850,7 @@ function openTrash() {
 
 .pr-source {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   font-style: italic;
   font-family: serif;
@@ -871,14 +871,14 @@ function openTrash() {
 }
 
 .fav-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .fav-all {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 22rpx;
   font-weight: bold;
 }
@@ -901,7 +901,7 @@ function openTrash() {
   width: 170rpx;
   height: 240rpx;
   border-radius: 22rpx;
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
   box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
 }
 
@@ -925,7 +925,7 @@ function openTrash() {
 }
 
 .fav-book-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 23rpx;
   font-weight: bold;
   font-family: serif;
@@ -936,7 +936,7 @@ function openTrash() {
 }
 
 .fav-rating {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 20rpx;
   font-weight: bold;
 }
@@ -957,13 +957,13 @@ function openTrash() {
 
 .insight-title {
   flex: 1;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
 }
 
 .insight-avg {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -981,18 +981,18 @@ function openTrash() {
 }
 
 .stat-num {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 42rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .stat-num.gold {
-  color: #9e7638;
+  color: var(--rt-gold);
 }
 
 .stat-label {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   margin-top: 4rpx;
 }
@@ -1013,7 +1013,7 @@ function openTrash() {
 
 .mem-title {
   flex: 1;
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 24rpx;
   font-weight: bold;
   font-family: serif;
@@ -1021,7 +1021,7 @@ function openTrash() {
 }
 
 .mem-arrow {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   margin-left: 10rpx;
 }
@@ -1038,7 +1038,7 @@ function openTrash() {
   border-radius: 22rpx;
   flex-shrink: 0;
   margin-right: 24rpx;
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
   box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
@@ -1058,7 +1058,7 @@ function openTrash() {
 }
 
 .mem-book-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 29rpx;
   font-weight: bold;
   font-family: serif;
@@ -1066,7 +1066,7 @@ function openTrash() {
 
 .mem-book-meta {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   margin-top: 4rpx;
 }
@@ -1077,7 +1077,7 @@ function openTrash() {
   border-radius: 20rpx;
   background: rgba(248, 247, 244, 0.85);
   border: 1.5rpx solid rgba(0, 0, 0, 0.06);
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   line-height: 1.5;
   font-style: italic;
@@ -1119,21 +1119,21 @@ function openTrash() {
 }
 
 .modal-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .modal-close {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 32rpx;
   padding: 8rpx;
 }
 
 .modal-subtitle {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   margin-top: 8rpx;
   margin-bottom: 24rpx;
@@ -1147,7 +1147,7 @@ function openTrash() {
 
 .modal-item {
   padding: 22rpx;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 24rpx;
   border: 1.5rpx solid rgba(0, 0, 0, 0.06);
   display: flex;
@@ -1161,13 +1161,13 @@ function openTrash() {
 }
 
 .item-main {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 26rpx;
   font-weight: bold;
 }
 
 .item-sub {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   margin-top: 4rpx;
 }

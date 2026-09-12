@@ -333,7 +333,7 @@ function onAction(type: string) {
 <style>
 .page {
   min-height: 100vh;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   padding: 24rpx 28rpx 260rpx;
   box-sizing: border-box;
 }
@@ -354,7 +354,7 @@ function onAction(type: string) {
 }
 
 .page-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 44rpx;
   font-weight: bold;
   font-family: serif;
@@ -363,7 +363,7 @@ function onAction(type: string) {
 .btn-auth {
   padding: 8rpx 24rpx;
   border-radius: 26rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 22rpx;
   font-weight: bold;
@@ -372,7 +372,7 @@ function onAction(type: string) {
 
 .profile-summary {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   line-height: 1.5;
   margin-top: 10rpx;
@@ -407,7 +407,7 @@ function onAction(type: string) {
 }
 
 .pass-brand-text {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-size: 22rpx;
   font-weight: bold;
   letter-spacing: 2rpx;
@@ -433,7 +433,7 @@ function onAction(type: string) {
   width: 90rpx;
   height: 90rpx;
   border-radius: 50%;
-  background: #3a6348;
+  background: var(--rt-accent);
   border: 2rpx solid #ffd700;
   color: #ffffff;
   font-size: 32rpx;
@@ -472,7 +472,7 @@ function onAction(type: string) {
 }
 
 .pass-sign {
-  color: #d4af37;
+  color: var(--rt-gold-bright);
   font-size: 18rpx;
   letter-spacing: 2rpx;
   font-weight: bold;
@@ -482,7 +482,7 @@ function onAction(type: string) {
 .vault-sync-bar {
   margin-top: 22rpx;
   height: 76rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border-radius: 24rpx;
   padding: 0 20rpx;
   display: flex;
@@ -491,13 +491,13 @@ function onAction(type: string) {
 }
 
 .vault-status-text {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
 }
 
 .btn-sync-now {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 22rpx;
   font-weight: bold;
 }
@@ -523,7 +523,7 @@ function onAction(type: string) {
 }
 
 .persona-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
@@ -534,14 +534,14 @@ function onAction(type: string) {
   border-radius: 20rpx;
   background: rgba(58, 99, 72, 0.1);
   border: 1.5rpx solid rgba(58, 99, 72, 0.3);
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 22rpx;
   font-weight: bold;
 }
 
 .persona-desc {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 23rpx;
   line-height: 1.5;
   margin-top: 12rpx;
@@ -553,7 +553,7 @@ function onAction(type: string) {
 
 /* ── 列表标签 ── */
 .section-label {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
@@ -584,7 +584,7 @@ function onAction(type: string) {
 }
 
 .card-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
 }
@@ -597,8 +597,8 @@ function onAction(type: string) {
 .card-badge {
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
-  background: #ece7de;
-  color: #3a6348;
+  background: var(--rt-chip);
+  color: var(--rt-accent);
   font-size: 21rpx;
   font-weight: bold;
 }
@@ -606,20 +606,20 @@ function onAction(type: string) {
 .card-pill {
   padding: 4rpx 16rpx;
   border-radius: 16rpx;
-  background: #ece7de;
-  color: #686e64;
+  background: var(--rt-chip);
+  color: var(--rt-muted);
   font-size: 21rpx;
   font-weight: bold;
 }
 
 .card-pill.accent {
   background: rgba(58, 99, 72, 0.1);
-  color: #3a6348;
+  color: var(--rt-accent);
 }
 
 .card-desc {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   line-height: 1.5;
   margin-top: 10rpx;
@@ -656,21 +656,21 @@ function onAction(type: string) {
 }
 
 .modal-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .modal-close {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 32rpx;
   padding: 8rpx;
 }
 
 .modal-sub {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
   margin-top: 6rpx;
   margin-bottom: 24rpx;
@@ -682,7 +682,7 @@ function onAction(type: string) {
 
 .form-label {
   display: block;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
   margin-bottom: 8rpx;
@@ -690,12 +690,12 @@ function onAction(type: string) {
 
 .form-input {
   height: 76rpx;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border: 1.5rpx solid rgba(0, 0, 0, 0.08);
   border-radius: 20rpx;
   padding: 0 20rpx;
   font-size: 24rpx;
-  color: #1a1c19;
+  color: var(--rt-ink);
 }
 
 .modal-btn-row {
@@ -704,7 +704,7 @@ function onAction(type: string) {
 
 .modal-btn-save {
   height: 84rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   border-radius: 28rpx;
   display: flex;

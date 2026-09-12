@@ -691,7 +691,7 @@ function goToPosterWithQuote() {
 <style>
 .page {
   min-height: 100vh;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   padding: 20rpx 28rpx 120rpx;
   box-sizing: border-box;
 }
@@ -714,12 +714,12 @@ function goToPosterWithQuote() {
   align-items: center;
   justify-content: center;
   font-size: 36rpx;
-  color: #1a1c19;
+  color: var(--rt-ink);
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
 .nav-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
@@ -757,7 +757,7 @@ function goToPosterWithQuote() {
   width: 200rpx;
   height: 290rpx;
   border-radius: 26rpx;
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
   box-shadow: 0 16rpx 36rpx rgba(0, 0, 0, 0.14);
 }
 
@@ -778,7 +778,7 @@ function goToPosterWithQuote() {
 }
 
 .editorial-sparkle {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 24rpx;
   margin-right: 8rpx;
 }
@@ -786,14 +786,14 @@ function goToPosterWithQuote() {
 .media-badge {
   padding: 4rpx 18rpx;
   border-radius: 20rpx;
-  background: #ece7de;
-  color: #1a1c19;
+  background: var(--rt-chip);
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
 }
 
 .book-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 42rpx;
   font-weight: bold;
   font-family: serif;
@@ -802,7 +802,7 @@ function goToPosterWithQuote() {
 }
 
 .book-author {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 25rpx;
   font-family: serif;
   margin-top: 8rpx;
@@ -822,7 +822,7 @@ function goToPosterWithQuote() {
 }
 
 .rating-num {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -836,7 +836,7 @@ function goToPosterWithQuote() {
 }
 
 .smp-text {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 23rpx;
   font-weight: bold;
 }
@@ -850,7 +850,7 @@ function goToPosterWithQuote() {
   width: 100%;
   height: 84rpx;
   border-radius: 28rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 26rpx;
   font-weight: bold;
@@ -871,7 +871,7 @@ function goToPosterWithQuote() {
   border-radius: 24rpx;
   background: #ffffff;
   border: 1.5rpx solid rgba(0, 0, 0, 0.09);
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 23rpx;
   font-weight: bold;
   display: flex;
@@ -895,7 +895,7 @@ function goToPosterWithQuote() {
 .btn-pill-green {
   height: 76rpx;
   border-radius: 24rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 23rpx;
   font-weight: bold;
@@ -915,14 +915,14 @@ function goToPosterWithQuote() {
   padding: 12rpx 28rpx;
   margin-right: 14rpx;
   border-radius: 30rpx;
-  background: #ece7de;
-  color: #686e64;
+  background: var(--rt-chip);
+  color: var(--rt-muted);
   font-size: 23rpx;
   font-weight: bold;
 }
 
 .detail-tab-chip.selected {
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
 }
 
@@ -943,7 +943,7 @@ function goToPosterWithQuote() {
 }
 
 .sec-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
@@ -966,13 +966,13 @@ function goToPosterWithQuote() {
 .quote-box {
   margin-top: 14rpx;
   padding: 20rpx;
-  background: #f8f7f4;
-  border-left: 6rpx solid #3a6348;
+  background: var(--rt-bg);
+  border-left: 6rpx solid var(--rt-accent);
   border-radius: 16rpx;
 }
 
 .quote-text {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 24rpx;
   font-style: italic;
   line-height: 1.6;
@@ -986,18 +986,18 @@ function goToPosterWithQuote() {
 }
 
 .mr-label {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
 }
 
 .mr-val {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
 }
 
 .mr-val.accent {
-  color: #3a6348;
+  color: var(--rt-accent);
 }
 
 .tags-wrap {
@@ -1009,8 +1009,8 @@ function goToPosterWithQuote() {
 .detail-tag {
   padding: 4rpx 14rpx;
   border-radius: 14rpx;
-  background: #ece7de;
-  color: #3a6348;
+  background: var(--rt-chip);
+  color: var(--rt-accent);
   font-size: 20rpx;
 }
 
@@ -1024,7 +1024,7 @@ function goToPosterWithQuote() {
 .btn-add-note {
   padding: 8rpx 20rpx;
   border-radius: 20rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 21rpx;
   font-weight: bold;
@@ -1046,7 +1046,7 @@ function goToPosterWithQuote() {
   width: 14rpx;
   height: 14rpx;
   border-radius: 50%;
-  background: #3a6348;
+  background: var(--rt-accent);
   margin-top: 12rpx;
   margin-right: 18rpx;
   flex-shrink: 0;
@@ -1054,19 +1054,19 @@ function goToPosterWithQuote() {
 
 .timeline-card {
   flex: 1;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 20rpx;
   padding: 18rpx 22rpx;
 }
 
 .tc-meta {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 20rpx;
 }
 
 .tc-content {
   display: block;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 24rpx;
   line-height: 1.5;
   margin-top: 8rpx;
@@ -1093,7 +1093,7 @@ function goToPosterWithQuote() {
 .character-card {
   display: flex;
   align-items: center;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 22rpx;
   padding: 18rpx;
 }
@@ -1102,7 +1102,7 @@ function goToPosterWithQuote() {
   width: 76rpx;
   height: 76rpx;
   border-radius: 50%;
-  background: #ece7de;
+  background: var(--rt-chip);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1123,19 +1123,19 @@ function goToPosterWithQuote() {
 }
 
 .c-name {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 26rpx;
   font-weight: bold;
 }
 
 .c-role {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 20rpx;
 }
 
 .c-desc {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   line-height: 1.4;
   margin-top: 6rpx;
@@ -1152,13 +1152,13 @@ function goToPosterWithQuote() {
 .outline-item {
   display: flex;
   align-items: flex-start;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 20rpx;
   padding: 18rpx;
 }
 
 .o-num {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
@@ -1171,14 +1171,14 @@ function goToPosterWithQuote() {
 
 .o-title {
   display: block;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 25rpx;
   font-weight: bold;
 }
 
 .o-summary {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   line-height: 1.4;
   margin-top: 4rpx;
@@ -1195,7 +1195,7 @@ function goToPosterWithQuote() {
 .track-item {
   display: flex;
   align-items: center;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 22rpx;
   padding: 20rpx;
 }
@@ -1204,7 +1204,7 @@ function goToPosterWithQuote() {
   width: 54rpx;
   height: 54rpx;
   border-radius: 50%;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -1219,20 +1219,20 @@ function goToPosterWithQuote() {
 }
 
 .track-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 26rpx;
   font-weight: bold;
 }
 
 .track-artist {
   display: block;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 20rpx;
   margin-top: 2rpx;
 }
 
 .track-tag {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 20rpx;
 }
 
@@ -1251,14 +1251,14 @@ function goToPosterWithQuote() {
 
 .an-label {
   width: 160rpx;
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 22rpx;
 }
 
 .an-bar-wrap {
   flex: 1;
   height: 14rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border-radius: 8rpx;
   margin: 0 16rpx;
   overflow: hidden;
@@ -1266,18 +1266,18 @@ function goToPosterWithQuote() {
 
 .an-bar {
   height: 100%;
-  background: #3a6348;
+  background: var(--rt-accent);
   border-radius: 8rpx;
 }
 
-.an-bar.gold { background: #9e7638; }
+.an-bar.gold { background: var(--rt-gold); }
 .an-bar.red { background: #e63946; }
 .an-bar.blue { background: #38bdf8; }
 
 .an-score {
   width: 50rpx;
   text-align: right;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
 }
@@ -1313,14 +1313,14 @@ function goToPosterWithQuote() {
 }
 
 .nd-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 30rpx;
   font-weight: bold;
   font-family: serif;
 }
 
 .nd-close {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 30rpx;
   padding: 8rpx;
 }
@@ -1328,12 +1328,12 @@ function goToPosterWithQuote() {
 .nd-textarea {
   width: 100%;
   height: 180rpx;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 20rpx;
   padding: 20rpx;
   box-sizing: border-box;
   font-size: 24rpx;
-  color: #1a1c19;
+  color: var(--rt-ink);
   margin-top: 20rpx;
 }
 
@@ -1346,7 +1346,7 @@ function goToPosterWithQuote() {
 .nd-input {
   flex: 1;
   height: 68rpx;
-  background: #f8f7f4;
+  background: var(--rt-bg);
   border-radius: 18rpx;
   padding: 0 16rpx;
   font-size: 22rpx;
@@ -1355,7 +1355,7 @@ function goToPosterWithQuote() {
 .btn-save-note {
   margin-top: 24rpx;
   height: 80rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   border-radius: 26rpx;
   display: flex;
@@ -1374,7 +1374,7 @@ function goToPosterWithQuote() {
 }
 
 .missing-text {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 26rpx;
 }
 
@@ -1382,7 +1382,7 @@ function goToPosterWithQuote() {
   margin-top: 30rpx;
   padding: 14rpx 36rpx;
   border-radius: 28rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 24rpx;
 }
@@ -1393,7 +1393,7 @@ function goToPosterWithQuote() {
   height: 72rpx;
   background: linear-gradient(135deg, #FAF4E6 0%, #F5E8C8 100%);
   border: 1.5rpx solid rgba(212, 175, 55, 0.4);
-  color: #9E7638;
+  color: var(--rt-gold);
   border-radius: 36rpx;
   display: flex;
   align-items: center;
@@ -1427,20 +1427,20 @@ function goToPosterWithQuote() {
 
 .ai-sparkle {
   font-size: 20rpx;
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
 }
 
 .ai-label {
   font-size: 20rpx;
   font-weight: 700;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .review-body {
   background: #FAF8F5;
   border-radius: 20rpx;
   padding: 24rpx;
-  border-left: 6rpx solid #3A6348;
+  border-left: 6rpx solid var(--rt-accent);
 }
 
 .review-text {
@@ -1469,7 +1469,7 @@ function goToPosterWithQuote() {
 
 .btn-copy-quote {
   font-size: 20rpx;
-  color: #3A6348;
+  color: var(--rt-accent);
   background: rgba(58, 99, 72, 0.1);
   padding: 4rpx 14rpx;
   border-radius: 16rpx;
@@ -1544,7 +1544,7 @@ function goToPosterWithQuote() {
 .ps-sec-title {
   font-size: 24rpx;
   font-weight: 700;
-  color: #3A6348;
+  color: var(--rt-accent);
   margin: 20rpx 0 12rpx;
 }
 
@@ -1560,7 +1560,7 @@ function goToPosterWithQuote() {
 
 .style-chip {
   width: 220rpx;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border: 1.5rpx solid rgba(0, 0, 0, 0.08);
   border-radius: 20rpx;
   padding: 16rpx;
@@ -1572,7 +1572,7 @@ function goToPosterWithQuote() {
 
 .style-chip.active {
   background: #FAF4E6;
-  border-color: #D4AF37;
+  border-color: var(--rt-gold-bright);
   box-shadow: 0 6rpx 16rpx rgba(212, 175, 55, 0.25);
 }
 
@@ -1595,7 +1595,7 @@ function goToPosterWithQuote() {
 
 .ps-input-wrap {
   position: relative;
-  background: #F8F7F4;
+  background: var(--rt-bg);
   border-radius: 24rpx;
   padding: 20rpx;
   border: 1rpx solid rgba(0, 0, 0, 0.08);
@@ -1620,7 +1620,7 @@ function goToPosterWithQuote() {
 .btn-ps-generate {
   margin: 24rpx 0;
   height: 84rpx;
-  background: linear-gradient(135deg, #3A6348 0%, #254430 100%);
+  background: linear-gradient(135deg, var(--rt-accent) 0%, #254430 100%);
   color: #FFFFFF;
   border-radius: 42rpx;
   display: flex;
@@ -1632,7 +1632,7 @@ function goToPosterWithQuote() {
 }
 
 .btn-ps-generate.loading {
-  background: #9E7638;
+  background: var(--rt-gold);
 }
 
 /* 结果卡片 */
@@ -1654,12 +1654,12 @@ function goToPosterWithQuote() {
 .res-badge {
   font-size: 22rpx;
   font-weight: 700;
-  color: #3A6348;
+  color: var(--rt-accent);
 }
 
 .res-source {
   font-size: 18rpx;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .res-text-box {
@@ -1674,7 +1674,7 @@ function goToPosterWithQuote() {
 }
 
 .typewriter-cursor {
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
   font-weight: 900;
   animation: blink 0.8s infinite;
 }
@@ -1690,7 +1690,7 @@ function goToPosterWithQuote() {
   background: linear-gradient(135deg, #FFFFFF 0%, #FAF4E6 100%);
   border-radius: 20rpx;
   padding: 20rpx;
-  border: 1.5rpx dashed #D4AF37;
+  border: 1.5rpx dashed var(--rt-gold-bright);
   position: relative;
 }
 
@@ -1704,7 +1704,7 @@ function goToPosterWithQuote() {
 .gq-label {
   font-size: 20rpx;
   font-weight: 700;
-  color: #9E7638;
+  color: var(--rt-gold);
 }
 
 .gq-len {
@@ -1727,7 +1727,7 @@ function goToPosterWithQuote() {
   background: rgba(212, 175, 55, 0.15);
   border-radius: 16rpx;
   font-size: 20rpx;
-  color: #9E7638;
+  color: var(--rt-gold);
   font-weight: 600;
 }
 
@@ -1743,7 +1743,7 @@ function goToPosterWithQuote() {
   width: 100%;
   height: 84rpx;
   line-height: 84rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   border-radius: 42rpx;
   font-size: 28rpx;
@@ -1759,7 +1759,7 @@ function goToPosterWithQuote() {
   flex: 1;
   height: 68rpx;
   background: #F2EFE9;
-  color: #3A6348;
+  color: var(--rt-accent);
   border-radius: 34rpx;
   display: flex;
   align-items: center;
@@ -1784,7 +1784,7 @@ function goToPosterWithQuote() {
 
 .ak-btn {
   font-size: 20rpx;
-  color: #3A6348;
+  color: var(--rt-accent);
   font-weight: 600;
 }
 </style>

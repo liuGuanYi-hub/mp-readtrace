@@ -295,14 +295,14 @@ function resetPomodoro() {
 <style>
 /* 暗色页全局底色：覆盖 App.vue 浅色 page 背景，防止回弹露白（page 选择器不能放 scoped 块） */
 page {
-  background: #0A0C10;
+  background: var(--rt-deep);
 }
 </style>
 
 <style scoped>
 .standby-page {
   min-height: 100vh;
-  background-color: #0A0C10;
+  background-color: var(--rt-deep);
   color: #FFFFFF;
   padding: 40rpx 32rpx 60rpx;
   box-sizing: border-box;
@@ -344,7 +344,7 @@ page {
 .greeting-text {
   font-size: 26rpx;
   font-weight: 700;
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
   letter-spacing: 1rpx;
 }
 
@@ -370,8 +370,8 @@ page {
 }
 
 .pill-opt.active {
-  background: #D4AF37;
-  color: #0A0C10;
+  background: var(--rt-gold-bright);
+  color: var(--rt-deep);
   font-weight: 700;
 }
 
@@ -435,7 +435,7 @@ page {
   height: 100rpx;
   border-radius: 50%;
   overflow: hidden;
-  border: 4rpx solid #D4AF37;
+  border: 4rpx solid var(--rt-gold-bright);
   z-index: 2;
 }
 
@@ -468,7 +468,7 @@ page {
   width: 24rpx;
   height: 24rpx;
   border-radius: 50%;
-  background: #D4AF37;
+  background: var(--rt-gold-bright);
   box-shadow: 0 0 10rpx rgba(212, 175, 55, 0.5);
 }
 
@@ -478,7 +478,7 @@ page {
   right: 20rpx;
   width: 6rpx;
   height: 180rpx;
-  background: linear-gradient(180deg, #D4AF37 0%, #A89F91 100%);
+  background: linear-gradient(180deg, var(--rt-gold-bright) 0%, #A89F91 100%);
   border-radius: 3rpx;
 }
 
@@ -513,7 +513,7 @@ page {
 
 .track-quote {
   font-size: 22rpx;
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
   font-style: italic;
   margin-top: 10rpx;
   text-align: center;
@@ -555,7 +555,7 @@ page {
 
 .clock-colon {
   font-size: 80rpx;
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
   font-weight: 700;
 }
 
@@ -598,7 +598,7 @@ page {
 }
 
 .noise-card.active {
-  border-color: #D4AF37;
+  border-color: var(--rt-gold-bright);
   background: #202734;
   box-shadow: 0 8rpx 20rpx rgba(212, 175, 55, 0.2);
 }
@@ -622,7 +622,7 @@ page {
 
 .noise-state-badge {
   font-size: 18rpx;
-  color: #D4AF37;
+  color: var(--rt-gold-bright);
   margin-top: 12rpx;
   font-weight: 600;
 }
@@ -653,7 +653,7 @@ page {
 }
 
 .dur-chip.active {
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   font-weight: 700;
 }
@@ -687,7 +687,7 @@ page {
   flex: 3;
   height: 72rpx;
   line-height: 72rpx;
-  background: #3A6348;
+  background: var(--rt-accent);
   color: #FFFFFF;
   font-size: 26rpx;
   font-weight: 700;
@@ -695,8 +695,8 @@ page {
 }
 
 .btn-pomo-start.running {
-  background: #D4AF37;
-  color: #0A0C10;
+  background: var(--rt-gold-bright);
+  color: var(--rt-deep);
 }
 
 .btn-pomo-reset {
@@ -759,7 +759,7 @@ page {
   width: 110rpx;
   height: 110rpx;
   border-radius: 50%;
-  background: #D4AF37;
+  background: var(--rt-gold-bright);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -768,7 +768,7 @@ page {
 
 .play-icon {
   font-size: 42rpx;
-  color: #0A0C10;
+  color: var(--rt-deep);
   font-weight: 900;
 }
 </style>

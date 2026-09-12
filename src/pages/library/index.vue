@@ -342,7 +342,7 @@ function exportView() {
   min-height: 100vh;
   padding: 24rpx 28rpx 260rpx;
   box-sizing: border-box;
-  background: #f8f7f4;
+  background: var(--rt-bg);
 }
 
 /* ── 顶部多维过滤面板 ── */
@@ -369,15 +369,15 @@ function exportView() {
 .btn-discover {
   padding: 10rpx 20rpx;
   border-radius: 28rpx;
-  background: #ECEAE4;
-  color: #3A6348;
+  background: var(--rt-chip);
+  color: var(--rt-accent);
   font-size: 22rpx;
   font-weight: bold;
   border: 1rpx solid rgba(58, 99, 72, 0.25);
 }
 
 .panel-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 42rpx;
   font-weight: bold;
   font-family: serif;
@@ -386,7 +386,7 @@ function exportView() {
 .btn-add {
   padding: 10rpx 24rpx;
   border-radius: 28rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;
@@ -404,17 +404,17 @@ function exportView() {
   padding: 10rpx 24rpx;
   margin-right: 12rpx;
   border-radius: 28rpx;
-  background: #ece7de;
-  color: #1a1c19;
+  background: var(--rt-chip);
+  color: var(--rt-ink);
   font-size: 23rpx;
   font-weight: bold;
   border: 1.5rpx solid rgba(0, 0, 0, 0.05);
 }
 
 .media-chip.selected {
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
-  border-color: #3a6348;
+  border-color: var(--rt-accent);
 }
 
 /* 搜索框 */
@@ -432,13 +432,13 @@ function exportView() {
 .search-icon {
   font-size: 26rpx;
   margin-right: 12rpx;
-  color: #686e64;
+  color: var(--rt-muted);
 }
 
 .search-input {
   flex: 1;
   font-size: 24rpx;
-  color: #1a1c19;
+  color: var(--rt-ink);
 }
 
 .ph {
@@ -446,13 +446,13 @@ function exportView() {
 }
 
 .search-clear {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 28rpx;
   padding: 8rpx;
 }
 
 .search-discover-tag {
-  background: #3A6348;
+  background: var(--rt-accent);
   padding: 6rpx 16rpx;
   border-radius: 20rpx;
   margin-left: 10rpx;
@@ -468,7 +468,7 @@ function exportView() {
 .segmented {
   display: flex;
   height: 64rpx;
-  background: #ece7de;
+  background: var(--rt-chip);
   border-radius: 20rpx;
   padding: 4rpx;
   margin-top: 18rpx;
@@ -481,13 +481,13 @@ function exportView() {
   justify-content: center;
   border-radius: 16rpx;
   font-size: 22rpx;
-  color: #686e64;
+  color: var(--rt-muted);
   font-weight: bold;
 }
 
 .seg-item.selected {
   background: #ffffff;
-  color: #1a1c19;
+  color: var(--rt-ink);
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
 }
 
@@ -508,13 +508,13 @@ function exportView() {
   margin-right: 12rpx;
   border-radius: 20rpx;
   background: rgba(58, 99, 72, 0.08);
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 21rpx;
   font-weight: bold;
 }
 
 .tag-chip.selected {
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
 }
 
@@ -528,7 +528,7 @@ function exportView() {
 }
 
 .count-text {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -542,7 +542,7 @@ function exportView() {
   padding: 8rpx 22rpx;
   border-radius: 24rpx;
   background: #ffffff;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 22rpx;
   font-weight: bold;
   border: 1.5rpx solid rgba(0, 0, 0, 0.08);
@@ -584,7 +584,7 @@ function exportView() {
   width: 140rpx;
   height: 200rpx;
   border-radius: 20rpx;
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
   box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
 }
 
@@ -617,7 +617,7 @@ function exportView() {
 
 .card-title {
   flex: 1;
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
   font-family: serif;
@@ -629,14 +629,14 @@ function exportView() {
 .status-pill {
   padding: 4rpx 14rpx;
   border-radius: 16rpx;
-  background: #ece7de;
-  color: #3a6348;
+  background: var(--rt-chip);
+  color: var(--rt-accent);
   font-size: 20rpx;
   font-weight: bold;
 }
 
 .author {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 23rpx;
   margin-top: 6rpx;
   white-space: nowrap;
@@ -653,7 +653,7 @@ function exportView() {
 }
 
 .rating {
-  color: #9e7638;
+  color: var(--rt-gold);
   font-size: 22rpx;
   font-weight: bold;
 }
@@ -667,7 +667,7 @@ function exportView() {
 }
 
 .tags {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 20rpx;
 }
 
@@ -675,8 +675,8 @@ function exportView() {
   margin-top: 12rpx;
   padding: 8rpx 16rpx;
   border-radius: 16rpx;
-  background: #f8f7f4;
-  color: #3a6348;
+  background: var(--rt-bg);
+  color: var(--rt-accent);
   font-size: 21rpx;
   font-style: italic;
   display: -webkit-box;
@@ -705,7 +705,7 @@ function exportView() {
   position: relative;
   width: 100%;
   height: 380rpx;
-  background: #eae2d5;
+  background: var(--rt-cover-ph);
 }
 
 .grid-cover {
@@ -752,7 +752,7 @@ function exportView() {
 }
 
 .grid-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 28rpx;
   font-weight: bold;
   font-family: serif;
@@ -762,7 +762,7 @@ function exportView() {
 }
 
 .grid-author {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 21rpx;
   margin-top: 4rpx;
   white-space: nowrap;
@@ -778,13 +778,13 @@ function exportView() {
 }
 
 .grid-status-pill {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 20rpx;
   font-weight: bold;
 }
 
 .grid-category {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 20rpx;
 }
 
@@ -806,13 +806,13 @@ function exportView() {
 }
 
 .empty-title {
-  color: #1a1c19;
+  color: var(--rt-ink);
   font-size: 32rpx;
   font-weight: bold;
 }
 
 .empty-body {
-  color: #686e64;
+  color: var(--rt-muted);
   font-size: 24rpx;
   text-align: center;
   margin-top: 10rpx;
@@ -823,7 +823,7 @@ function exportView() {
   margin-top: 30rpx;
   padding: 14rpx 36rpx;
   border-radius: 28rpx;
-  background: #3a6348;
+  background: var(--rt-accent);
   color: #ffffff;
   font-size: 26rpx;
   font-weight: bold;
@@ -848,12 +848,12 @@ function exportView() {
 }
 
 .back-top-arrow {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 20rpx;
 }
 
 .back-top-text {
-  color: #3a6348;
+  color: var(--rt-accent);
   font-size: 18rpx;
   font-weight: bold;
 }
