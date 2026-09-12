@@ -692,3 +692,471 @@ export async function generateLibraryScroll(
     });
   });
 }
+
+// ═══════════════════════════════════════════════════════════
+// 💎 工坊扩展：游戏白金卡带 / 双生共鸣微卡 / 封面画廊 / 编年长卷
+// ═══════════════════════════════════════════════════════════
+
+/** 六维雷达通用绘制（蛛网 + 数据多边形） */
+function drawRadarWeb(
+  ctx: UniApp.CanvasContext,
+  cx: number,
+  cy: number,
+  r: number,
+  scores: number[],
+  dataColor = '#C47D5C',
+) {
+  const angles = [-90, -30, 30, 90, 150, 210].map((d) => (d * Math.PI) / 180);
+  ctx.setStrokeStyle('rgba(0, 0, 0, 0.14)');
+  ctx.setLineWidth(1);
+  for (const ring of [0.33, 0.66, 1]) {
+    ctx.beginPath();
+    angles.forEach((a, i) => {
+      const x = cx + r * ring * Math.cos(a);
+      const y = cy + r * ring * Math.sin(a);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  angles.forEach((a, i) => {
+    const n = Math.min(10, Math.max(1, scores[i])) / 10;
+    const x = cx + r * n * Math.cos(a);
+    const y = cy + r * n * Math.sin(a);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.setFillStyle('rgba(196, 125, 92, 0.27)');
+  ctx.fill();
+  ctx.setStrokeStyle(dataColor);
+  ctx.setLineWidth(2);
+  ctx.stroke();
+}
+
+/** 通用：圆角矩形路径 */
+function roundRectPath(ctx: UniApp.CanvasContext, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.arc(x + r, y + r, r, Math.PI, Math.PI * 1.5);
+  ctx.arc(x + w - r, y + r, r, Math.PI * 1.5, Math.PI * 2);
+  ctx.arc(x + w - r, y + h - r, r, 0, Math.PI * 0.5);
+  ctx.arc(x + r, y + h - r, r, Math.PI * 0.5, Math.PI);
+  ctx.closePath();
+}
+
+/** 🕹️ 游戏白金全息卡带（750×1334，对齐 GameCartridgePosterView） */
+async function drawCartridgePoster(
+  ctx: UniApp.CanvasContext,
+  book: Book,
+  localCoverPath?: string,
+): Promise<void> {
+  const W = 750;
+  const H = 1334;
+  ctx.setFillStyle('#0D0D0E');
+  ctx.fillRect(0, 0, W, H);
+
+  // 卡带外壳
+  const bx = 90;
+  const by = 200;
+  const bw = W - 180;
+  const bh = 880;
+  ctx.setFillStyle('#1C1B1F');
+  roundRectPath(ctx, bx, by, bw, bh, 30);
+  ctx.fill();
+  ctx.setStrokeStyle('rgba(212, 175, 55, 0.5)');
+  ctx.setLineWidth(2);
+  ctx.stroke();
+
+  // 顶部标签槽
+  ctx.setFillStyle('#101013');
+  roundRectPath(ctx, bx + 40, by + 36, bw - 80, 300, 16);
+  ctx.fill();
+  if (localCoverPath) {
+    ctx.save();
+    roundRectPath(ctx, bx + 48, by + 44, bw - 96, 284, 12);
+    ctx.clip();
+    ctx.drawImage(localCoverPath, bx + 48, by + 44, bw - 96, 284);
+    ctx.restore();
+  } else {
+    ctx.setFontSize(64);
+    ctx.setTextAlign('center');
+    ctx.fillText('🎮', W / 2, by + 210);
+    ctx.setTextAlign('left');
+  }
+
+  // 白金徽标
+  ctx.setFillStyle('#D4AF37');
+  roundRectPath(ctx, W / 2 - 92, by + 368, 184, 52, 26);
+  ctx.fill();
+  ctx.setFillStyle('#101013');
+  ctx.setFontSize(24);
+  ctx.setTextAlign('center');
+  ctx.fillText('PLATINUM · 白金', W / 2, by + 402);
+  ctx.setTextAlign('left');
+
+  // 标题与作者
+  const title = book.title.length > 11 ? book.title.slice(0, 10) + '…' : book.title;
+  ctx.setFontSize(44);
+  ctx.setFillStyle('#F5F3ED');
+  ctx.setTextAlign('center');
+  ctx.fillText(`《${title}》`, W / 2, by + 500);
+  ctx.setFontSize(26);
+  ctx.setFillStyle('#8C9487');
+  ctx.fillText(book.author || '未知开发商', W / 2, by + 556);
+
+  // 评级条码装饰
+  if (book.rating) {
+    ctx.setFillStyle('#D4AF37');
+    ctx.setFontSize(30);
+    ctx.fillText(`★ ${book.rating.toFixed(1)} / 10`, W / 2, by + 620);
+  }
+  let barX = W / 2 - 140;
+  ctx.setFillStyle('#3A4038');
+  for (let i = 0; i < 28; i++) {
+    const wBar = (i * 7) % 3 === 0 ? 5 : 2;
+    ctx.fillRect(barX, by + 700, wBar, 56);
+    barX += wBar + 4;
+  }
+  ctx.setTextAlign('left');
+
+  // 卡带底部插口槽
+  ctx.setFillStyle('#0A0A0C');
+  roundRectPath(ctx, bx + 60, by + bh - 90, bw - 120, 44, 10);
+  ctx.fill();
+
+  // 页脚
+  ctx.setFontSize(20);
+  ctx.setFillStyle('#8C887B');
+  ctx.setTextAlign('center');
+  ctx.fillText('READTRACE GAME CARTRIDGE · AUTHENTIC', W / 2, H - 90);
+  ctx.setTextAlign('left');
+}
+
+/** 🎴 双生共鸣微卡（750×1334，六维雷达 + 共鸣语，对齐 ResonancePosterView） */
+async function drawResonancePoster(
+  ctx: UniApp.CanvasContext,
+  book: Book,
+  mindprint: { depth: number; artistry: number; emotion: number; logic: number; difficulty: number; healing: number },
+  localCoverPath?: string,
+): Promise<void> {
+  const W = 750;
+  const H = 1334;
+  ctx.setFillStyle('#F6F1E8');
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(60, 64, 96, 6);
+  ctx.setFontSize(22);
+  ctx.setFillStyle('#8C887B');
+  ctx.fillText('RESONANCE MICRO-CARD · 双生共鸣', 60, 112);
+  ctx.setFontSize(48);
+  ctx.setFillStyle('#1A1C19');
+  ctx.fillText('跨媒介双生印记', 60, 182);
+
+  // 封面圆窗
+  const cx = W / 2;
+  const cy = 400;
+  const cr = 150;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  if (localCoverPath) {
+    ctx.drawImage(localCoverPath, cx - cr, cy - cr, cr * 2, cr * 2);
+  } else {
+    ctx.setFillStyle('#EAE2D5');
+    ctx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
+  }
+  ctx.restore();
+  ctx.setStrokeStyle('#9E7638');
+  ctx.setLineWidth(4);
+  ctx.beginPath();
+  ctx.arc(cx, cy, cr + 4, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // 六维雷达
+  drawRadarWeb(
+    ctx,
+    W / 2,
+    760,
+    150,
+    [mindprint.depth, mindprint.artistry, mindprint.emotion, mindprint.logic, mindprint.difficulty, mindprint.healing],
+  );
+  const dimLabels = ['思想', '美学', '共情', '逻辑', '门槛', '治愈'];
+  const angles = [-90, -30, 30, 90, 150, 210].map((d) => (d * Math.PI) / 180);
+  angles.forEach((a, i) => {
+    ctx.setTextAlign('center');
+    ctx.setFontSize(22);
+    ctx.setFillStyle('#686E64');
+    ctx.fillText(dimLabels[i], cx + (170 + 26) * Math.cos(a), 760 + (170 + 26) * Math.sin(a) + 8);
+  });
+
+  const title = book.title.length > 14 ? book.title.slice(0, 13) + '…' : book.title;
+  ctx.setTextAlign('center');
+  ctx.setFontSize(42);
+  ctx.setFillStyle('#1A1C19');
+  ctx.fillText(`《${title}》`, W / 2, 1090);
+  ctx.setFontSize(24);
+  ctx.setFillStyle('#5C584E');
+  ctx.fillText(book.shortComment || '双生灵魂在此共鸣 · 思想跨界交汇', W / 2, 1140);
+  ctx.setFontSize(19);
+  ctx.setFillStyle('#8C887B');
+  ctx.fillText('READTRACE RESONANCE · VOL. I', W / 2, H - 70);
+  ctx.setTextAlign('left');
+}
+
+/** 🖼️ 全屏纯净封面画廊（动态高度，3 列网格） */
+function drawCoverGallery(
+  ctx: UniApp.CanvasContext,
+  works: Book[],
+  coverPaths: Map<number, string | undefined>,
+): number {
+  const W = 750;
+  const COLS = 3;
+  const list = works.slice(0, 27);
+  const HEADER_H = 220;
+  const cellW = (W - 80 - 2 * 24) / COLS;
+  const cellH = cellW * 1.42;
+  const rows = Math.ceil(list.length / COLS) || 1;
+  const H = HEADER_H + rows * (cellH + 70) + 140;
+
+  ctx.setFillStyle('#101216');
+  ctx.fillRect(0, 0, W, H);
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(40, 56, 96, 6);
+  ctx.setFontSize(22);
+  ctx.setFillStyle('#8C9487');
+  ctx.fillText('COVER GALLERY · 封面画廊', 40, 106);
+  ctx.setFontSize(44);
+  ctx.setFillStyle('#F5F3ED');
+  ctx.fillText(`藏品封面画廊 · ${list.length} 幅`, 40, 170);
+
+  list.forEach((b, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    const x = 40 + col * (cellW + 24);
+    const y = HEADER_H + row * (cellH + 70);
+    const cover = coverPaths.get(b.id);
+    if (cover) {
+      ctx.drawImage(cover, x, y, cellW, cellH);
+    } else {
+      ctx.setFillStyle('#22282A');
+      ctx.fillRect(x, y, cellW, cellH);
+      ctx.setTextAlign('center');
+      ctx.setFontSize(40);
+      ctx.fillText('📖', x + cellW / 2, y + cellH / 2);
+      ctx.setTextAlign('left');
+    }
+    const title = b.title.length > 8 ? b.title.slice(0, 7) + '…' : b.title;
+    ctx.setFontSize(21);
+    ctx.setFillStyle('#C9D1D9');
+    ctx.fillText(title, x, y + cellH + 34);
+  });
+
+  ctx.setTextAlign('center');
+  ctx.setFontSize(19);
+  ctx.setFillStyle('#8C9487');
+  ctx.fillText('READTRACE CURATOR ARCHIVE', W / 2, H - 60);
+  ctx.setTextAlign('left');
+  return H;
+}
+
+
+/** 📜 追番/藏品编年长卷（按完结年份分组，动态高度） */
+function drawChronicleScroll(
+  ctx: UniApp.CanvasContext,
+  works: Book[],
+  coverPaths: Map<number, string | undefined>,
+): number {
+  const W = 750;
+  const HEADER_H = 260;
+  const ROW_H = 132;
+  const GROUP_H = 96;
+  const list = works.slice(0, 24);
+
+  const groups = new Map<string, Book[]>();
+  for (const b of list) {
+    const src = b.finishDate || b.updatedAt || '';
+    const year = String(src).slice(0, 4) || '年份待考';
+    if (!groups.has(year)) groups.set(year, []);
+    groups.get(year)!.push(b);
+  }
+  const years = Array.from(groups.keys()).sort();
+  const H = HEADER_H + years.length * GROUP_H + list.length * ROW_H + 150;
+
+  ctx.setFillStyle('#F6F1E8');
+  ctx.fillRect(0, 0, W, H);
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(60, 56, 96, 6);
+  ctx.setFontSize(22);
+  ctx.setFillStyle('#8C887B');
+  ctx.fillText('CHRONICLE SCROLL · 编年画卷', 60, 106);
+  ctx.setFontSize(48);
+  ctx.setFillStyle('#1A1C19');
+  ctx.fillText('藏品编年 · 时光画卷', 60, 176);
+  ctx.setFillStyle('#9E7638');
+  ctx.fillRect(60, 214, W - 120, 3);
+
+  let y = HEADER_H;
+  for (const year of years) {
+    const items = groups.get(year)!;
+    ctx.setFontSize(34);
+    ctx.setFillStyle('#9E7638');
+    ctx.fillText(String(year), 60, y + 40);
+    ctx.setFontSize(20);
+    ctx.setFillStyle('#8C887B');
+    ctx.fillText(`${items.length} 部`, 170, y + 40);
+    y += GROUP_H;
+
+    for (const b of items) {
+      const cover = coverPaths.get(b.id);
+      if (cover) {
+        ctx.drawImage(cover, 60, y + 8, 76, 104);
+      } else {
+        ctx.setFillStyle('#EAE2D5');
+        ctx.fillRect(60, y + 8, 76, 104);
+      }
+      const title = b.title.length > 14 ? b.title.slice(0, 13) + '…' : b.title;
+      ctx.setFontSize(28);
+      ctx.setFillStyle('#1A1C19');
+      ctx.fillText(`《${title}》`, 166, y + 52);
+      ctx.setFontSize(21);
+      ctx.setFillStyle('#686E64');
+      const meta = [b.author || '未知作者', b.rating ? `★ ${b.rating.toFixed(1)}` : ''].filter(Boolean).join(' · ');
+      ctx.fillText(meta, 166, y + 90);
+      ctx.setStrokeStyle('rgba(0, 0, 0, 0.06)');
+      ctx.beginPath();
+      ctx.moveTo(60, y + ROW_H - 4);
+      ctx.lineTo(W - 60, y + ROW_H - 4);
+      ctx.stroke();
+      y += ROW_H;
+    }
+  }
+
+  ctx.setTextAlign('center');
+  ctx.setFontSize(22);
+  ctx.setFillStyle('#5C584E');
+  ctx.fillText('— 岁月失语，惟石能言 —', W / 2, H - 80);
+  ctx.setTextAlign('left');
+  return H;
+}
+
+/** 画廊/编年动态画布高度计算（页面据此设置 canvas 元素尺寸） */
+export function computeGalleryHeight(worksCount: number): number {
+  const COLS = 3;
+  const cellW = (750 - 80 - 2 * 24) / COLS;
+  const cellH = cellW * 1.42;
+  const rows = Math.ceil(Math.min(worksCount, 27) / COLS) || 1;
+  return 220 + rows * (cellH + 70) + 140;
+}
+
+export function computeChronicleHeight(worksCount: number): number {
+  const list = Math.min(worksCount, 24);
+  return 260 + list * 96 + list * 132 + 150;
+}
+
+/** 统一入口：单作品工坊海报（卡带/共鸣微卡，750×1334） */
+export async function generateWorkshopPoster(
+  canvasId: string,
+  componentContext: any,
+  options: {
+    type: 'cartridge' | 'resonance';
+    book: Book;
+    mindprint?: { depth: number; artistry: number; emotion: number; logic: number; difficulty: number; healing: number };
+  },
+): Promise<string> {
+  let localCover: string | undefined;
+  if (options.book.coverUrl) {
+    try {
+      localCover = await getLocalImagePath(options.book.coverUrl);
+    } catch {
+      localCover = undefined;
+    }
+  }
+  const ctx = uni.createCanvasContext(canvasId, componentContext);
+  if (options.type === 'cartridge') {
+    await drawCartridgePoster(ctx, options.book, localCover);
+  } else {
+    const fallback = { depth: 8.5, artistry: 8.8, emotion: 8.2, logic: 9.0, difficulty: 6.5, healing: 8.6 };
+    await drawResonancePoster(ctx, options.book, options.mindprint || fallback, localCover);
+  }
+  return new Promise((resolve, reject) => {
+    ctx.draw(false, () => {
+      setTimeout(() => {
+        uni.canvasToTempFilePath(
+          { canvasId, destWidth: 1500, destHeight: 2668, fileType: 'png', quality: 1.0, success: (res) => resolve(res.tempFilePath), fail: (err) => reject(err) },
+          componentContext,
+        );
+      }, 150);
+    });
+  });
+}
+
+/** 封面画廊导出（传入动态尺寸 canvas） */
+export async function generateCoverGallery(
+  canvasId: string,
+  componentContext: any,
+  works: Book[],
+  canvasHeight: number,
+): Promise<string> {
+  const list = works.slice(0, 27);
+  const coverPaths = new Map<number, string | undefined>();
+  for (const w of list) {
+    if (w.coverUrl) {
+      try {
+        coverPaths.set(w.id, await getLocalImagePath(w.coverUrl));
+      } catch {
+        coverPaths.set(w.id, undefined);
+      }
+    }
+  }
+  const ctx = uni.createCanvasContext(canvasId, componentContext);
+  const H = drawCoverGallery(ctx, works, coverPaths);
+  const useH = Math.max(H, canvasHeight);
+  return new Promise((resolve, reject) => {
+    ctx.draw(false, () => {
+      setTimeout(() => {
+        uni.canvasToTempFilePath(
+          { canvasId, width: 750, height: useH, destWidth: 1500, destHeight: useH * 2, fileType: 'png', quality: 1.0, success: (res) => resolve(res.tempFilePath), fail: (err) => reject(err) },
+          componentContext,
+        );
+      }, 200);
+    });
+  });
+}
+
+/** 编年长卷导出（传入动态尺寸 canvas） */
+export async function generateChronicleScroll(
+  canvasId: string,
+  componentContext: any,
+  works: Book[],
+  canvasHeight: number,
+): Promise<string> {
+  const list = works.slice(0, 24);
+  const coverPaths = new Map<number, string | undefined>();
+  for (const w of list) {
+    if (w.coverUrl) {
+      try {
+        coverPaths.set(w.id, await getLocalImagePath(w.coverUrl));
+      } catch {
+        coverPaths.set(w.id, undefined);
+      }
+    }
+  }
+  const ctx = uni.createCanvasContext(canvasId, componentContext);
+  const H = drawChronicleScroll(ctx, works, coverPaths);
+  const useH = Math.max(H, canvasHeight);
+  return new Promise((resolve, reject) => {
+    ctx.draw(false, () => {
+      setTimeout(() => {
+        uni.canvasToTempFilePath(
+          { canvasId, width: 750, height: useH, destWidth: 1500, destHeight: useH * 2, fileType: 'png', quality: 1.0, success: (res) => resolve(res.tempFilePath), fail: (err) => reject(err) },
+          componentContext,
+        );
+      }, 200);
+    });
+  });
+}

@@ -244,6 +244,13 @@
       style="position: fixed; left: -9999px; top: -9999px; width: 750px; height: 1334px;"
     />
 
+    <!-- 离屏工坊画布（画廊/编年动态高度） -->
+    <canvas
+      canvas-id="workshopCanvas"
+      id="workshopCanvas"
+      :style="'position: fixed; left: -9999px; top: -9999px; width: 750px; height: ' + workshopCanvasHeight + 'px;'"
+    />
+
     <!-- 底部导航 -->
     <TabBar :active="3" />
   </scroll-view>
@@ -255,8 +262,8 @@ import { onLoad, onShow } from '@dcloudio/uni-app';
 import TabBar from '../../components/TabBar.vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
-import { loadLocalWorks } from '../../utils/sync';
-import { generatePosterImage, savePosterToAlbum, type PosterType } from '../../utils/poster-engine';
+import { loadLocalWorks, loadLocalMindprints } from '../../utils/sync';
+import { generatePosterImage, savePosterToAlbum, generateWorkshopPoster, generateCoverGallery, generateChronicleScroll, computeGalleryHeight, computeChronicleHeight, type PosterType } from '../../utils/poster-engine';
 import { audioEngine, SOUND_TRACKS, type AudioTrack } from '../../utils/audio-engine';
 
 const instance = getCurrentInstance();
@@ -461,10 +468,70 @@ function openWorkshop(card: any) {
       syncVinylDisplayFromWork();
     }
     activeModal.value = card.key;
+  } else if (card.key === 'cartridge' || card.key === 'resonance') {
+    const media = card.key === 'cartridge' ? 'game' : 'music';
+    const pool = allWorks.value.filter((b) => b.mediaType === media);
+    if (pool.length) currentSelectedWork.value = pool[0];
+    handleWorkshopGenerate(card.key);
+  } else if (card.key === 'gallery') {
+    handleWorkshopGenerate('gallery');
+  } else if (card.key === 'chronicle') {
+    handleWorkshopGenerate('chronicle');
   } else {
     uni.showToast({
       title: `${card.title} 模组已就绪，将在下一版本开放长图导出`,
       icon: 'none',
+    });
+  }
+}
+
+// ── 💎 工坊扩展渲染（卡带/共鸣/画廊/编年）──
+const workshopCanvasHeight = ref(1334);
+
+async function handleWorkshopGenerate(kind: 'cartridge' | 'resonance' | 'gallery' | 'chronicle') {
+  if (kind === 'cartridge' || kind === 'resonance') {
+    if (!allWorks.value.length) {
+      uni.showToast({ title: '请先在藏库添加作品', icon: 'none' });
+      return;
+    }
+  }
+  uni.showLoading({ title: '正在渲染 2K 长图...', mask: true });
+  try {
+    let tempPath = '';
+    if (kind === 'gallery') {
+      workshopCanvasHeight.value = computeGalleryHeight(allWorks.value.length);
+      await new Promise((r) => setTimeout(r, 150));
+      tempPath = await generateCoverGallery('workshopCanvas', instance, allWorks.value, workshopCanvasHeight.value);
+    } else if (kind === 'chronicle') {
+      workshopCanvasHeight.value = computeChronicleHeight(allWorks.value.length);
+      await new Promise((r) => setTimeout(r, 150));
+      tempPath = await generateChronicleScroll('workshopCanvas', instance, allWorks.value, workshopCanvasHeight.value);
+    } else {
+      const mind = loadLocalMindprints().find((m) => m.bookId === currentSelectedWork.value.id);
+      const mindOpts = mind
+        ? {
+            depth: mind.depthScore,
+            artistry: mind.artistryScore,
+            emotion: mind.emotionScore,
+            logic: mind.logicScore,
+            difficulty: mind.difficultyScore,
+            healing: mind.healingScore,
+          }
+        : undefined;
+      tempPath = await generateWorkshopPoster('workshopCanvas', instance, {
+        type: kind,
+        book: currentSelectedWork.value,
+        mindprint: mindOpts,
+      });
+    }
+    uni.hideLoading();
+    posterResultModal.value = { visible: true, imageUrl: tempPath };
+  } catch (err: any) {
+    uni.hideLoading();
+    uni.showModal({
+      title: '生成海报失败',
+      content: err?.errMsg || err?.message || '画布绘制超时，请重试',
+      showCancel: false,
     });
   }
 }

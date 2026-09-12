@@ -1,7 +1,14 @@
 <template>
   <view class="galaxy-page">
-    <!-- 🌌 深空全屏 Canvas / SVG 星图舞台 -->
-    <view class="sky-canvas-wrapper" @tap="selectedStar = null">
+    <!-- 🌌 深空星图舞台（漫游模式支持单指拖拽 + 双指缩放） -->
+    <view
+      class="sky-canvas-wrapper"
+      @tap="selectedStar = null"
+      @touchstart="onRoamTouchStart"
+      @touchmove="onRoamTouchMove"
+      @touchend="onRoamTouchEnd"
+    >
+      <view class="sky-content" :style="skyContentStyle">
       <!-- 动态背景星尘 -->
       <view
         v-for="dust in stardust"
@@ -57,6 +64,12 @@
           <text class="label-emoji">{{ s.emoji }}</text>
           <text class="label-text">{{ s.shortTitle }}</text>
         </view>
+      </view>
+      </view>
+
+      <!-- 漫游模式提示胶囊 -->
+      <view v-if="isRoam" class="roam-hint">
+        <text class="roam-hint-text">✦ 单指拖拽漫游 · 双指缩放 · 点「聚星模式」复位</text>
       </view>
     </view>
 
@@ -305,12 +318,60 @@ function selectStar(s: StarNode) {
   selectedStar.value = s;
 }
 
+// ── ⛶ 全屏漫游：单指拖拽 + 双指缩放（对齐 App MindprintConstellationActivity 手势）──
+const pan = ref({ x: 0, y: 0 });
+const roamScale = ref(1);
+let touchStart: { x: number; y: number } | null = null;
+let panStart = { x: 0, y: 0 };
+let pinchStartDist = 0;
+let pinchStartScale = 1;
+
+const skyContentStyle = computed(() => ({
+  transform: `translate(${pan.value.x}px, ${pan.value.y}px) scale(${roamScale.value})`,
+  transformOrigin: '50% 50%',
+}));
+
+function onRoamTouchStart(e: any) {
+  if (!isRoam.value) return;
+  const ts = e.touches || [];
+  if (ts.length === 1) {
+    touchStart = { x: ts[0].clientX, y: ts[0].clientY };
+    panStart = { ...pan.value };
+  } else if (ts.length >= 2) {
+    pinchStartDist = Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY);
+    pinchStartScale = roamScale.value;
+  }
+}
+
+function onRoamTouchMove(e: any) {
+  if (!isRoam.value) return;
+  const ts = e.touches || [];
+  if (ts.length === 1 && touchStart) {
+    pan.value = {
+      x: panStart.x + (ts[0].clientX - touchStart.x),
+      y: panStart.y + (ts[0].clientY - touchStart.y),
+    };
+  } else if (ts.length >= 2 && pinchStartDist > 0) {
+    const d = Math.hypot(ts[0].clientX - ts[1].clientX, ts[0].clientY - ts[1].clientY);
+    roamScale.value = Math.min(3, Math.max(0.5, pinchStartScale * (d / pinchStartDist)));
+  }
+}
+
+function onRoamTouchEnd() {
+  touchStart = null;
+  pinchStartDist = 0;
+}
+
 function toggleRoam() {
   isRoam.value = !isRoam.value;
-  uni.showToast({
-    title: isRoam.value ? '已开启全景漫游视角' : '已恢复标准观星视角',
-    icon: 'none',
-  });
+  if (isRoam.value) {
+    uni.showToast({ title: '已开启全景漫游视角', icon: 'none' });
+  } else {
+    // 复位视角
+    pan.value = { x: 0, y: 0 };
+    roamScale.value = 1;
+    selectedStar.value = null;
+  }
 }
 
 function openDetail(book: Book) {
@@ -361,6 +422,35 @@ page {
   height: 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+/* 漫游变换容器：包住星尘/连线画布/星体，整体平移缩放 */
+.sky-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 漫游模式提示胶囊 */
+.roam-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 220rpx;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.14);
+  border-radius: 40rpx;
+  padding: 12rpx 30rpx;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.roam-hint-text {
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 1rpx;
 }
 
 /* 星辰节点 */
