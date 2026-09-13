@@ -115,7 +115,7 @@ export const SOUND_TRACKS: AudioTrack[] = [
     type: 'vinyl',
     emoji: '🌸',
     src: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c83a0058.mp3?filename=clair-de-lune-debussy-piano-10878.mp3',
-    coverUrl: 'https://i0.hdslb.com/bfs/bangumi/image/82d628408f5472f1440982e880b0b4f0146862ad.png',
+    coverUrl: '',
     durationSec: 240,
     quote: '最后的一吻，献给不再需要福音战士的新世界。',
   },

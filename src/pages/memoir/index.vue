@@ -346,13 +346,13 @@ const memoirCards = [
 const activeModal = ref<string | null>(null);
 const allWorks = ref<Book[]>([]);
 
-const defaultCover = 'https://i0.hdslb.com/bfs/bangumi/803ee7dc0e151ea3f634fe49e73d3b3fb93ca433.jpg';
+const defaultCover = '/static/covers/placeholder.jpg';
 
 const currentSelectedWork = ref<Book>({
   id: 1,
   title: '星际穿越',
   author: '克里斯托弗·诺兰',
-  coverUrl: 'https://i0.hdslb.com/bfs/bangumi/803ee7dc0e151ea3f634fe49e73d3b3fb93ca433.jpg',
+  coverUrl: '/static/covers/placeholder.jpg',
   category: '科幻 / 史诗',
   status: 'finished',
   mediaType: 'movie',
