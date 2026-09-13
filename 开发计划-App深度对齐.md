@@ -1,0 +1,121 @@
+# 阅痕小程序 → Android App 深度对齐 · 开发计划
+
+> 建立时间：2026-09-13 17:20
+> 维护方式：每完成一项就勾选并 commit；本文档是跨会话的唯一进度事实源。
+> 关联仓库：https://github.com/liuGuanYi-hub/mp-readtrace（main 分支）
+
+---
+
+## 一、状态快照（截至 f24b5ed）
+
+### 已完成并推送
+| 提交 | 内容 |
+|---|---|
+| `3a7e7fe` | 地基修复：收藏持久化/归档软删除/切页兜底/黑胶数据污染/背景统一/同步文案如实化 |
+| `1c84378` | 设计 Token 体系 `--rt-*` 全量对齐 App colors.xml（14 页接入，夜间主题预留位） |
+| `c685c03` | App 标志性特效移植（极光背景/流光扫光/字符解密/数字滚动/首字下沉/弹簧按压）+ SVG→Canvas（雷达图/星图连线真机兼容） |
+| `b8c2c6d` | 详情页真化（编辑印记/海报带参直达/伴读黑胶）+ 档案页真化（真实统计徽章墙/动态画像称号/版本纪要/关于/署名编辑） |
+| `581f090` | 藏库导出宣纸长卷（Canvas 渲染→预览→存相册） |
+| `0f376fc` | 纪念工坊四模组（卡带/共鸣微卡/封面画廊/编年长卷）+ 星图全屏漫游（拖拽+缩放） |
+| `f24b5ed` | 封面与作品一一对应：12 张官方图本地打包 `static/covers/`（含与 App 同源的 bgm 资产 4 张），清除全部错配外链，修正三体豆瓣 ID |
+
+### ⚠️ 待用户确认（封面验证的前置动作）
+- [ ] 微信开发者工具：**清缓存 → 清除全部缓存 → 编译**（预置数据在首启时已写入本地存储，不清缓存永远显示旧封面）
+- [ ] 若清缓存后封面仍不对：发 App 页面截图 + 小程序同页面截图，按图排查（手机 App 封面可能来自已删除的 cover_server 下载缓存，与资产文件存在不一致的可能）
+
+---
+
+## 二、Phase A：三页深度对齐（用户已批准，等 App 截图）
+
+**对照方式**：用户发手机/模拟器的 App 截图（Hub / 详情 / 我的），按截图像素级对齐。
+**工作方式**：每页独立分支式推进——改完 → `npm run build:mp-weixin` 构建验证 → 中文 commit → push → 下一页。
+
+### A1. 首页 Hub（pages/hub/index.vue）
+对齐目标：App `fragment_hub.xml` + `HubFragment.kt`（P35 清爽记录台两段式）。
+- [ ] 首屏方形记录台（高度=一屏、内容垂直居中、运行时宽=高）
+- [ ] 眉标行 `PERSONAL ARCHIVE · EST. 2026` + 右侧金色 `VOL. I` 刊号 + 1dp 分隔线
+- [ ] 衬线大标题 + 昼夜切换按钮（App 38dp ☀️/🌙；小程序已置灰提示，App 截图对照后决定形态）
+- [ ] 四时副标题动态文案（已实现，对照措辞）
+- [ ] 五媒介统计网格（serif 数字 + 已接 CountUp）
+- [ ] 主按钮 `＋ 添加新作`（46dp 苔绿圆角 18）+ 副按钮行三枚 42dp 玻璃按钮——对照小程序现有按钮组文案与层级
+- [ ] 页脚铭文（serif 10.5sp 居中）
+- [ ] InfiniteMarquee 跑马灯（36dp 高、按住暂停——小程序端补按住暂停）
+- [ ] **Hero 策展主位**：破壁层叠卡（封面越界 -10dp、elevation 10）+ EditorialBadge 档案徽标（等宽字体 `[NO. 01 · 🌅 晨曦 // CURATED]`）+ 金色评分徽章 `★ 9.8 · 精神珍藏` + 双按钮（媒介定制文案）+ 全息高光膜 + 陀螺仪视差（小程序：CSS 视差或触控视差替代）
+- [ ] 晶体工坊微胶囊横滑条（六个入口、首个深色）
+- [ ] 羊皮纸灵感便签（bg_parchment_ribbon + DropCap 首字下沉 + 右对齐出处 + 换一句弹跳）
+- [ ] 那年今日 · 时光回溯（同款羊皮纸，无历史记忆时隐藏）
+- [ ] 我的最爱 · 心选展厅横滑（NO.1 排位角标）
+- [ ] 文化印记总览（四列统计数字滚动）
+- [ ] 时光深处的印记（媒介 pill ➔ + 封面 + 引语条）
+- [ ] 滚动揭示：第 3/5/6/8/9 区块进视口依次上浮渐入（50ms 错峰，仅一次）
+
+### A2. 详情页（pages/book-detail/index.vue）
+对齐目标：App `activity_book_detail.xml` + `BookDetailActivity.kt`（15 区块深页）。
+- [ ] 全局：Palette 封面取色自适应极光漫射光晕（小程序可用封面主色 CSS 变量近似）
+- [ ] 悬浮返回光球（滚动吸附/脉冲）+ 全屏左缘侧滑返回
+- [ ] 页头：标题 26sp + 副标题 + 44dp 收藏按钮
+- [ ] **BorderBeam 流光边框主卡**（SweepGradient 360° 旋转光弧，conic-gradient + 遮罩旋转实现）
+- [ ] 主卡内容：96×144 封面 → EditorialBadge + 媒介 pill → 书名 ScrambleText 23sp → 作者 → **HolographicRatingView 全息评级 36dp**（三色扫光）→ 状态胶囊（点击改状态）→ 3D 翻阅主按钮 → 编辑/归档 → 海报/藏书票
+- [ ] 按媒介定制按钮文案与跳转（影→电影票根、游戏→卡带、乐→黑胶、番→护照）
+- [ ] 快捷导航条（✨概览与雷达 / ⏳心路时间轴 / 👥角色与大纲 / 💬痕迹与摘录，点击平滑滚动）
+- [ ] 关于这本书（分类/封面 URL/简介 3 行折叠+展开）
+- [ ] 阅读轨迹（状态可点、六维打分入口、远程评分采用条、标签、起讫日期）
+- [ ] 留下的感受（文心雕龙金按钮 + DropCap 短评/长评 + 双向概念脉络 chips）
+- [ ] 摘录与随想（翻阅笔记 swiper + 计数 + 笔记卡列表）
+- [ ] 实体馆藏（购买渠道/物理位置/装帧版次/价格）
+- [ ] 人物角色谱（横滑角色卡，现有 preset 只有 1001/1004 有数据——与 App 数据面一致即可）
+- [ ] 章节大纲（横滑大纲卡）
+- [ ] 作品全息时间轴（筛选 chips + 混合事件流 + 导出长图）
+- [ ] 六维心智雷达区块（Canvas 雷达 220dp + 六项数值网格 + 美学情绪胶囊 FlowLayout + 星系定位/对比/评分按钮）
+- [ ] 空间叙事足迹 + 灵犀共鸣推荐（限 2 条）+ 记录时间
+
+### A3. 我的页（pages/profile/index.vue）
+对齐目标：App `fragment_profile.xml` + `ProfileFragment.kt`。
+- [ ] 顶部档案面板：标题行 + 策展人入驻按钮 + 动态副文案（"已沉淀 N 部文化藏品"）
+- [ ] **全息策展人通行卡 CuratorPassCardView**：表面渐变 + 顶部 24dp 烫金光带 + 防伪编号/绑定徽章/加入日期 + 认证状态点（绿/金/灰）——小程序现有深蓝卡对照 App 截图重做配色与光带
+- [ ] 云端保险库同步条（上次同步时间 + 立即同步 + 长按进 WebDAV 配置）
+- [ ] 年度认知心智画像卡（人格称号 + 180dp 雷达——Canvas 版已有，调尺寸与文案）
+- [ ] 分组标签样式（16.5sp FieldLabel）
+- [ ] 虚拟空间与展览广场分组：我的最爱 / 年鉴 / 云端展览广场 / 成就勋章（已解锁 N/18 动态）
+- [ ] 系统管理与备份恢复分组：搬家中心（豆瓣·B站·Steam pill）/ 备份导出 / 回收站 / 版本纪要
+- [ ] 关于卡（Logo 52dp + 版本 pill + slogan + 点击弹关于详情）
+
+### 验收标准（每页相同）
+1. 与 App 截图并排对比：区块顺序、层级、圆角/间距节奏、字体层级一致
+2. `npm run build:mp-weixin` 通过
+3. 微信开发者工具人工过目（用户验收）
+4. 独立中文 commit + push
+
+---
+
+## 三、Phase B：遗留 Backlog（按优先级）
+
+- [ ] **P0 pixabay 音频 CDN 403**：伴读白噪音/黑胶全部播不出来（控制台报 403 + AudioContext TypeError）→ 换可用音源或本地化小体积音频
+- [ ] **P0 域名白名单清单**：上线前需在小程序后台配置（目前已知外链：api.bgm.tv、pixabay CDN、B 站图床残留引用、DeepSeek API）；bgm.tv 在当前网络不可达，discover 的 Bangumi 实时搜源需自建 HTTPS 中转或退化为纯本地目录
+- [ ] P1 文化护照数据驱动：去掉硬编码"持照策展人：ZZD"与写死的签证戳（用真实完结作品生成集章）
+- [ ] P1 星图连线性能：作品多时 O(n²) 连线计算考虑阈值裁剪
+- [ ] P2 discover 搜源增强（豆瓣/杉果源需要中转服务器，暂缓）
+- [ ] P2 wx.login 微信身份接入（对齐 App 账号体系；与云端漫游 openid 打通）
+- [ ] P2 快速日志页录入作品缺 author/cover 的体验优化
+- [ ] P3 README.md 更新（appid 已填、DioramaCard/VinylPlayer 孤儿组件清理或接入、删除"暂不承载海报工坊"的过时说明）
+
+## 四、平台硬边界备忘（明确不做/降级项）
+
+| App 能力 | 小程序结论 |
+|---|---|
+| 桌面小组件 ×3 | 无等价物，不做 |
+| 振幅级触觉 / SonicHapticMatrix / ASMR 联觉 | 仅 wx.vibrateShort 三档，降级 |
+| OpenGL 3D 画廊（gallery3d） | WebGL 可行但重；社区展厅依赖自建后端，暂缓 |
+| 豆瓣/杉果/网易云爬虫搜源 | 小程序域名限制+反爬，需中转服务器；Bangumi 直连在当前网络不可达 |
+| 手机号+阿里云短信登录 | 改用微信自带手机号快捷获取 / wx.login |
+| Keystore 级生物识别 | wx.startSoterAuthentication 部分等价 |
+
+## 五、关键事实备忘（后续会话直接用，避免重新踩坑）
+
+1. **模拟器/真机预置数据在首启写死**：改 preset-data 后必须"清缓存→清除全部缓存→编译"才能看到效果。
+2. **微信 WXML 不支持 SVG 标签**：雷达图/星座连线已 Canvas 2D 化（`MindprintRadar.vue`、constellation `#sky-lines-canvas`），新页面禁止直写 SVG。
+3. **按压反馈用 hover-class**（`.rt-press` + `.rt-spring` 全局类），`:active` 在真机不可靠。
+4. **CSS 变量定义在 App.vue 的 page 选择器**（`--rt-*` 全套对齐 App colors.xml），原生组件属性（slider activeColor、showModal confirmColor）不吃变量，保留字面量。
+5. **旧版 Canvas 长图导出模板**：canvas 元素 style 先设目标高度 → 等 150ms → 绘制 → `canvasToTempFilePath` 传显式 width/height/destWidth/destHeight（2 倍导出）；单幅条数上限防超 4096px。
+6. **App 端封面真相源**：`device_readtrace.db` 的 books.cover_url（assets 路径名）；bgm 系资产在 `app/src/main/assets/covers/*.webp`；douban/steam 系 App 是运行时从 cover_server 拉的（该目录已删除）。
+7. **App 设计规格来源**：`res/values/colors.xml`（Token）、`fragment_hub.xml`/`activity_book_detail.xml`/`fragment_profile.xml`（布局）、自定义控件 onDraw（特效）。
