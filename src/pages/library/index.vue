@@ -7,86 +7,88 @@
     :show-scrollbar="false"
     @scroll="onScroll"
   >
-    <!-- 顶部一体化 Header & 多维过滤面板（bg_glass_panel） -->
+    <!-- 顶部一体化 Header & 多维过滤面板（对齐 App 玻璃拟态面板） -->
     <view class="header-panel">
-      <!-- 标题与新增操作栏 -->
+      <!-- 标题与单一新增操作栏 -->
       <view class="title-row">
         <text class="panel-title">📚 精神藏库</text>
         <view class="header-actions">
-          <view class="btn-discover rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goDiscover">🔍 搜源建库</view>
           <view class="btn-add rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goQuickLog">+ 记录</view>
         </view>
       </view>
 
-      <!-- 一级：媒介类型切换胶囊栏 -->
-      <scroll-view scroll-x class="chip-scroller" enhanced :show-scrollbar="false">
-        <view
-          class="media-chip"
-          :class="{ selected: mediaFilter === '' }"
-          @tap="onMediaChange('')"
-        >
-          全部 🌌
-        </view>
-        <view
-          v-for="(m, key) in MEDIA_LABEL"
-          :key="key"
-          class="media-chip"
-          :class="{ selected: mediaFilter === key }"
-          @tap="onMediaChange(key as MediaType)"
-        >
-          {{ m.name }} {{ m.emoji }}
-        </view>
-      </scroll-view>
-
-      <!-- 搜索框（bg_input_glass） -->
+      <!-- 搜索框（纯净玻璃拟态，对齐截图无冗余标签） -->
       <view class="search-box">
         <text class="search-icon">🔍</text>
         <input
           class="search-input"
           v-model="keyword"
-          placeholder="搜索藏库作品名、创作者、分类、标签..."
+          placeholder="搜索书名、影名、游戏、番剧、作者、标签..."
           placeholder-class="ph"
           confirm-type="search"
+          @input="onKeywordInput"
         />
-        <view v-if="keyword" class="search-clear" @tap="keyword = ''">✕</view>
-        <view class="search-discover-tag" @tap="goDiscover">
-          <text class="sdt-text">全网搜源 ➔</text>
-        </view>
+        <view v-if="keyword" class="search-clear" @tap="clearKeyword">✕</view>
       </view>
 
-      <!-- 二级：iOS 风格轻量状态分段条 -->
+      <!-- 一级：媒介类型切换胶囊栏（全部 🌌 / 书籍 📖 / 番剧 🌸 / 影视 🎬 / 游戏 🎮） -->
+      <scroll-view scroll-x class="chip-scroller" enhanced :show-scrollbar="false">
+        <view
+          class="media-chip rt-spring"
+          :class="{ selected: mediaFilter === '' }"
+          hover-class="rt-press"
+          @tap="onMediaChange('')"
+        >
+          全部 🌌
+        </view>
+        <view
+          v-for="m in MEDIA_ORDER"
+          :key="m.key"
+          class="media-chip rt-spring"
+          :class="{ selected: mediaFilter === m.key }"
+          hover-class="rt-press"
+          @tap="onMediaChange(m.key)"
+        >
+          {{ m.name }} {{ m.emoji }}
+        </view>
+      </scroll-view>
+
+      <!-- 二级：iOS 风格轻量状态分段条（全部 / 进行中 / 已完成 / 愿望单） -->
       <view class="segmented">
         <view
           v-for="opt in statusOpts"
           :key="opt.key"
-          class="seg-item"
+          class="seg-item rt-spring"
           :class="{ selected: statusFilter === opt.key }"
+          hover-class="rt-press"
           @tap="onStatusChange(opt.key as BookStatus | '')"
         >
           {{ opt.label }}
         </view>
       </view>
 
-      <!-- 三级：评分区间筛选条 -->
+      <!-- 三级：评分区间筛选条（全部 / 7.0~7.5 / 7.5~8.0 / 8.0~9.0 / 9.0以上） -->
       <view class="segmented rating-bar">
         <view
           v-for="opt in RATING_RANGES"
           :key="opt.key"
-          class="seg-item"
+          class="seg-item rt-spring"
           :class="{ selected: ratingRange === opt.key }"
-          @tap="ratingRange = opt.key"
+          hover-class="rt-press"
+          @tap="onRatingChange(opt.key)"
         >
           {{ opt.label }}
         </view>
       </view>
 
-      <!-- 四级：动态标签流（带计数） -->
+      <!-- 四级：动态标签流（带计数胶囊，对齐截图标签样式） -->
       <scroll-view v-if="tagOpts.length" scroll-x class="tag-scroller" enhanced :show-scrollbar="false">
         <view
           v-for="t in tagOpts"
           :key="t.name"
-          class="tag-chip"
+          class="tag-chip rt-spring"
           :class="{ selected: selectedTag === t.name }"
+          hover-class="rt-press"
           @tap="toggleTag(t.name)"
         >
           {{ t.name }} ({{ t.count }})
@@ -98,18 +100,54 @@
     <view class="stats-row">
       <text class="count-text">共 {{ filtered.length }} 部藏品</text>
       <view class="stats-btn-group">
-        <!-- 真正支持单列/双列无缝切换，完全对齐 App -->
-        <view class="stats-btn" @tap="isGridView = !isGridView">
-          {{ isGridView ? '📄 单列视图' : '🎴 双列网格' }}
+        <view class="stats-btn rt-spring" hover-class="rt-press" @tap="isGridView = !isGridView">
+          {{ isGridView ? '📋 列表' : '🎴 网格' }}
         </view>
-        <view class="stats-btn stats-btn-gap" @tap="exportView">📜 导出长卷</view>
+        <view class="stats-btn stats-btn-gap rt-spring" hover-class="rt-press" @tap="exportView">📜 导出长卷</view>
+      </view>
+    </view>
+
+    <!-- ═══ 藏品双列网格（item_book_grid_card 风格，对齐 library_top.png & library_scrolled.png） ═══ -->
+    <view v-if="isGridView" class="grid-container">
+      <view
+        v-for="book in pagedList"
+        :key="`grid-${book.id}`"
+        class="grid-card rt-spring"
+        hover-class="rt-press"
+        hover-stay-time="120"
+        @tap="openDetail(book)"
+      >
+        <view class="grid-cover-wrap">
+          <image v-if="book.coverUrl" class="grid-cover" :src="book.coverUrl" mode="aspectFill" />
+          <view v-else class="grid-cover grid-cover-ph">
+            <text class="grid-ph-emoji">{{ MEDIA_LABEL[book.mediaType]?.emoji }}</text>
+          </view>
+          <!-- 悬浮左上媒介标 -->
+          <view class="grid-media-badge">{{ MEDIA_LABEL[book.mediaType]?.emoji }}</view>
+          <!-- 悬浮右上状态标（游戏通关显示「通关」） -->
+          <view class="grid-status-badge">
+            {{ MEDIA_STATUS[book.mediaType]?.[book.status] || '已完成' }}
+          </view>
+        </view>
+
+        <view class="grid-info">
+          <text class="grid-title">{{ book.title }}</text>
+          <text class="grid-author">{{ book.author || '未知作者' }}</text>
+          <view class="grid-meta-row">
+            <view class="grid-score-wrap">
+              <text class="grid-score-num">{{ formatRatingNum(book.rating) }}</text>
+              <text class="grid-score-unit"> 分</text>
+            </view>
+            <text class="grid-category" v-if="book.category">{{ book.category }}</text>
+          </view>
+        </view>
       </view>
     </view>
 
     <!-- ═══ 藏品单列列表（item_book_card 风格） ═══ -->
-    <view v-if="!isGridView" class="list-container">
+    <view v-else class="list-container">
       <view
-        v-for="book in filtered"
+        v-for="book in pagedList"
         :key="book.id"
         class="book-card rt-spring"
         hover-class="rt-press"
@@ -147,43 +185,33 @@
       </view>
     </view>
 
-    <!-- ═══ 藏品双列网格（item_book_grid_card 风格） ═══ -->
-    <view v-else class="grid-container">
-      <view
-        v-for="book in filtered"
-        :key="`grid-${book.id}`"
-        class="grid-card rt-spring"
-        hover-class="rt-press"
-        hover-stay-time="120"
-        @tap="openDetail(book)"
-      >
-        <view class="grid-cover-wrap">
-          <image v-if="book.coverUrl" class="grid-cover" :src="book.coverUrl" mode="aspectFill" />
-          <view v-else class="grid-cover grid-cover-ph">
-            <text class="grid-ph-emoji">{{ MEDIA_LABEL[book.mediaType]?.emoji }}</text>
-          </view>
-          <!-- 悬浮角标 -->
-          <view class="grid-media-tag">{{ MEDIA_LABEL[book.mediaType]?.emoji }}</view>
-          <view class="grid-rating-tag" v-if="book.rating">★ {{ book.rating }}</view>
-        </view>
-
-        <view class="grid-info">
-          <text class="grid-title">{{ book.title }}</text>
-          <text class="grid-author">{{ book.author || '未知作者' }}</text>
-          <view class="grid-meta-row">
-            <text class="grid-status-pill">{{ MEDIA_STATUS[book.mediaType]?.[book.status] }}</text>
-            <text class="grid-category" v-if="book.category">{{ book.category }}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
     <!-- 空状态面板（bg_glass_panel） -->
     <view v-if="filtered.length === 0" class="empty-panel">
       <view class="empty-icon">🏛️</view>
       <text class="empty-title">暂无匹配藏品</text>
       <text class="empty-body">换个筛选条件看看，或点击上方「+ 记录」添加新作品</text>
       <view class="btn-empty-add" @tap="goQuickLog">＋ 记录新作品</view>
+    </view>
+
+    <!-- 📄 底部悬浮毛玻璃胶囊翻页条 (对齐 App 悬浮翻页条) -->
+    <view class="floating-pagination" v-if="totalPages > 1">
+      <view
+        class="fp-btn rt-spring"
+        :class="{ disabled: currentPage <= 1 }"
+        hover-class="rt-press"
+        @tap="prevPage"
+      >
+        ‹ 上一页
+      </view>
+      <text class="fp-indicator">{{ currentPage }} / {{ totalPages }}</text>
+      <view
+        class="fp-btn rt-spring"
+        :class="{ disabled: currentPage >= totalPages }"
+        hover-class="rt-press"
+        @tap="nextPage"
+      >
+        下一页 ›
+      </view>
     </view>
 
     <!-- 悬浮回到顶部胶囊 -->
@@ -226,19 +254,28 @@
 
 <script setup lang="ts">
 import { onLoad, onShow } from '@dcloudio/uni-app';
-import { computed, ref } from 'vue';
+import { computed, ref, getCurrentInstance } from 'vue';
 import type { Book, BookStatus, MediaType } from '../../utils/models';
 import { MEDIA_LABEL, MEDIA_STATUS } from '../../utils/models';
 import { loadLocalWorks } from '../../utils/sync';
 import { generateLibraryScroll, computeScrollHeight, savePosterToAlbum } from '../../utils/poster-engine';
-import { getCurrentInstance } from 'vue';
 import TabBar from '../../components/TabBar.vue';
 
+// 严格对齐 App 媒介栏顺序：全部、书籍、番剧、影视、游戏
+const MEDIA_ORDER: { key: MediaType; name: string; emoji: string }[] = [
+  { key: 'book', name: '书籍', emoji: '📖' },
+  { key: 'anime', name: '番剧', emoji: '🌸' },
+  { key: 'movie', name: '影视', emoji: '🎬' },
+  { key: 'game', name: '游戏', emoji: '🎮' },
+];
+
+// 严格对齐 App 五档评分分段器
 const RATING_RANGES = [
-  { key: '', label: '全部评分' },
+  { key: '', label: '全部' },
   { key: '7075', label: '7.0~7.5' },
   { key: '7580', label: '7.5~8.0' },
-  { key: '80plus', label: '8.0 以上' },
+  { key: '8090', label: '8.0~9.0' },
+  { key: '90plus', label: '9.0以上' },
 ];
 
 const books = ref<Book[]>([]);
@@ -247,7 +284,10 @@ const statusFilter = ref<'' | BookStatus>('');
 const ratingRange = ref('');
 const selectedTag = ref('');
 const keyword = ref('');
-const isGridView = ref(false); // 单双列切换
+const isGridView = ref(true); // 默认开启双列网格视图（完全对齐 App 实机截图）
+
+const currentPage = ref(1);
+const pageSize = 20;
 
 const scrollTopSet = ref(0);
 const showBackTop = ref(false);
@@ -272,7 +312,7 @@ const statusOpts = computed(() => {
       { key: '', label: '全部' },
       { key: 'reading', label: '进行中' },
       { key: 'finished', label: '已完成' },
-      { key: 'wishlist', label: '想看' },
+      { key: 'wishlist', label: '愿望单' },
     ];
   }
   const map = MEDIA_STATUS[mf];
@@ -284,7 +324,7 @@ const statusOpts = computed(() => {
   ];
 });
 
-// 动态提取热门标签
+// 动态提取热门高频标签
 const tagOpts = computed(() => {
   const map: Record<string, number> = {};
   const currentMediaWorks = mediaFilter.value
@@ -300,21 +340,43 @@ const tagOpts = computed(() => {
 
   return Object.entries(map)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 12)
+    .slice(0, 15)
     .map(([name, count]) => ({ name, count }));
 });
 
 function onMediaChange(m: '' | MediaType) {
   mediaFilter.value = m;
   selectedTag.value = '';
+  currentPage.value = 1;
 }
 
 function onStatusChange(s: '' | BookStatus) {
   statusFilter.value = s;
+  currentPage.value = 1;
+}
+
+function onRatingChange(r: string) {
+  ratingRange.value = r;
+  currentPage.value = 1;
 }
 
 function toggleTag(t: string) {
   selectedTag.value = selectedTag.value === t ? '' : t;
+  currentPage.value = 1;
+}
+
+function onKeywordInput() {
+  currentPage.value = 1;
+}
+
+function clearKeyword() {
+  keyword.value = '';
+  currentPage.value = 1;
+}
+
+function formatRatingNum(r: number | null): string {
+  if (r == null) return '8';
+  return r.toFixed(1).replace(/\.0$/, '');
 }
 
 const filtered = computed(() => {
@@ -327,7 +389,8 @@ const filtered = computed(() => {
       const r = b.rating ?? 0;
       if (ratingRange.value === '7075' && (r < 7.0 || r > 7.5)) return false;
       if (ratingRange.value === '7580' && (r < 7.5 || r > 8.0)) return false;
-      if (ratingRange.value === '80plus' && r < 8.0) return false;
+      if (ratingRange.value === '8090' && (r < 8.0 || r > 9.0)) return false;
+      if (ratingRange.value === '90plus' && r < 9.0) return false;
     }
 
     if (keyword.value.trim()) {
@@ -343,6 +406,28 @@ const filtered = computed(() => {
   });
 });
 
+// 分页列表计算
+const totalPages = computed(() => Math.max(1, Math.ceil(filtered.value.length / pageSize)));
+
+const pagedList = computed(() => {
+  const start = (currentPage.value - 1) * pageSize;
+  return filtered.value.slice(start, start + pageSize);
+});
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    backToTop();
+  }
+}
+
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+    backToTop();
+  }
+}
+
 function onScroll(e: any) {
   showBackTop.value = e.detail.scrollTop > 360;
 }
@@ -352,10 +437,6 @@ function backToTop() {
   setTimeout(() => {
     scrollTopSet.value = -1;
   }, 100);
-}
-
-function goDiscover() {
-  uni.navigateTo({ url: '/pages/discover/index' });
 }
 
 function goQuickLog() {
@@ -382,7 +463,6 @@ function exportView() {
   }
   scrollCanvasHeight.value = computeScrollHeight(works.length);
   uni.showLoading({ title: '正在铺陈宣纸长卷...', mask: true });
-  // 等待画布尺寸生效后再绘制
   setTimeout(async () => {
     try {
       const tempPath = await generateLibraryScroll('scrollCanvas', instance, works);
@@ -409,7 +489,7 @@ async function saveScroll() {
   try {
     await savePosterToAlbum(scrollPreview.value.imageUrl);
   } catch {
-    // 授权/保存提示已由 savePosterToAlbum 处理
+    // 提示已由内部处理
   }
 }
 </script>
@@ -417,14 +497,14 @@ async function saveScroll() {
 <style>
 .page {
   min-height: 100vh;
-  padding: 24rpx 28rpx 260rpx;
+  padding: 24rpx 28rpx 280rpx;
   box-sizing: border-box;
   background: var(--rt-bg);
 }
 
 /* ── 顶部多维过滤面板 ── */
 .header-panel {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   border-radius: 40rpx;
   padding: 32rpx;
   box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.05);
@@ -440,17 +520,6 @@ async function saveScroll() {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14rpx;
-}
-
-.btn-discover {
-  padding: 10rpx 20rpx;
-  border-radius: 28rpx;
-  background: var(--rt-chip);
-  color: var(--rt-accent);
-  font-size: 22rpx;
-  font-weight: bold;
-  border: 1rpx solid rgba(58, 99, 72, 0.25);
 }
 
 .panel-title {
@@ -461,13 +530,13 @@ async function saveScroll() {
 }
 
 .btn-add {
-  padding: 10rpx 24rpx;
-  border-radius: 28rpx;
-  background: var(--rt-accent);
+  padding: 10rpx 28rpx;
+  border-radius: 30rpx;
+  background: #2D5A46;
   color: #ffffff;
   font-size: 24rpx;
   font-weight: bold;
-  box-shadow: 0 4rpx 14rpx rgba(58, 99, 72, 0.3);
+  box-shadow: 0 4rpx 14rpx rgba(45, 90, 70, 0.3);
 }
 
 /* 一级媒介胶囊 */
@@ -478,20 +547,20 @@ async function saveScroll() {
 
 .media-chip {
   display: inline-block;
-  padding: 10rpx 24rpx;
+  padding: 12rpx 28rpx;
   margin-right: 12rpx;
-  border-radius: 28rpx;
-  background: var(--rt-chip);
-  color: var(--rt-ink);
+  border-radius: 30rpx;
+  background: #E8ECE9;
+  color: #2A332B;
   font-size: 23rpx;
   font-weight: bold;
-  border: 1.5rpx solid rgba(0, 0, 0, 0.05);
+  border: 1.5rpx solid rgba(0, 0, 0, 0.04);
 }
 
 .media-chip.selected {
-  background: var(--rt-accent);
+  background: #2D5A46;
   color: #ffffff;
-  border-color: var(--rt-accent);
+  border-color: #2D5A46;
 }
 
 /* 搜索框 */
@@ -528,24 +597,11 @@ async function saveScroll() {
   padding: 8rpx;
 }
 
-.search-discover-tag {
-  background: var(--rt-accent);
-  padding: 6rpx 16rpx;
-  border-radius: 20rpx;
-  margin-left: 10rpx;
-}
-
-.sdt-text {
-  font-size: 20rpx;
-  color: #FFFFFF;
-  font-weight: 600;
-}
-
-/* 二级/三级分段条 */
+/* 二级状态与三级评分分段条（对齐 iOS 经典分段器与截图深绿高亮） */
 .segmented {
   display: flex;
   height: 64rpx;
-  background: var(--rt-chip);
+  background: #EAECE9;
   border-radius: 20rpx;
   padding: 4rpx;
   margin-top: 18rpx;
@@ -558,19 +614,20 @@ async function saveScroll() {
   justify-content: center;
   border-radius: 16rpx;
   font-size: 22rpx;
-  color: var(--rt-muted);
+  color: #525D53;
   font-weight: bold;
+  transition: all 0.2s ease;
 }
 
 .seg-item.selected {
-  background: #ffffff;
-  color: var(--rt-ink);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+  background: #2D5A46;
+  color: #ffffff;
+  box-shadow: 0 4rpx 10rpx rgba(45, 90, 70, 0.25);
 }
 
 .rating-bar {
   margin-top: 14rpx;
-  height: 58rpx;
+  height: 60rpx;
 }
 
 /* 动态标签流 */
@@ -581,18 +638,20 @@ async function saveScroll() {
 
 .tag-chip {
   display: inline-block;
-  padding: 8rpx 20rpx;
+  padding: 8rpx 22rpx;
   margin-right: 12rpx;
-  border-radius: 20rpx;
-  background: rgba(58, 99, 72, 0.08);
-  color: var(--rt-accent);
+  border-radius: 22rpx;
+  background: #EEF2EE;
+  color: #374338;
   font-size: 21rpx;
-  font-weight: bold;
+  font-weight: 500;
+  border: 1.5rpx solid rgba(45, 90, 70, 0.18);
 }
 
 .tag-chip.selected {
-  background: var(--rt-accent);
+  background: #2D5A46;
   color: #ffffff;
+  border-color: #2D5A46;
 }
 
 /* ── 统计与视图切换 ── */
@@ -630,6 +689,139 @@ async function saveScroll() {
   margin-left: 14rpx;
 }
 
+/* ── ═══ 双列网格（1:1 还原 library_top.png & library_scrolled.png） ═══ ── */
+.grid-container {
+  margin-top: 20rpx;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.grid-card {
+  background: #ffffff;
+  border-radius: 32rpx;
+  overflow: hidden;
+  border: 1.5rpx solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.grid-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 380rpx;
+  background: #E5E8E5;
+}
+
+.grid-cover {
+  width: 100%;
+  height: 100%;
+}
+
+.grid-cover-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-ph-emoji {
+  font-size: 80rpx;
+}
+
+/* 左上角圆形半透明媒介徽标 */
+.grid-media-badge {
+  position: absolute;
+  top: 14rpx;
+  left: 14rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 右上角半透明胶囊状态徽标（通关/已读/在读等） */
+.grid-status-badge {
+  position: absolute;
+  top: 14rpx;
+  right: 14rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 20rpx;
+  font-weight: bold;
+  color: #2D5A46;
+  border: 1rpx solid rgba(45, 90, 70, 0.18);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.grid-info {
+  padding: 16rpx 18rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-title {
+  color: #1A1C19;
+  font-size: 29rpx;
+  font-weight: bold;
+  font-family: serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-author {
+  color: #727970;
+  font-size: 22rpx;
+  margin-top: 6rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.grid-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.grid-score-wrap {
+  display: flex;
+  align-items: baseline;
+}
+
+.grid-score-num {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #2D5A46;
+  font-family: serif;
+}
+
+.grid-score-unit {
+  font-size: 20rpx;
+  font-weight: bold;
+  color: #2D5A46;
+}
+
+.grid-category {
+  color: #727970;
+  font-size: 21rpx;
+  max-width: 65%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+
 /* ── 单列卡片列表 ── */
 .list-container {
   margin-top: 18rpx;
@@ -646,10 +838,6 @@ async function saveScroll() {
   border: 1.5rpx solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
   transition: transform 0.15s ease;
-}
-
-.book-card:active {
-  transform: scale(0.99);
 }
 
 .cover-box {
@@ -762,107 +950,45 @@ async function saveScroll() {
   overflow: hidden;
 }
 
-/* ── 双列网格 ── */
-.grid-container {
-  margin-top: 18rpx;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-}
-
-.grid-card {
-  background: #ffffff;
-  border-radius: 30rpx;
-  overflow: hidden;
-  border: 1.5rpx solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.04);
-}
-
-.grid-cover-wrap {
-  position: relative;
-  width: 100%;
-  height: 380rpx;
-  background: var(--rt-cover-ph);
-}
-
-.grid-cover {
-  width: 100%;
-  height: 100%;
-}
-
-.grid-cover-ph {
+/* ── 📄 悬浮胶囊翻页条（完全对齐 App 底部悬浮翻页条） ── */
+.floating-pagination {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(156rpx + env(safe-area-inset-bottom));
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 40rpx;
+  border: 1.5rpx solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+  height: 72rpx;
+  padding: 0 24rpx;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 24rpx;
 }
 
-.grid-ph-emoji {
-  font-size: 80rpx;
-}
-
-.grid-media-tag {
-  position: absolute;
-  top: 12rpx;
-  right: 12rpx;
-  background: rgba(255, 255, 255, 0.88);
+.fp-btn {
+  font-size: 24rpx;
+  color: #1A1C19;
+  font-weight: 600;
+  padding: 8rpx 14rpx;
   border-radius: 16rpx;
-  padding: 4rpx 12rpx;
-  font-size: 20rpx;
 }
 
-.grid-rating-tag {
-  position: absolute;
-  bottom: 12rpx;
-  left: 12rpx;
-  background: rgba(158, 118, 56, 0.92);
-  color: #ffffff;
-  border-radius: 14rpx;
-  padding: 2rpx 12rpx;
-  font-size: 20rpx;
+.fp-btn.disabled {
+  color: #A0A8A0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.fp-indicator {
+  font-size: 23rpx;
+  color: #1A1C19;
   font-weight: bold;
-}
-
-.grid-info {
-  padding: 16rpx;
-  display: flex;
-  flex-direction: column;
-}
-
-.grid-title {
-  color: var(--rt-ink);
-  font-size: 28rpx;
-  font-weight: bold;
-  font-family: serif;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.grid-author {
-  color: var(--rt-muted);
-  font-size: 21rpx;
-  margin-top: 4rpx;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.grid-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10rpx;
-}
-
-.grid-status-pill {
-  color: var(--rt-accent);
-  font-size: 20rpx;
-  font-weight: bold;
-}
-
-.grid-category {
-  color: var(--rt-muted);
-  font-size: 20rpx;
+  font-family: monospace, sans-serif;
 }
 
 /* ── 空状态 ── */
@@ -910,7 +1036,7 @@ async function saveScroll() {
 .back-top {
   position: fixed;
   right: 36rpx;
-  bottom: 200rpx;
+  bottom: 240rpx;
   width: 90rpx;
   height: 90rpx;
   border-radius: 50%;

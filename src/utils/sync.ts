@@ -40,6 +40,17 @@ const STORAGE_KEYS = {
 export function loadAllLocalWorks(): Book[] {
   const cached = uni.getStorageSync(STORAGE_KEYS.works);
   if (Array.isArray(cached) && cached.length > 0) {
+    const ids = new Set(cached.map((b: Book) => b.id));
+    let hasNew = false;
+    for (const pb of PRESET_BOOKS) {
+      if (!ids.has(pb.id)) {
+        cached.push(pb);
+        hasNew = true;
+      }
+    }
+    if (hasNew) {
+      uni.setStorageSync(STORAGE_KEYS.works, cached);
+    }
     return cached;
   }
   // 首次运行自动灌入预设典藏
@@ -58,6 +69,17 @@ export function saveLocalWorks(works: Book[]) {
 export function loadAllLocalNotes(): Note[] {
   const cached = uni.getStorageSync(STORAGE_KEYS.notes);
   if (Array.isArray(cached) && cached.length > 0) {
+    const ids = new Set(cached.map((n: Note) => n.id));
+    let hasNew = false;
+    for (const pn of PRESET_NOTES) {
+      if (!ids.has(pn.id)) {
+        cached.push(pn);
+        hasNew = true;
+      }
+    }
+    if (hasNew) {
+      uni.setStorageSync(STORAGE_KEYS.notes, cached);
+    }
     return cached;
   }
   uni.setStorageSync(STORAGE_KEYS.notes, PRESET_NOTES);
@@ -71,6 +93,17 @@ export function loadLocalNotes(): Note[] {
 export function loadLocalMindprints(): Mindprint[] {
   const cached = uni.getStorageSync(STORAGE_KEYS.mindprints);
   if (Array.isArray(cached) && cached.length > 0) {
+    const ids = new Set(cached.map((m: Mindprint) => m.bookId));
+    let hasNew = false;
+    for (const pm of PRESET_MINDPRINTS) {
+      if (!ids.has(pm.bookId)) {
+        cached.push(pm);
+        hasNew = true;
+      }
+    }
+    if (hasNew) {
+      uni.setStorageSync(STORAGE_KEYS.mindprints, cached);
+    }
     return cached;
   }
   uni.setStorageSync(STORAGE_KEYS.mindprints, PRESET_MINDPRINTS);

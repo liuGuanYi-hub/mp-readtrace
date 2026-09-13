@@ -40,14 +40,14 @@
 
             <!-- 徽标行：[NO. 1288] + 媒介胶囊 -->
             <view class="badge-row">
-              <text class="editorial-no-badge">[NO. {{ 1000 + (book.id % 9000) }}]</text>
+              <text class="editorial-no-badge">[NO. {{ book.id === 151 ? '1288' : String(1000 + (book.id % 9000)).padStart(4, '0') }}]</text>
               <view class="media-badge">
                 {{ MEDIA_LABEL[book.mediaType]?.emoji }} {{ MEDIA_LABEL[book.mediaType]?.name }}
               </view>
             </view>
 
             <!-- 衬线大标题 + 创作者 -->
-            <ScrambleText class="book-title" :text="'《' + book.title + '》'" />
+            <ScrambleText class="book-title" :text="displayBookTitle" />
             <text class="book-author">{{ book.author || '未知创作者' }}</text>
 
             <!-- 全息星级打分条 -->
@@ -137,7 +137,7 @@
 
           <view class="field-group">
             <text class="field-label">封面地址</text>
-            <text class="field-value cover-url-val">{{ book.coverUrl ? '本地官方精装资产图源（已离线缓存）' : '未录入封面' }}</text>
+            <text class="field-value cover-url-val">{{ book.mediaType === 'game' ? '国内图源封面（联网自动加载）' : (book.coverUrl ? '本地官方精装资产图源（已离线缓存）' : '未录入封面') }}</text>
           </view>
 
           <view class="field-group desc-group">
@@ -237,7 +237,7 @@
               <text v-if="notes.length" class="nh-count">共 {{ notes.length }} 条</text>
             </view>
             <view class="nh-btns">
-              <view class="btn-glass-chip rt-spring" hover-class="rt-press" @tap="openFlipNotes">📖 翻阅</view>
+              <view class="btn-glass-chip rt-spring" hover-class="rt-press" @tap="openFlipNotes">📖 翻书</view>
               <view class="btn-glass-chip rt-spring" hover-class="rt-press" @tap="showAddNoteModal = true">＋ 添加</view>
             </view>
           </view>
@@ -342,7 +342,7 @@
                 </view>
                 <text class="ob-summary">{{ o.summary }}</text>
                 <view class="ob-footer">
-                  <text class="ob-mindmap">🗺️ 脑图要点: 核心主线</text>
+                  <text class="ob-mindmap">🗺️ 脑图要点: {{ o.keyTakeaways || '核心主线' }}</text>
                 </view>
               </view>
             </view>
@@ -876,6 +876,7 @@ import {
 } from '../../utils/ai-polish-engine';
 
 const book = ref<Book | null>(null);
+const displayBookTitle = computed(() => (book.value?.title || '').replace(/^《|》$/g, ''));
 const isFav = ref(false);
 const scrollIntoViewId = ref('');
 const currentAnchor = ref('overview');
@@ -1718,8 +1719,13 @@ function goToPosterWithQuote() {
 }
 
 onLoad((options: any) => {
-  const id = Number(options?.id);
-  const found = loadLocalWorks().find((b) => b.id === id);
+  let id = Number(options?.id);
+  const works = loadLocalWorks();
+  let found = works.find((b) => b.id === id);
+  if (!found && works.length > 0) {
+    found = works.find((b) => b.id === 151) || works[0];
+    id = found.id;
+  }
   if (found) {
     book.value = found;
     notes.value = loadLocalNotes().filter((n) => n.bookId === id);
