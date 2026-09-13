@@ -31,7 +31,7 @@
   position: absolute;
   border-radius: 50%;
   filter: blur(90rpx);
-  opacity: 0.5;
+  opacity: 0.34;
   will-change: transform;
 }
 

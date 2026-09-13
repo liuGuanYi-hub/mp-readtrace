@@ -409,8 +409,9 @@ function consumePendingWorkshop() {
     const found = allWorks.value.find((b) => b.id === bookId);
     if (found) currentSelectedWork.value = found;
   }
-  if (ws === 'exlibris') {
-    activeModal.value = 'exlibris';
+  if (ws === 'exlibris' || ws === 'vinyl' || ws === 'passport') {
+    activeModal.value = ws;
+    if (ws === 'vinyl') syncVinylDisplayFromWork();
   } else if (ws === 'quote') {
     handleGeneratePoster('quote');
   }

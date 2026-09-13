@@ -38,12 +38,12 @@
 
         <view class="divider"></view>
 
-        <!-- 快速功能操作区（主按键独占 + 副按键等分一行） -->
-        <view class="btn-add rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goDiscover">🔍 探索与全网搜源录入</view>
+        <!-- 快速功能操作区（主按键独占 + 副按键等分一行，对齐 App 记录台） -->
+        <view class="btn-add rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goQuickLog">＋ 添加新作</view>
         <view class="sub-btn-row">
-          <view class="btn-secondary flex1 rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goQuickLog">⚡ 极速速记</view>
-          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="showImportModal = true">📥 预置书单</view>
-          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goProfile">📦 数据主权</view>
+          <view class="btn-secondary flex1 rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="showImportModal = true">导入书单</view>
+          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goBackup">📦 备份</view>
+          <view class="btn-secondary flex1 gap rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="goTrash">回收站</view>
         </view>
 
         <!-- ✦ 页脚铭文行：项目理念常驻 -->
@@ -62,11 +62,11 @@
     <view v-if="hero" class="hero-card rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="openDetail(hero)">
       <view class="hero-head">
         <view class="hero-badge-left">
-          <text class="hero-editorial-badge">✦</text>
+          <text class="hero-no-badge">[NO. 01 · {{ circadian.label }}]</text>
           <text class="hero-badge-title">🏛️ 策展主位</text>
         </view>
         <view class="status-pill">
-          {{ MEDIA_LABEL[hero.mediaType]?.emoji }} {{ hero.category || MEDIA_LABEL[hero.mediaType]?.name }}
+          {{ MEDIA_LABEL[hero.mediaType]?.emoji }} {{ MEDIA_LABEL[hero.mediaType]?.name }}
         </view>
       </view>
 
@@ -94,8 +94,8 @@
       </view>
 
       <view class="hero-actions">
-        <view class="btn-primary flex1" @tap.stop="openDetail(hero)">📖 沉浸检视印记</view>
-        <view class="btn-secondary hero-detail-btn" @tap.stop="openDetail(hero)">✦ 详细档案</view>
+        <view class="btn-primary flex1" @tap.stop="openDetail(hero)">📖 3D 沉浸翻阅</view>
+        <view class="btn-secondary hero-detail-btn" @tap.stop="openDetail(hero)">✦ 检视印记</view>
       </view>
     </view>
 
@@ -121,7 +121,10 @@
         <text class="pr-title">📜 灵感随想 · 羊皮纸笺</text>
         <view class="pr-refresh rt-spring" hover-class="rt-press" hover-stay-time="120" @tap="rotateQuote">🔄 换一句</view>
       </view>
-      <DropCapText class="pr-quote" :text="currentQuote.text" />
+      <view class="pr-quote-row">
+        <text class="pr-quote-mark">❝</text>
+        <text class="pr-quote-text">{{ currentQuote.text }}</text>
+      </view>
       <text class="pr-source">—— {{ currentQuote.source }}</text>
     </view>
 
@@ -250,7 +253,6 @@ import InfiniteMarquee from '../../components/InfiniteMarquee.vue';
 import AuroraBackground from '../../components/AuroraBackground.vue';
 import ScrambleText from '../../components/ScrambleText.vue';
 import CountUp from '../../components/CountUp.vue';
-import DropCapText from '../../components/DropCapText.vue';
 
 const ARC_MEDIA = [
   { key: 'book', label: '📚 书籍' },
@@ -282,14 +284,14 @@ const nowTime = computed(() => {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 });
 
+// 对齐 App Hub 六枚晶体工坊胶囊
 const capsules = [
-  { emoji: '✨', title: '精神探索', route: '/pages/constellation/index' },
+  { emoji: '✨', title: '精神探索', route: '/pages/discover/index' },
   { emoji: '⏳', title: '伴读钟', route: '/pages/standby/index' },
-  { emoji: '📻', title: '声学磁带', route: '/pages/memoir/index' },
-  { emoji: '🎴', title: '文化通行证', route: '/pages/profile/index' },
+  { emoji: '📻', title: '声学磁带', route: '/pages/memoir/index?workshop=vinyl' },
+  { emoji: '🎫', title: '文化通行证', route: '/pages/memoir/index?workshop=passport' },
   { emoji: '📜', title: '时光画卷', route: '/pages/memoir/index' },
   { emoji: '🌌', title: '心智拓扑', route: '/pages/constellation/index' },
-  { emoji: '🗂️', title: '年度编年史', route: '/pages/memoir/index' },
 ];
 
 function onCapsuleTap(c: any) {
@@ -379,7 +381,7 @@ const memory = computed(() => {
 
 const memoryTitleText = computed(() => {
   if (!memory.value) return '';
-  return '🕰️ 那年今日 · 时光印记';
+  return '🕰 时光深处的印记';
 });
 
 // 批量导入预设对话框
@@ -417,6 +419,14 @@ function openDetail(book: Book) {
 
 function goProfile() {
   uni.redirectTo({ url: '/pages/profile/index' });
+}
+
+function goBackup() {
+  uni.navigateTo({ url: '/pages/backup/index' });
+}
+
+function goTrash() {
+  uni.navigateTo({ url: '/pages/trash/index' });
 }
 
 function goLibraryAll() {
@@ -532,11 +542,13 @@ function openTrash() {
   height: 80rpx;
   border-radius: 50%;
   background: #ffffff;
+  border: 2rpx solid var(--rt-stroke);
   font-size: 32rpx;
   box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 }
 
 .home-subtitle {
@@ -665,6 +677,18 @@ function openTrash() {
   color: var(--rt-gold);
   font-size: 22rpx;
   margin-right: 8rpx;
+}
+
+/* 对齐 App：虚线边框档案编号徽标 [NO. 01 · 白昼正午] */
+.hero-no-badge {
+  border: 2rpx dashed rgba(0, 0, 0, 0.22);
+  border-radius: 12rpx;
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--rt-muted);
+  font-size: 21rpx;
+  letter-spacing: 2rpx;
+  padding: 6rpx 18rpx;
+  margin-right: 16rpx;
 }
 
 .hero-badge-title {
@@ -861,6 +885,29 @@ function openTrash() {
   color: var(--rt-ink);
   font-size: 21rpx;
   font-weight: bold;
+}
+
+/* 对齐 App 羊皮纸笺：青蓝大引号 ❝ + 正文 + 右对齐出处 */
+.pr-quote-row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 16rpx;
+}
+
+.pr-quote-mark {
+  color: #38bdf8;
+  font-size: 56rpx;
+  line-height: 1;
+  font-family: serif;
+  margin-right: 18rpx;
+  margin-top: 2rpx;
+}
+
+.pr-quote-text {
+  flex: 1;
+  color: var(--rt-ink);
+  font-size: 27rpx;
+  line-height: 1.7;
 }
 
 .pr-quote {
