@@ -1,6 +1,6 @@
 <template>
   <view class="dropcap-wrap">
-    <text class="dropcap-char">{{ firstChar }}</text>
+    <text class="dropcap-char" :style="{ color: color || '#38bdf8' }">{{ firstChar }}</text>
     <text class="dropcap-rest">{{ rest }}</text>
   </view>
 </template>
@@ -11,9 +11,15 @@
  */
 import { computed } from 'vue';
 
-const props = defineProps<{
-  text: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    text: string;
+    color?: string;
+  }>(),
+  {
+    color: '#38bdf8',
+  }
+);
 
 const firstChar = computed(() => (props.text || '').charAt(0));
 const rest = computed(() => (props.text || '').slice(1));
@@ -32,11 +38,12 @@ const rest = computed(() => (props.text || '').slice(1));
   font-size: 2.6em;
   line-height: 1;
   margin: 0.04em 0.14em 0 0;
-  color: #5C584E;
-  text-shadow: 0 0 12rpx rgba(92, 88, 78, 0.12);
+  text-shadow: 0 0 12rpx rgba(56, 189, 248, 0.25);
 }
 
 .dropcap-rest {
   font-size: 1em;
+  color: var(--rt-ink);
+  line-height: 1.75;
 }
 </style>
