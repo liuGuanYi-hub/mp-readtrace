@@ -157,19 +157,25 @@
           <view class="passport-page-left">
             <text class="pp-country">READTRACE PASSPORT</text>
             <view class="pp-emblem">🛂</view>
-            <text class="pp-name">持照策展人：ZZD</text>
+            <text class="pp-name">持照策展人：{{ curatorPassName }}</text>
             <text class="pp-meta">签发地：海拉鲁 / 马孔多 / 第三村</text>
           </view>
           <view class="passport-page-right">
-            <view class="visa-stamp s1">
-              <text class="vs-title">🌸 追番入境签证</text>
-              <text class="vs-meta">新世纪福音战士：终</text>
-              <text class="vs-date">2026.05.02 PASSED</text>
+            <!-- 尚未完结任何作品：如实空态，不再摆假戳 -->
+            <view v-if="passportStamps.length === 0" class="visa-empty">
+              <text class="vs-title">🕊 尚未集章</text>
+              <text class="vs-date">完结一部作品，即可盖下第一枚精神印记</text>
             </view>
-            <view class="visa-stamp s2">
-              <text class="vs-title">🎮 白金通关戳印</text>
-              <text class="vs-meta">塞尔达传说：王国之泪</text>
-              <text class="vs-date">2026.03.28 PLATINUM</text>
+            <!-- 真实完结作品集章：媒介定制戳印文案 + 真实完结日期 -->
+            <view
+              v-for="(stamp, idx) in passportStamps"
+              :key="stamp.workId"
+              class="visa-stamp"
+              :class="idx % 2 === 0 ? 's1' : 's2'"
+            >
+              <text class="vs-title">{{ stamp.label }}</text>
+              <text class="vs-meta">{{ stamp.workTitle }}</text>
+              <text class="vs-date">{{ stamp.dateLabel }} {{ stamp.suffix }}</text>
             </view>
           </view>
         </view>
@@ -293,7 +299,7 @@ const memoirCards = [
     title: '精神巡礼护照盖章簿',
     badge: '打开护照 →',
     green: false,
-    desc: '深蓝烫金首页 · 72 部番剧入境签证 · 69 款游戏白金戳印',
+    desc: '深蓝烫金首页 · 完结作品自动集章 · 五媒介定制签证戳印',
     tags: ['🌸 追番入境签证', '🎮 白金通关戳印'],
   },
   {
@@ -348,6 +354,59 @@ const allWorks = ref<Book[]>([]);
 
 const defaultCover = '/static/covers/placeholder.jpg';
 
+// ── 🛂 精神巡礼护照 · 数据驱动（真实策展人署名 + 真实完结作品集章）──
+// 原名 `持照策展人：ZZD` 与两枚写死的签证戳均为占位假数据，此处改为读真实存储与真实作品。
+const curatorPassName = ref('自由漫游策展人');
+
+/** 护照签发姓名与「我的页」通行卡同源，避免两处署名不一致 */
+function syncCuratorPassName() {
+  const stored = uni.getStorageSync('rt_curator_name');
+  curatorPassName.value = stored || '自由漫游策展人';
+}
+
+/** 各媒介的签证戳文案（与 App 端媒介定制签证戳语义对齐）*/
+const PASSPORT_STAMP_STYLE: Record<MediaType, { label: string; suffix: string }> = {
+  book: { label: '📖 阅毕典藏印', suffix: 'EX LIBRIS' },
+  anime: { label: '🌸 追番入境签证', suffix: 'PASSED' },
+  movie: { label: '🎬 观影纪行戳印', suffix: 'SCREENED' },
+  game: { label: '🎮 白金通关戳印', suffix: 'PLATINUM' },
+  music: { label: '🎵 聆听印记', suffix: 'ON REPEAT' },
+};
+
+/** 完结日期 YYYY-MM-DD → 戳印日期 2026.05.02 */
+function formatStampDate(date: string | null): string {
+  if (!date) return '日期未记';
+  const parts = date.slice(0, 10).split('-');
+  return parts.length === 3 ? `${parts[0]}.${parts[1]}.${parts[2]}` : date;
+}
+
+/**
+ * 真实集章：取未删除且已完结的作品，按完结日期倒序（同日按评分），最多 4 枚。
+ * 上限 4 的原因：护照弹窗容器 `position: fixed` 居中且不滚动，超过会溢出屏幕不可达。
+ */
+const passportStamps = computed(() => {
+  return allWorks.value
+    .filter((w) => !w.isDeleted && w.status === 'finished')
+    .slice()
+    .sort((a, b) => {
+      const da = (a.finishDate || '').slice(0, 10);
+      const db = (b.finishDate || '').slice(0, 10);
+      if (da !== db) return db.localeCompare(da);
+      return (b.rating || 0) - (a.rating || 0);
+    })
+    .slice(0, 4)
+    .map((w) => {
+      const style = PASSPORT_STAMP_STYLE[w.mediaType] || PASSPORT_STAMP_STYLE.book;
+      return {
+        workId: w.id,
+        label: style.label,
+        suffix: style.suffix,
+        workTitle: w.title,
+        dateLabel: formatStampDate(w.finishDate),
+      };
+    });
+});
+
 const currentSelectedWork = ref<Book>({
   id: 1,
   title: '星际穿越',
@@ -388,6 +447,7 @@ onMounted(() => {
 
 onShow(() => {
   allWorks.value = loadLocalWorks();
+  syncCuratorPassName();
   if (allWorks.value.length > 0) {
     const found = allWorks.value.find((b) => b.id === currentSelectedWork.value.id);
     if (found) {
@@ -1315,6 +1375,17 @@ function goToStandby() {
 .visa-stamp.s2 {
   border-color: #2a9d8f;
   color: #2a9d8f;
+}
+
+/* 无完结作品时的如实空态（替代原先写死的假戳）*/
+.visa-empty {
+  border: 2rpx dashed #c9c9c9;
+  border-radius: 14rpx;
+  padding: 24rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  color: #8d8d8d;
 }
 
 .vs-title {
