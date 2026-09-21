@@ -44,7 +44,7 @@ npm run dev:mp-weixin
 # 用微信开发者工具打开 dist/dev/mp-weixin
 ```
 
-`src/manifest.json` 中的 `YOUR_WECHAT_APPID` 需替换为你的小程序 AppID。
+`src/manifest.json` 的 appid **已填为本项目 AppID**（`wx78b31c8ce9bd4418`），无需替换即可直接导入。
 
 ## 与 Android 端互通
 
@@ -55,5 +55,15 @@ npm run dev:mp-weixin
 
 ## 已知边界
 
-- 小程序端暂不承载六维雷达编辑、海报工坊等重交互（请使用 App 端）；
+> 本节于 **2026-09-22** 按代码事实重新核验，原文两条中有一条已过时。
+
+- ~~小程序端暂不承载六维雷达编辑、海报工坊等重交互（请使用 App 端）~~
+  → **该说明已过时**：`pages/book-detail` 已有 `✏️ 编辑印记弹窗`（六维雷达可编辑）；
+  `pages/memoir` 的海报工坊四模组（`generateWorkshopPoster` / `generateCoverGallery` / `generateChronicleScroll`）
+  与 `pages/library` 的宣纸长卷导出（`generateLibraryScroll`）均已落地。
+- **⚠️ 音频当前不可用（P0，未修）**：`utils/audio-engine.ts` 的 8 条音源全部指向 `cdn.pixabay.com`，
+  该 CDN 对小程序请求返回 403，白噪音与黑胶目前都播不出声。修复方案待定，
+  详见 [`开发计划-App深度对齐.md`](./开发计划-App深度对齐.md) 的「Phase B」。
+- **未接线组件**：`components/DioramaCard.vue`、`components/VinylPlayer.vue` 递归检索确认**无任何页面引用**
+  （上方「功能范围」表把二者列为已有能力，属 P19 立项时的设计愿景，真实入口在 App 端）。处置待定。
 - `wx.request` 对 PUT/MKCOL 的兼容性以坚果云/Nextcloud 实测为准，失败时回退只读浏览。
