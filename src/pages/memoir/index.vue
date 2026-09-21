@@ -131,7 +131,7 @@
             <text class="vm-title">{{ vinylDisplay.title }}</text>
             <text class="vm-artist">{{ vinylDisplay.artist }} · 33 1/3 RPM</text>
             <text class="vm-status">
-              {{ isVinylPlaying ? '● 正在沉浸播放 · 机械落针运转中' : '○ 唱臂抬起待命 · 点击落针播放' }}
+              {{ isVinylPlaying ? '● 正在沉浸播放 · 机械落针运转中' : (vinylNotice || '○ 唱臂抬起待命 · 点击落针播放') }}
             </text>
           </view>
           <!-- 控制按键 -->
@@ -527,6 +527,9 @@ function openWorkshop(card: any) {
       const musics = allWorks.value.filter((b) => b.mediaType === 'music');
       if (musics.length) currentSelectedWork.value = musics[0];
       syncVinylDisplayFromWork();
+    } else if (card.key === 'passport') {
+      // 对标 App SpatialAudioEngine.playStampThud()：翻开护照时的盖印钝响
+      audioEngine.playSfx('stamp');
     }
     activeModal.value = card.key;
   } else if (card.key === 'cartridge' || card.key === 'resonance') {
@@ -667,26 +670,46 @@ const isVinylPlaying = computed(() => {
   return audioEngine.isPlaying;
 });
 
+/** 播不出声时如实展示原因（版权音频未内置等），不假装「正在沉浸播放」 */
+const vinylNotice = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+  syncAudioTick.value;
+  return audioEngine.isPlaying ? '' : audioEngine.lastNotice;
+});
+
 function toggleVinylPlay() {
-  if (!audioEngine.isPlaying && audioEngine.currentTrack.type !== 'vinyl') {
+  const wasPlaying = audioEngine.isPlaying;
+  if (!wasPlaying && audioEngine.currentTrack.type !== 'vinyl') {
     const vinyls = SOUND_TRACKS.filter((t) => t.type === 'vinyl');
     if (vinyls.length) {
       audioEngine.playTrack(vinyls[0]);
-      syncVinylDisplayFromTrack();
     }
   } else {
     audioEngine.togglePlay();
   }
+  syncVinylDisplayFromTrack();
+  // 意图是「播放」却没出声 → 如实弹出来源说明
+  if (!wasPlaying && !audioEngine.audible && audioEngine.lastNotice) {
+    uni.showToast({ title: audioEngine.lastNotice, icon: 'none', duration: 2600 });
+  }
+}
+
+/** 黑胶区上一曲/下一曲：仅在黑胶曲目内轮转（可播放音轨只剩白噪音，跨类跳转会莫名其妙） */
+function cycleVinylTrack(step: number) {
+  const vinyls = SOUND_TRACKS.filter((t) => t.type === 'vinyl');
+  if (!vinyls.length) return;
+  const idx = vinyls.findIndex((t) => t.id === audioEngine.currentTrack.id);
+  const next = vinyls[(idx + step + vinyls.length) % vinyls.length];
+  audioEngine.playTrack(next);
+  syncVinylDisplayFromTrack();
 }
 
 function prevVinylTrack() {
-  audioEngine.prevTrack();
-  syncVinylDisplayFromTrack();
+  cycleVinylTrack(-1);
 }
 
 function nextVinylTrack() {
-  audioEngine.nextTrack();
-  syncVinylDisplayFromTrack();
+  cycleVinylTrack(1);
 }
 
 function goToStandby() {

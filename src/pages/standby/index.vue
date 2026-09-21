@@ -90,7 +90,9 @@
             <text class="noise-desc">{{ track.artist.split('·')[0] }}</text>
           </view>
           <view class="noise-state-badge">
-            <text v-if="currentTrack.id === track.id && audioEngine.isPlaying">▶ 正在播放</text>
+            <text v-if="currentTrack.id === track.id && audioEngine.isPlaying">
+              {{ audioEngine.audible ? '▶ 正在播放' : '◌ 纯视觉模式' }}
+            </text>
             <text v-else>点击启幕</text>
           </view>
         </view>
@@ -248,12 +250,22 @@ function goBack() {
   });
 }
 
+/** 播不出声时如实告知原因（如运行时不支持 WebAudio 合成），不谎报「正在播放」 */
+function reportIfSilent() {
+  if (!audioEngine.audible && audioEngine.lastNotice) {
+    uni.showToast({ title: audioEngine.lastNotice, icon: 'none', duration: 2600 });
+  }
+}
+
 function playNoise(track: AudioTrack) {
   audioEngine.playTrack(track);
+  reportIfSilent();
 }
 
 function togglePlay() {
+  const wasPlaying = audioEngine.isPlaying;
   audioEngine.togglePlay();
+  if (!wasPlaying) reportIfSilent();
 }
 
 function prevTrack() {
