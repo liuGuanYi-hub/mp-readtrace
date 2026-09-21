@@ -61,8 +61,11 @@ npm run dev:mp-weixin
   → **该说明已过时**：`pages/book-detail` 已有 `✏️ 编辑印记弹窗`（六维雷达可编辑）；
   `pages/memoir` 的海报工坊四模组（`generateWorkshopPoster` / `generateCoverGallery` / `generateChronicleScroll`）
   与 `pages/library` 的宣纸长卷导出（`generateLibraryScroll`）均已落地。
-- **⚠️ 音频当前不可用（P0，未修）**：`utils/audio-engine.ts` 的 8 条音源全部指向 `cdn.pixabay.com`，
-  该 CDN 对小程序请求返回 403，白噪音与黑胶目前都播不出声。修复方案待定，
+- **音频已按 App 真实路线重做（2026-09-22）**：4 类伴读白噪音改为 **WebAudio 程序化合成**
+  （`utils/audio-synth.ts`，**零资源、零网络**，对标 App `SpatialAudioEngine` 的纯 PCM 内存合成路线），
+  此前 8 条 `cdn.pixabay.com` 外链已全部拆除（该 CDN 对小程序 403，曾导致白噪音与黑胶全哑）。
+  **版权音频（4 首古典/流行黑胶）不内置** —— 与 App 同策略（App 源码注释原文「无版权音频内置，跳转外部播放」），
+  小程序无法外跳，故如实标注不可播并由 UI 说明原因，**不再假装正在播放**（降级态显示「◌ 纯视觉模式」）。
   详见 [`开发计划-App深度对齐.md`](./开发计划-App深度对齐.md) 的「Phase B」。
 - **未接线组件**：`components/DioramaCard.vue`、`components/VinylPlayer.vue` 递归检索确认**无任何页面引用**
   （上方「功能范围」表把二者列为已有能力，属 P19 立项时的设计愿景，真实入口在 App 端）。处置待定。
