@@ -224,78 +224,152 @@ function renderNoise(kind: NoiseKind): StereoPcm {
 }
 
 // ════════════════════════════════════════════════════════════
-// 6 类物理拟真短音效（波形与包络直接对齐 App SpatialAudioEngine）
+// 6 类物理拟真短音效（**语义与触发点**对齐 App SpatialAudioEngine）
+//
+// ⚠️ 2026-09-22 悦耳化重做：App 原波形是**裸正弦 + 噪声**——撕票 = 2400Hz 正弦 0.6、
+//    卡带 = 1800/900Hz 双正弦、星音 = 基频 + 八度纯正弦、落针 = 480Hz 正弦 + 噪声。
+//    听感是电子「哔——」而非拟物拟音，而且**通通没有起音包络**，每个音头都带一记爆音。
+//    此处保留同一套声音语义（盖印/撕票/翻页/落针/卡带/星音）与同样的触发时机，
+//    改用「噪声整形 + 共振峰 + 钟式泛音堆 + 起音淡入 + 软限幅」重做音色，
+//    目标是拟物耐听，而不是电子提示音。
 // ════════════════════════════════════════════════════════════
+
+/** 起音淡入时长（秒）。消除音头爆音，是「悦耳」最关键的一步 */
+const ATTACK_SEC = 0.003;
+
+/**
+ * 音效总线增益。
+ * 刻意压低：App 原音效峰值约 0.27~0.43（9000~14000/32768），是**背景层拟音**而非提示音。
+ * 拟音过响会立刻变「不悦耳」，宁可让人「注意到有声音」而不是「被声音打到」。
+ */
+const SFX_MASTER = 0.7;
+
+/** 一阶低通整形器（每次渲染新建一份，自带滤波状态） */
+function makeOnePole(coef: number) {
+  let z = 0;
+  return (x: number) => {
+    z += (x - z) * coef;
+    return z;
+  };
+}
+
+/** 软限幅：把叠加后的过冲圆滑掉，避免数字削波带来的刺耳感 */
+function softClip(v: number) {
+  return v / (1 + Math.abs(v) * 0.35);
+}
 
 interface SfxSpec {
   durationMs: number;
+  /** 最终增益（≤1，过冲交给 softClip 兜底） */
   amp: number;
   /**
-   * 返回单声道样本值（-1 ~ 1）
-   * @param freqHz 仅 celestial 使用：评分分级基频（App 端高分奏 528Hz、低分奏 432Hz 宇宙基准频率）
+   * 生成本次渲染专用的采样函数。
+   * 用工厂而非纯函数，是为了让噪声整形能携带一阶滤波状态、并让左右声道各自去相关。
+   * @param numSamples 总样本数
+   * @param freqHz 仅 celestial 使用：评分分级基频（App 端 432~528Hz）
    */
-  sample: (t: number, i: number, numSamples: number, freqHz: number) => number;
+  create: (numSamples: number, freqHz: number) => (i: number) => number;
 }
 
 const SFX_SPECS: Record<SfxName, SfxSpec> = {
-  // 护照盖印：110Hz 下沉到 60Hz 的沉重钝响
+  // 🛂 护照盖印 / 火漆封蜡：低频下扫钝响 + 次谐波厚度 + 极短接触瞬态（听感「咚」）
   stamp: {
-    durationMs: 120,
-    amp: 14000 / 32768,
-    sample: (t, i, num) => {
-      const decay = Math.exp(-t * 28);
-      const freq = 110 - 50 * (i / num);
-      return Math.sin(2 * Math.PI * freq * t) * decay;
-    },
-  },
-  // 电影撕票：2400Hz 齿轮破孔 + 噪声
-  ticket: {
-    durationMs: 90,
-    amp: 12000 / 32768,
-    sample: (t) => {
-      const decay = Math.exp(-t * 35);
-      const click = Math.sin(2 * Math.PI * 2400 * t) * 0.6 + (Math.random() * 2 - 1) * 0.4;
-      return click * decay;
-    },
-  },
-  // 拟真翻页：正弦包络的纸张沙沙声
-  pageTurn: {
     durationMs: 140,
-    amp: 9000 / 32768,
-    sample: (_t, i, num) => {
-      const envelope = Math.sin((Math.PI * i) / num);
-      return (Math.random() * 2 - 1) * envelope;
+    amp: 0.85,
+    create: (num) => {
+      const contactLp = makeOnePole(0.62);
+      return (i) => {
+        const t = i / SAMPLE_RATE;
+        const attack = Math.min(1, t / ATTACK_SEC);
+        const decay = Math.exp(-t * 24);
+        const freq = 110 - 50 * (i / num);
+        const thud = Math.sin(2 * Math.PI * freq * t);
+        const sub = Math.sin(2 * Math.PI * freq * 0.5 * t) * 0.35;
+        const contact = contactLp(Math.random() * 2 - 1) * Math.exp(-t * 300) * 2.4;
+        return (thud + sub + contact * 0.32) * decay * attack * 0.8;
+      };
     },
   },
-  // 黑胶落针：480Hz 触盘 + 微爆音
+  // 🎟️ 电影票撕开：宽带噪声经高通留下纸纤维的中高频 + 手撕颗粒颤动（听感「嚓」）
+  ticket: {
+    durationMs: 130,
+    amp: 0.78,
+    create: () => {
+      const lp = makeOnePole(0.55);
+      return (i) => {
+        const t = i / SAMPLE_RATE;
+        const attack = Math.min(1, t / 0.002);
+        const env = Math.exp(-t * 22) * attack;
+        const n = Math.random() * 2 - 1;
+        const hp = n - lp(n);
+        const grain = 0.65 + 0.35 * Math.sin(2 * Math.PI * 34 * t);
+        return hp * env * grain;
+      };
+    },
+  },
+  // 📜 纸张翻动：中高频摩擦 + 柔和鼓包包络（听感「沙」）
+  pageTurn: {
+    durationMs: 180,
+    amp: 0.62,
+    create: (num) => {
+      const lp = makeOnePole(0.5);
+      return (i) => {
+        const attack = Math.min(1, i / (SAMPLE_RATE * 0.004));
+        const env = Math.pow(Math.sin((Math.PI * i) / num), 1.4) * attack;
+        const n = Math.random() * 2 - 1;
+        const shaped = lp(n);
+        return ((n - shaped) * 0.78 + shaped * 0.22) * env;
+      };
+    },
+  },
+  // 💽 黑胶落针：针尖触盘的低频「啵」+ 静电微爆音（听感「噗」）
   needle: {
-    durationMs: 80,
-    amp: 9000 / 32768,
-    sample: (t) => {
-      const decay = Math.exp(-t * 50);
-      return (Math.sin(2 * Math.PI * 480 * t) * 0.4 + (Math.random() * 2 - 1) * 0.6) * decay;
+    durationMs: 110,
+    amp: 0.7,
+    create: () => {
+      const lp = makeOnePole(0.35);
+      return (i) => {
+        const t = i / SAMPLE_RATE;
+        const attack = Math.min(1, t / 0.0015);
+        const thump = Math.sin(2 * Math.PI * 210 * t) * Math.exp(-t * 85);
+        const crackle = lp(Math.random() * 2 - 1) * Math.exp(-t * 40) * 1.7;
+        return (thump * 0.75 + crackle * 0.5) * attack;
+      };
     },
   },
-  // 卡带插入：1800Hz + 900Hz 金属卡扣
+  // 🕹️ 卡带插入卡槽：极短噪声「咔」+ 塑料腔体低频回响（不再是 1800Hz 高频哔）
   cartridge: {
-    durationMs: 100,
-    amp: 13000 / 32768,
-    sample: (t) => {
-      const decay = Math.exp(-t * 40);
-      return (Math.sin(2 * Math.PI * 1800 * t) * 0.7 + Math.sin(2 * Math.PI * 900 * t) * 0.3) * decay;
+    durationMs: 130,
+    amp: 0.78,
+    create: () => {
+      const lp = makeOnePole(0.75);
+      return (i) => {
+        const t = i / SAMPLE_RATE;
+        const attack = Math.min(1, t / 0.0012);
+        const snap = lp(Math.random() * 2 - 1) * Math.exp(-t * 190) * 2.4;
+        const body =
+          (Math.sin(2 * Math.PI * 300 * t) * 0.55 + Math.sin(2 * Math.PI * 610 * t) * 0.3) *
+          Math.exp(-t * 55);
+        return (snap + body * 0.7) * attack;
+      };
     },
   },
-  // 星系引力琴：基频 + 二次泛音的空灵泛音（App 端按评分分级 432~528Hz）
+  // 🌌 星系引力琴：钟式泛音堆——基频 + 八度 + **非谐泛音 2.76f**（钟的特征）+ 三度泛音，
+  //    高次泛音衰减更快（听感是空灵钟声，而非测试音）
   celestial: {
-    durationMs: 280,
-    amp: 11000 / 32768,
-    sample: (t, _i, _num, freqHz) => {
-      const decay = Math.exp(-t * 8);
-      return (
-        (Math.sin(2 * Math.PI * freqHz * t) * 0.6 +
-          Math.sin(2 * Math.PI * freqHz * 2 * t) * 0.4) *
-        decay
-      );
+    durationMs: 460,
+    amp: 0.6,
+    create: (_num, freqHz) => {
+      const f = freqHz;
+      return (i) => {
+        const t = i / SAMPLE_RATE;
+        const attack = Math.min(1, t / ATTACK_SEC);
+        const p1 = Math.sin(2 * Math.PI * f * t) * Math.exp(-t * 4.2);
+        const p2 = Math.sin(2 * Math.PI * f * 2 * t) * Math.exp(-t * 7) * 0.42;
+        const p3 = Math.sin(2 * Math.PI * f * 2.76 * t) * Math.exp(-t * 11) * 0.2;
+        const p4 = Math.sin(2 * Math.PI * f * 3.01 * t) * Math.exp(-t * 14) * 0.12;
+        return (p1 + p2 + p3 + p4) * attack * 0.75;
+      };
     },
   },
 };
@@ -310,11 +384,13 @@ function renderSfx(name: SfxName, pan: number, freqHz: number): StereoPcm {
   const gainL = Math.min(1, Math.max(0.1, (1 - safePan) / 2));
   const gainR = Math.min(1, Math.max(0.1, (1 + safePan) / 2));
 
+  // 左右声道各起一份独立发生器：噪声去相关后才有真实空间宽度（纯音则自然居中）
+  const genL = spec.create(num, freqHz);
+  const genR = spec.create(num, freqHz);
+
   for (let i = 0; i < num; i++) {
-    const t = i / SAMPLE_RATE;
-    const v = Math.max(-1, Math.min(1, spec.sample(t, i, num, freqHz))) * spec.amp;
-    left[i] = v * gainL;
-    right[i] = v * gainR;
+    left[i] = softClip(genL(i)) * spec.amp * SFX_MASTER * gainL;
+    right[i] = softClip(genR(i)) * spec.amp * SFX_MASTER * gainR;
   }
   return { left, right };
 }

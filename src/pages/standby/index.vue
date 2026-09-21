@@ -258,14 +258,20 @@ function reportIfSilent() {
 }
 
 function playNoise(track: AudioTrack) {
+  const wasPlaying = audioEngine.isPlaying;
   audioEngine.playTrack(track);
+  // 唱臂落针拟音（对标 App VinylCassettePlayerActivity:595 playNeedleDrop：落针入槽那一下响）
+  if (!wasPlaying && audioEngine.isPlaying) audioEngine.playSfx('needle');
   reportIfSilent();
 }
 
 function togglePlay() {
   const wasPlaying = audioEngine.isPlaying;
   audioEngine.togglePlay();
-  if (!wasPlaying) reportIfSilent();
+  if (!wasPlaying) {
+    if (audioEngine.isPlaying) audioEngine.playSfx('needle');
+    reportIfSilent();
+  }
 }
 
 function prevTrack() {

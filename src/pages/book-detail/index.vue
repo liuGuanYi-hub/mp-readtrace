@@ -1551,6 +1551,9 @@ function exportTimelinePoster() {
 }
 
 function goConstellation() {
+  // 对标 App MindprintTopologyActivity:177 → playCelestialTone：进入心智拓扑/星图时奏星音
+  const rating = book.value?.remoteRating ?? book.value?.rating ?? 5;
+  audioEngine.playSfx('celestial', 0, 432 + (Math.min(10, Math.max(1, rating)) / 10) * 96);
   uni.navigateTo({ url: `/pages/constellation/index?bookId=${book.value?.id}` });
 }
 

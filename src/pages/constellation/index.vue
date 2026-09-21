@@ -152,6 +152,7 @@ import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import type { Book, MediaType } from '../../utils/models';
 import { MEDIA_LABEL } from '../../utils/models';
 import { loadLocalWorks } from '../../utils/sync';
+import { audioEngine } from '../../utils/audio-engine';
 import TabBar from '../../components/TabBar.vue';
 
 const GALAXY_MEDIA = [
@@ -316,6 +317,11 @@ const selectedStar = ref<StarNode | null>(null);
 
 function selectStar(s: StarNode) {
   selectedStar.value = s;
+  // 对标 App：MindprintConstellationActivity:63 点星奏引力琴泛音，
+  // 频率按评分分级（高分 528Hz 治愈声波、低分 432Hz 宇宙基准频率，与 CosmicGravityGraphView 同式）
+  const rating = s.book.remoteRating ?? s.book.rating ?? 5;
+  const freq = 432 + (Math.min(10, Math.max(1, rating)) / 10) * 96;
+  audioEngine.playSfx('celestial', 0, freq);
 }
 
 // ── ⛶ 全屏漫游：单指拖拽 + 双指缩放（对齐 App MindprintConstellationActivity 手势）──

@@ -514,6 +514,19 @@ function selectWork(book: Book) {
   uni.showToast({ title: `已定制《${book.title}》`, icon: 'none' });
 }
 
+// ── 🎧 工坊拟音（对标 App 各 Activity 的音效触发点）──
+/**
+ * 各工坊入场拟音。App 对应关系：
+ * - 护照盖印 → `CulturalPassportActivity:88` playStampThud
+ * - 藏书票/票根翻动 → `ExLibrisStudioActivity:91/96/101` playParchmentRustle（羊皮纸摩擦）
+ * 注：黑胶落针（playNeedleDrop）不在此处触发——App 是**落针入槽那一下**响，
+ * 对应到小程序是伴读钟开始播放时（见 `pages/standby`）。
+ */
+function playWorkshopEntranceSfx(key: string) {
+  if (key === 'passport') audioEngine.playSfx('stamp');
+  else if (key === 'exlibris' || key === 'ticket') audioEngine.playSfx('pageTurn');
+}
+
 function openWorkshop(card: any) {
   if (['ticket', 'exlibris', 'vinyl', 'passport'].includes(card.key)) {
     // 自动适配作品媒介
@@ -527,10 +540,9 @@ function openWorkshop(card: any) {
       const musics = allWorks.value.filter((b) => b.mediaType === 'music');
       if (musics.length) currentSelectedWork.value = musics[0];
       syncVinylDisplayFromWork();
-    } else if (card.key === 'passport') {
-      // 对标 App SpatialAudioEngine.playStampThud()：翻开护照时的盖印钝响
-      audioEngine.playSfx('stamp');
     }
+    // 各工坊入场拟音，对标 App 对应 Activity 的音效触发点
+    playWorkshopEntranceSfx(card.key);
     activeModal.value = card.key;
   } else if (card.key === 'cartridge' || card.key === 'resonance') {
     const media = card.key === 'cartridge' ? 'game' : 'music';
@@ -559,6 +571,10 @@ async function handleWorkshopGenerate(kind: 'cartridge' | 'resonance' | 'gallery
       return;
     }
   }
+  // 对标 App：卡带插入 → GameCartridgePosterActivity:91/125 playCartridgeSnap；
+  // 共鸣微卡 → ResonancePosterActivity:69/133 playCelestialTone
+  if (kind === 'cartridge') audioEngine.playSfx('cartridge');
+  else if (kind === 'resonance') audioEngine.playSfx('celestial');
   uni.showLoading({ title: '正在渲染 2K 长图...', mask: true });
   try {
     let tempPath = '';
@@ -607,6 +623,10 @@ const posterResultModal = ref({
 });
 
 async function handleGeneratePoster(type: PosterType) {
+  // 对标 App 两个海报工坊的落位拟音：
+  // 撕票 → MovieTicketPosterActivity:96 playTicketTear；火漆封蜡 → ExLibrisStudioActivity:147 playWaxSealThud
+  if (type === 'ticket') audioEngine.playSfx('ticket');
+  else if (type === 'exlibris') audioEngine.playSfx('stamp');
   uni.showLoading({ title: '正在渲染 2K 海报...', mask: true });
   try {
     const tempPath = await generatePosterImage('posterCanvas', instance, {

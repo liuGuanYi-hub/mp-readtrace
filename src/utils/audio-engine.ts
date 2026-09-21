@@ -28,7 +28,7 @@
  * 5. **如实呈现**：播不出声时不谎报「正在播放」，经 `audible` 与 `lastNotice` 告知 UI
  */
 
-import { audioSynth, type NoiseKind } from './audio-synth';
+import { audioSynth, type NoiseKind, type SfxName } from './audio-synth';
 
 export interface AudioTrack {
   id: string;
@@ -382,9 +382,12 @@ class AudioEngine {
     this.playTrack(next);
   }
 
-  /** 播放一次物理拟真短音效（对标 App SpatialAudioEngine 的 6 类微声学） */
-  public playSfx(name: Parameters<typeof audioSynth.playSfx>[0], pan = 0): boolean {
-    return audioSynth.playSfx(name, pan);
+  /**
+   * 播放一次物理拟真短音效（对标 App SpatialAudioEngine 的 6 类微声学）
+   * @param freqHz 仅 'celestial' 使用：评分分级基频（App 端高分 528Hz、低分 432Hz）
+   */
+  public playSfx(name: SfxName, pan = 0, freqHz = 528): boolean {
+    return audioSynth.playSfx(name, pan, freqHz);
   }
 
   // ── 内部：合成播放的进度模拟 ──
