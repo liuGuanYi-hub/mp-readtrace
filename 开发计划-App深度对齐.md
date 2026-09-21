@@ -167,8 +167,39 @@
   > **验证**：`npm run build:mp-weixin` 通过；产物含 `utils/audio-synth.js`（内含 rain/hearth/pages/cafe 与 createBuffer）；
   > `src/` 全域 `cdn.pixabay.com` / `images.unsplash.com` **真实 URL 零命中**。
   > **未验证**：真机/微信开发者工具内的实际听感与 `wx.WebAudioContext` 可用性（本机无法自动化微信开发者工具）。
-  > **遗留**：6 类微声学音效中仅「护照盖印」已接调用点（`pages/memoir` 翻开护照时），
-  > 其余 5 类（撕票/翻页/落针/卡带/星音）引擎已备但**尚未接 UI**，待确认是否按 App 逐个补上。
+  > **✅ 2026-09-22 续（commit `ee5aa82`）：音效悦耳化 + 6 类全部接线**
+  >
+  > ① **悦耳化（用户反馈「有些音效很不悦耳」的根因）**：App 原波形是**裸正弦**——
+  > 撕票 2400Hz 正弦 0.6、卡带 1800/900Hz 双正弦、星音 基频 + 八度纯正弦、落针 480Hz 正弦，
+  > 听感是电子「哔——」而非拟物拟音；而且**通通没有起音包络**，每个音头都带一记爆音。
+  > 现改用「噪声整形 + 共振峰 + 钟式泛音堆」重做音色：
+  > 统一 **3ms 起音淡入**消爆音；撕票改宽带噪声高通 + 手撕颗粒颤动（「嚓」）；
+  > 卡带改极短噪声「咔」+ 塑料腔体低频回响；星音改基频 + 八度 + **非谐泛音 2.76f**（钟的特征）的钟式泛音堆；
+  > 盖印加次谐波厚度与接触瞬态；落针改低频「啵」+ 静电微爆音。
+  > 另加 `softClip` 软限幅与 **0.7 总线增益**，把峰值压回 App 量级（0.27~0.43）——
+  > 拟音过响会立刻变不悦耳，目标是「注意到有声音」而不是「被声音打到」。
+  >
+  > ② **6 类全部接线**（**10 个调用点 / 4 个页面**）。App↔小程序音效地图：
+  >
+  > | App 触发点 | 音效 | 小程序接线点 |
+  > |:---|:---|:---|
+  > | `CulturalPassportActivity:88` | stamp | `memoir` 打开护照 |
+  > | `ExLibrisStudioActivity:147` | stamp | `memoir` 生成藏书票（火漆封蜡） |
+  > | `ExLibrisStudioActivity:91/96/101` | pageTurn | `memoir` 打开藏书票 / 票根 |
+  > | `MovieTicketPosterActivity:96` | ticket | `memoir` 生成票根（撕票） |
+  > | `GameCartridgePosterActivity:91/125` | cartridge | `memoir` 卡带工坊 |
+  > | `ResonancePosterActivity:69/133` | celestial | `memoir` 共鸣微卡 |
+  > | `MindprintConstellationActivity:63` | celestial | `constellation` 点星 |
+  > | `MindprintTopologyActivity:177` | celestial | `book-detail` 星系定位 |
+  > | `CosmicGravityGraphView:487/514` | celestial（按评分） | 上述星音点**按评分 432~528Hz 定频** |
+  > | `VinylCassettePlayerActivity:595` | needle | `standby` 开始播放（唱臂落针那一下） |
+  >
+  > **未对应（小程序无该步骤）**：`MovieTicketPosterActivity:100/130`、`VinylCassettePlayerActivity:598`
+  > 的 cartridge（票根落位 / 卡带插入播放）——小程序这两个流程没有独立「落位」动作。
+  > **仍未做**：App 的 `SonicHapticMatrix` 是**音效 + 线性马达触觉毫秒级同步**；小程序只做了音效，
+  > 触觉可降级为 `uni.vibrateShort`（见「四、平台硬边界备忘」），待确认是否补。
+  > **验证**：`npm run build:mp-weixin` 通过；6 类音效在 `src/pages/` 下接线命中齐全。
+  > **未验证**：音色听感与响度是否真的「悦耳」，仍需真机/开发者工具试听。
 
 - [ ] **P0 域名白名单清单**：上线前需在小程序后台配置（目前已知外链：api.bgm.tv、pixabay CDN、B 站图床残留引用、DeepSeek API）；bgm.tv 在当前网络不可达，discover 的 Bangumi 实时搜源需自建 HTTPS 中转或退化为纯本地目录
   > **⬜ 2026-09-22 实测仍未做**：`src/manifest.json` 仍为 `"urlCheck": true`（真机/发布版会拦截未白名单域名），
@@ -218,7 +249,8 @@
 3. **P1 星图连线阈值裁剪** → 独立、低风险、纯算法，随时可开工。
 4. **P3 孤儿组件处置** → 需用户先选「清理 / 接入」。
 5. P2 三项（搜源增强 / `wx.login` / 快速日志体验）→ 依赖中转服务器或账号体系决策，暂无阻塞成本。
-6. **微声学 5 类音效接 UI**（本轮遗留）→ 引擎已备（撕票/翻页/落针/卡带/星音），按 App 逐个补调用点即可。
+6. ~~微声学 5 类音效接 UI~~ → **已于 `ee5aa82` 完成**（6 类全部接线，共 10 个调用点 / 4 个页面）。
+   剩余**可选**项：补 `uni.vibrateShort` 触觉，以对齐 App `SonicHapticMatrix` 的音触同步。
 
 ## 四、平台硬边界备忘（明确不做/降级项）
 
